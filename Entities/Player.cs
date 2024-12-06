@@ -288,14 +288,15 @@ public class Player
             idleFrameRate++;  // Tăng dần frame rate cho trạng thái idle
             if (idleFrameRate >= 5)  // Điều chỉnh tốc độ idle animation (mỗi 5 ticks mới thay đổi frame)
             {
-                steps++;
-                if (steps > end)
+                steps++;  // Tiến lên frame tiếp theo
+                if (steps >= idleMovements.Count)
                 {
-                    steps = start;
+                    steps = 0;  // Nếu vượt quá số frame thì quay lại từ đầu
                 }
-                idleFrameRate = 0;
+                idleFrameRate = 0;  // Reset idle frame rate
             }
-            playerImage = Image.FromFile(idleMovements[steps % idleMovements.Count]);
+
+            playerImage = Image.FromFile(idleMovements[steps]);  // Cập nhật hình ảnh player
         }
     }
 
@@ -361,7 +362,9 @@ public class Player
         }
         else
         {
-            LoadMovementImages(idleDirection);  // Nếu không di chuyển, chỉ tải ảnh idle
+            // Khi không có phím nào được nhấn, gọi AnimateIdle liên tục
+            //LoadMovementImages(idleDirection);  // Nếu không di chuyển, chỉ tải ảnh idle
+            LoadIdleImages(idleDirection);
             AnimateIdle(0, 5);  // Animation idle nếu không di chuyển
         }
     }

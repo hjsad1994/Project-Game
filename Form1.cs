@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using Project_Game.Entities;
+using Project_Game.Entities;  // Thêm namespace chứa SpriteSheet nếu cần
 
 namespace Project_Game
 {
@@ -17,7 +17,6 @@ namespace Project_Game
         private Image bg;
         private bool needsRedraw = false;
         private int currentMap = 1;  // Chỉ số bản đồ hiện tại
-        private SpriteSheet houseSheet;  // Đối tượng SpriteSheet
 
         // Danh sách chứa các PictureBox đại diện cho vật cản
         private List<PictureBox> obstacles;
@@ -33,7 +32,6 @@ namespace Project_Game
             enemy = new Enemy();
             gameLogic = new GameLogic(player, enemy, obstacles);  // Truyền obstacles vào GameLogic
             gameOver = new GameOver(gameOverTimer, ResetGameAction, Invalidate);
-            houseSheet = new SpriteSheet("Indoor_Decor.png", 128, 128);
             bg = Image.FromFile("bg.jpg");  // Bản đồ đầu tiên khi bắt đầu
             this.DoubleBuffered = true;
             this.KeyPreview = true;
@@ -77,9 +75,6 @@ namespace Project_Game
             canvas.DrawImage(player.playerImage, player.playerX, player.playerY, player.playerWidth, player.playerHeight);
             canvas.DrawImage(enemy.enemyImage, enemy.enemyX, enemy.enemyY, enemy.enemyWidth, enemy.enemyHeight);
 
-            // Vẽ các sprite trong bản đồ
-            houseSheet.DrawSprite(canvas, 500, 100, 2, 2);
-            houseSheet.DrawSprite(canvas, 700, 100, 1, 1);
 
             // Hiển thị thông báo Game Over nếu trạng thái game over
             if (gameOverState)

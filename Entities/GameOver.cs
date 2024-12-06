@@ -9,7 +9,6 @@ namespace Project_Game.Entities
         private Timer gameOverTimer;
         private Action resetGameAction;
         private Action invalidateAction;
-        private Action invalidateActionaa;
 
         public GameOver(Timer gameOverTimer, Action resetGameAction, Action invalidateAction)
         {

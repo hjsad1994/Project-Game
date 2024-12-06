@@ -50,7 +50,6 @@
     <Compile Include="Entities\GameObject.cs" />
     <Compile Include="Entities\GameOver.cs" />
     <Compile Include="Entities\Player.cs" />
-    <Compile Include="Entities\SpriteSheet.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
