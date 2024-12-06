@@ -286,7 +286,7 @@ public class Player
         if (idleMovements.Count > 0)
         {
             idleFrameRate++;  // Tăng dần frame rate cho trạng thái idle
-            if (idleFrameRate >= 5)  // Điều chỉnh tốc độ idle animation (mỗi 5 ticks mới thay đổi frame)
+            if (idleFrameRate >= 8)  // Điều chỉnh tốc độ idle animation (mỗi 5 ticks mới thay đổi frame)
             {
                 steps++;  // Tiến lên frame tiếp theo
                 if (steps >= idleMovements.Count)

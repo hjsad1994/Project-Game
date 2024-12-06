@@ -91,9 +91,24 @@ namespace Project_Game.Entities
                 }
             }
         }
+        public bool CheckCollisionWithObstacles(int newX, int newY, List<GameObject> obstacles)
+        {
+            // Kiểm tra va chạm với các vật thể (obstacles)
+            Rectangle enemyRect = new Rectangle(newX, newY, enemyWidth, enemyHeight);
+
+            foreach (var obstacle in obstacles)
+            {
+                Rectangle obstacleRect = new Rectangle(obstacle.X, obstacle.Y, obstacle.Width, obstacle.Height);
+                if (enemyRect.IntersectsWith(obstacleRect))
+                {
+                    return true;  // Nếu va chạm, trả về true
+                }
+            }
+            return false;  // Không va chạm
+        }
 
         // Phương thức di chuyển của enemy (gọi MoveTowardsPlayer trong TimerEvent)
-        public void Move(int playerX, int playerY, int screenWidth, int screenHeight)
+        public void Move(int playerX, int playerY, int screenWidth, int screenHeight, List<GameObject> obstacles)
         {
             // Tính toán khoảng cách giữa enemy và player
             int deltaX = playerX - enemyX;
@@ -102,19 +117,30 @@ namespace Project_Game.Entities
             // Di chuyển enemy về phía player theo từng trục
             if (Math.Abs(deltaX) > enemySpeedX)
             {
-                enemyX += Math.Sign(deltaX) * enemySpeedX;
-                LoadMovementImages(deltaX < 0 ? "Left" : "Right");  // Chọn hướng di chuyển (trái hoặc phải)
+                // Kiểm tra va chạm trước khi di chuyển
+                int newX = enemyX + Math.Sign(deltaX) * enemySpeedX;
+                if (!CheckCollisionWithObstacles(newX, enemyY, obstacles))  // Nếu không va chạm, di chuyển
+                {
+                    enemyX = newX;
+                    LoadMovementImages(deltaX < 0 ? "Left" : "Right");  // Chọn hướng di chuyển
+                }
             }
 
             if (Math.Abs(deltaY) > enemySpeedY)
             {
-                enemyY += Math.Sign(deltaY) * enemySpeedY;
-                LoadMovementImages(deltaY < 0 ? "Up" : "Down");  // Chọn hướng di chuyển (lên hoặc xuống)
+                // Kiểm tra va chạm trước khi di chuyển
+                int newY = enemyY + Math.Sign(deltaY) * enemySpeedY;
+                if (!CheckCollisionWithObstacles(enemyX, newY, obstacles))  // Nếu không va chạm, di chuyển
+                {
+                    enemyY = newY;
+                    LoadMovementImages(deltaY < 0 ? "Up" : "Down");  // Chọn hướng di chuyển
+                }
             }
 
             // Cập nhật animation của enemy dựa trên hướng di chuyển
             AnimateEnemy(0, 6);  // Giới hạn frame từ 0 đến 6
         }
+
 
         // Phương thức để cập nhật hướng di chuyển của enemy
         public void LoadMovementImages(string direction)
