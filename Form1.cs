@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using Project_Game.Entities;  // Thêm namespace chứa SpriteSheet nếu cần
+using Project_Game.Entities;
 
 namespace Project_Game
 {
     public partial class Form1 : Form
     {
         private Player player;
-        private Enemy enemy;
+        private TestEnemy enemy; // Sử dụng TestEnemy thay vì Enemy
         private GameLogic gameLogic;
         private GameOver gameOver;
         private bool gameOverState = false;
         private Image bg;
         private bool needsRedraw = false;
-        private int currentMap = 1;  // Chỉ số bản đồ hiện tại
+        private int currentMap = 1; // Chỉ số bản đồ hiện tại
 
         // Danh sách chứa các PictureBox đại diện cho vật cản
         private List<PictureBox> obstacles;
@@ -28,11 +28,11 @@ namespace Project_Game
             // Tạo các PictureBox vật cản
             obstacles = new List<PictureBox> { Test1, Test2 }; // Bạn có thể thêm nhiều PictureBox ở đây
 
-            player = new Player(obstacles);  // Truyền danh sách vật cản vào constructor của Player
-            enemy = new Enemy();
-            gameLogic = new GameLogic(player, enemy, obstacles);  // Truyền obstacles vào GameLogic
+            player = new Player(obstacles); // Truyền danh sách vật cản vào constructor của Player
+            enemy = new TestEnemy(); // Sử dụng TestEnemy thay vì Enemy
+            gameLogic = new GameLogic(player, enemy, obstacles); // Truyền TestEnemy vào GameLogic
             gameOver = new GameOver(gameOverTimer, ResetGameAction, Invalidate);
-            bg = Image.FromFile("bg.jpg");  // Bản đồ đầu tiên khi bắt đầu
+            bg = Image.FromFile("bg.jpg"); // Bản đồ đầu tiên khi bắt đầu
             this.DoubleBuffered = true;
             this.KeyPreview = true;
             this.KeyDown += KeyIsDown;
@@ -75,7 +75,6 @@ namespace Project_Game
             canvas.DrawImage(player.playerImage, player.playerX, player.playerY, player.playerWidth, player.playerHeight);
             canvas.DrawImage(enemy.enemyImage, enemy.enemyX, enemy.enemyY, enemy.enemyWidth, enemy.enemyHeight);
 
-
             // Hiển thị thông báo Game Over nếu trạng thái game over
             if (gameOverState)
             {
@@ -98,7 +97,7 @@ namespace Project_Game
                 // Pass the gameObjects list to the Move method
                 gameLogic.TimerEvent(sender, e, healBar);
                 player.Move();
-                enemy.Move(player.playerX, player.playerY, this.Width, this.Height, gameObjects);  // Pass obstacles as gameObjects
+                enemy.Move(player.playerX, player.playerY, this.Width, this.Height, gameObjects); // Pass obstacles as gameObjects
 
                 // Cập nhật bản đồ khi player di chuyển đến các khu vực khác nhau
                 UpdateMap();
@@ -108,7 +107,7 @@ namespace Project_Game
 
             if (needsRedraw)
             {
-                Invalidate();  // Vẽ lại form
+                Invalidate(); // Vẽ lại form
                 needsRedraw = false;
             }
         }
@@ -116,15 +115,15 @@ namespace Project_Game
         private void UpdateMap()
         {
             // Điều kiện thay đổi bản đồ khi player di chuyển đến vị trí xác định
-            if (player.playerX > 400 && currentMap == 1)  // Nếu player di chuyển qua x=400, thay đổi bản đồ
+            if (player.playerX > 400 && currentMap == 1) // Nếu player di chuyển qua x=400, thay đổi bản đồ
             {
-                currentMap = 2;  // Đổi sang bản đồ 2
-                bg = Image.FromFile("bg2.jpg");  // Tải ảnh nền cho bản đồ 2
+                currentMap = 2; // Đổi sang bản đồ 2
+                bg = Image.FromFile("bg2.jpg"); // Tải ảnh nền cho bản đồ 2
             }
-            else if (player.playerX <= 400 && currentMap == 2)  // Nếu player di chuyển trở lại x<=400, quay lại bản đồ 1
+            else if (player.playerX <= 400 && currentMap == 2) // Nếu player di chuyển trở lại x<=400, quay lại bản đồ 1
             {
-                currentMap = 1;  // Đổi lại bản đồ 1
-                bg = Image.FromFile("bg.jpg");  // Tải ảnh nền cho bản đồ 1
+                currentMap = 1; // Đổi lại bản đồ 1
+                bg = Image.FromFile("bg.jpg"); // Tải ảnh nền cho bản đồ 1
             }
         }
 
@@ -141,8 +140,8 @@ namespace Project_Game
             player.ResetPlayer();
 
             // Reset trạng thái của enemy
-            enemy.enemyX = 500;
-            enemy.enemyY = 100;
+            enemy.SetPosition(500, 100);
+
 
             // Đặt lại các cờ di chuyển
             player.goLeft = false;
