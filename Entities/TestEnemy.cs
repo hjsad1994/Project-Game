@@ -1,44 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 
 namespace Project_Game.Entities
 {
     public class TestEnemy : Enemy
     {
-        // Constructor cho TestEnemy, thay đổi đường dẫn baseFolderPath thành "test"
-        public TestEnemy() : base("Char_MoveMent")
-        {
-        }
+        private AnimationManager movementAnimation; // Quản lý hoạt ảnh di chuyển
 
-        // Ghi đè phương thức LoadEnemyImages nếu cần cấu hình riêng
-        protected override void LoadEnemyImages(string baseFolderPath)
+        public TestEnemy() : base("TestEnemy", maxHealth: 50)
         {
-            // Sử dụng đường dẫn "test" cho các hình ảnh
-            //baseFolderPath = "Char_MoveMent";
-            LoadEnemyDirectionImages("Left", enemyMovementsLeft, baseFolderPath);
-            LoadEnemyDirectionImages("Right", enemyMovementsRight, baseFolderPath);
-            LoadEnemyDirectionImages("Up", enemyMovementsUp, baseFolderPath);
-            LoadEnemyDirectionImages("Down", enemyMovementsDown, baseFolderPath);
-
-            if (enemyMovementsDown.Count > 0)
-            {
-                enemyImage = Image.FromFile(enemyMovementsDown[0]);
-            }
-        }
-
-        // Bạn có thể ghi đè các phương thức khác như AnimateEnemy, Move nếu cần hành vi khác
-        public override void AnimateEnemy(int start, int end)
-        {
-            base.AnimateEnemy(start, end);
-            // Thêm logic hoạt ảnh đặc biệt cho TestEnemy (nếu cần)
+            movementAnimation = new AnimationManager(frameRate: 5);
+            movementAnimation.LoadFrames("Char_MoveMent/Down");
         }
 
         public override void Move(int playerX, int playerY, int screenWidth, int screenHeight, List<GameObject> obstacles)
         {
-            base.Move(playerX, playerY, screenWidth, screenHeight, obstacles);
-            // Thêm logic di chuyển riêng cho TestEnemy (nếu cần)
+            if (enemyX < playerX)
+            {
+                enemyX += enemySpeed;
+                movementAnimation.LoadFrames("Char_MoveMent/Right");
+            }
+            else if (enemyX > playerX)
+            {
+                enemyX -= enemySpeed;
+                movementAnimation.LoadFrames("Char_MoveMent/Left");
+            }
+
+            if (enemyY < playerY)
+            {
+                enemyY += enemySpeed;
+                movementAnimation.LoadFrames("Char_MoveMent/Down");
+            }
+            else if (enemyY > playerY)
+            {
+                enemyY -= enemySpeed;
+                movementAnimation.LoadFrames("Char_MoveMent/Up");
+            }
+
+            movementAnimation.UpdateAnimation();
+        }
+
+        public Image GetCurrentFrame()
+        {
+            return movementAnimation.CurrentFrame;
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            base.TakeDamage(damage);
+            Console.WriteLine($"{Name} bị tấn công! Máu còn lại: {Health}");
         }
     }
 }
