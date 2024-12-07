@@ -7,6 +7,9 @@ namespace Project_Game.Entities
     public class TestEnemy : Enemy
     {
         private AnimationManager movementAnimation; // Quản lý hoạt ảnh di chuyển
+        private bool isDead = false; // Trạng thái kẻ địch
+
+        public bool ShouldRemove { get; private set; } = false; // Đánh dấu kẻ địch cần xóa
 
         public TestEnemy() : base("TestEnemy", maxHealth: 50)
         {
@@ -16,6 +19,8 @@ namespace Project_Game.Entities
 
         public override void Move(int playerX, int playerY, int screenWidth, int screenHeight, List<GameObject> obstacles)
         {
+            if (isDead) return; // Không di chuyển nếu đã chết
+
             if (enemyX < playerX)
             {
                 enemyX += enemySpeed;
@@ -48,8 +53,27 @@ namespace Project_Game.Entities
 
         public override void TakeDamage(int damage)
         {
+            if (isDead) return;
+
             base.TakeDamage(damage);
             Console.WriteLine($"{Name} bị tấn công! Máu còn lại: {Health}");
+
+            if (Health <= 0)
+            {
+                Die();
+            }
+        }
+
+        private void Die()
+        {
+            isDead = true;
+            ShouldRemove = true; // Đánh dấu kẻ địch cần xóa khỏi giao diện
+            Console.WriteLine($"{Name} đã chết!");
+        }
+
+        public bool IsDead()
+        {
+            return isDead;
         }
     }
 }

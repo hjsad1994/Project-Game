@@ -50,7 +50,7 @@ public class GameLogic
         {
             if (player.Health > 0)
             {
-                player.TakeDamage(1); // Gây sát thương cho người chơi
+                player.TakeDamage(0); // Gây sát thương cho người chơi
                 healBar.Value = player.Health;
             }
             else

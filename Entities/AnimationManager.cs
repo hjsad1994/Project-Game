@@ -9,16 +9,14 @@ public class AnimationManager
     private int currentFrameIndex = 0;
     private int frameRateCounter = 0;
     private int frameRateLimit;
-    public string CurrentDirection { get; set; }
 
     public Image CurrentFrame { get; private set; } // Khung hình hiện tại
 
     public AnimationManager(int frameRate = 5)
     {
-        frameRateLimit = frameRate; // Số lần lặp trước khi chuyển khung hình
+        frameRateLimit = frameRate;
     }
 
-    // Tải các khung hình từ thư mục
     public void LoadFrames(string folderPath)
     {
         if (Directory.Exists(folderPath))
@@ -35,7 +33,6 @@ public class AnimationManager
         }
     }
 
-    // Điều khiển hoạt ảnh
     public void UpdateAnimation()
     {
         if (frames.Count == 0) return;
@@ -49,7 +46,6 @@ public class AnimationManager
         }
     }
 
-    // Reset hoạt ảnh
     public void ResetAnimation()
     {
         currentFrameIndex = 0;
@@ -58,5 +54,10 @@ public class AnimationManager
         {
             CurrentFrame = Image.FromFile(frames[0]);
         }
+    }
+
+    public bool IsComplete()
+    {
+        return currentFrameIndex == frames.Count - 1 && frameRateCounter == 0;
     }
 }

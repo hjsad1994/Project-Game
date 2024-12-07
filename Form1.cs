@@ -71,8 +71,14 @@ namespace Project_Game
                 canvas.DrawImage(bg, 0, 0, this.Width, this.Height);
             }
 
+            // Vẽ người chơi
             canvas.DrawImage(player.GetCurrentFrame(), player.playerX, player.playerY, player.playerWidth, player.playerHeight);
-            canvas.DrawImage(enemy.GetCurrentFrame(), enemy.enemyX, enemy.enemyY, enemy.enemyWidth, enemy.enemyHeight);
+
+            // Chỉ vẽ kẻ địch nếu kẻ địch tồn tại và chưa chết
+            if (enemy != null && !enemy.IsDead())
+            {
+                canvas.DrawImage(enemy.GetCurrentFrame(), enemy.enemyX, enemy.enemyY, enemy.enemyWidth, enemy.enemyHeight);
+            }
 
             if (gameOverState)
             {
@@ -83,14 +89,30 @@ namespace Project_Game
             }
         }
 
+
         private void TimerEvent(object sender, EventArgs e)
         {
             if (!gameOverState)
             {
-                gameLogic.TimerEvent(sender, e, healBar);
+                // Nếu đang tấn công, cập nhật hoạt ảnh tấn công
+                if (player.IsAttacking)
+                {
+                    player.UpdateAttack();
+                }
+                else
+                {
+                    // Nếu không tấn công, cho phép di chuyển
+                    gameLogic.TimerEvent(sender, e, healBar);
+                }
+
+                // Kiểm tra nếu kẻ địch cần xóa
+                if (enemy != null && enemy.IsDead())
+                {
+                    Console.WriteLine("Enemy defeated and removed.");
+                    enemy = null; // Xóa tham chiếu đến kẻ địch
+                }
 
                 UpdateMap();
-
                 needsRedraw = true;
             }
 
@@ -100,6 +122,9 @@ namespace Project_Game
                 needsRedraw = false;
             }
         }
+
+
+
 
         private void UpdateMap()
         {
@@ -129,34 +154,31 @@ namespace Project_Game
 
         private void FormMouseClick(object sender, MouseEventArgs e)
         {
-            if (gameOverState) return;
+            if (gameOverState || player.IsAttacking) return;
 
-            double distance = Math.Sqrt(Math.Pow(e.X - player.playerX, 2) + Math.Pow(e.Y - player.playerY, 2));
+            // Tính khoảng cách giữa chuột và kẻ địch
+            double distance = Math.Sqrt(Math.Pow(e.X - enemy.enemyX, 2) + Math.Pow(e.Y - enemy.enemyY, 2));
 
-            if (distance <= 100) // Giới hạn phạm vi tấn công
+            const int attackRange = 100; // Phạm vi tấn công
+
+            if (distance <= attackRange && !enemy.IsDead())
             {
-                Rectangle enemyBounds = new Rectangle(enemy.enemyX, enemy.enemyY, enemy.enemyWidth, enemy.enemyHeight);
-                if (enemyBounds.Contains(e.Location))
-                {
-                    player.PerformAttack(enemy);
+                Console.WriteLine("Player attacks!");
+                player.PerformAttack(enemy); // Tấn công kẻ địch
 
-                    if (enemy.IsDead())
-                    {
-                        Console.WriteLine("Enemy defeated!");
-                    }
-                }
-                else
+                if (enemy.IsDead())
                 {
-                    Console.WriteLine("Click không trúng mục tiêu!");
+                    Console.WriteLine("Enemy defeated!");
                 }
             }
             else
             {
-                Console.WriteLine("Target is out of range!");
+                Console.WriteLine("Target is out of range or already dead!");
             }
 
-            Invalidate();
+            Invalidate(); // Cập nhật giao diện
         }
+
         public void EndGame(int currentHealth, ProgressBar healBar)
         {
             gameOverState = true;
