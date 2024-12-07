@@ -23,7 +23,7 @@ namespace Project_Game.Entities
         public int enemyFrameRate = 0;  // Thêm frameRate để làm chậm animation
         private int enemySpeedX = 2;
         private int enemySpeedY = 2;
-        // taaaaasdsadsass
+        // taaaaasdsadsassaa
         // aa
         public Enemy()
         {

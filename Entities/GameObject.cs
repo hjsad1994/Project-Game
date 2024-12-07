@@ -22,6 +22,7 @@ namespace Project_Game.Entities
             Width = width;
             Height = height;
             Name = name;
+            // ai biet gi daua
         }
         public bool CheckCollision(Rectangle playerRect)
         {
