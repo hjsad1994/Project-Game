@@ -1,10 +1,10 @@
-﻿using Project_Game.Entities;
-using Project_Game;
+﻿using Project_Game;
+using Project_Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Forms;
-using System;
 using System.Linq;
+using System.Windows.Forms;
 
 public class GameLogic
 {
@@ -24,20 +24,20 @@ public class GameLogic
     {
         if (isGameOver) return;
 
-        if (e.KeyCode == Keys.Left) player.goLeft = true;
-        if (e.KeyCode == Keys.Right) player.goRight = true;
-        if (e.KeyCode == Keys.Up) player.goUp = true;
-        if (e.KeyCode == Keys.Down) player.goDown = true;
+        if (e.KeyCode == Keys.Left) player.GoLeft = true;
+        if (e.KeyCode == Keys.Right) player.GoRight = true;
+        if (e.KeyCode == Keys.Up) player.GoUp = true;
+        if (e.KeyCode == Keys.Down) player.GoDown = true;
     }
 
     public void KeyIsUp(object sender, KeyEventArgs e)
     {
         if (isGameOver) return;
 
-        if (e.KeyCode == Keys.Left) player.goLeft = false;
-        if (e.KeyCode == Keys.Right) player.goRight = false;
-        if (e.KeyCode == Keys.Up) player.goUp = false;
-        if (e.KeyCode == Keys.Down) player.goDown = false;
+        if (e.KeyCode == Keys.Left) player.GoLeft = false;
+        if (e.KeyCode == Keys.Right) player.GoRight = false;
+        if (e.KeyCode == Keys.Up) player.GoUp = false;
+        if (e.KeyCode == Keys.Down) player.GoDown = false;
     }
 
     public void CheckCollision(ProgressBar healBar)
@@ -45,49 +45,47 @@ public class GameLogic
         Rectangle playerRect = new Rectangle(player.playerX, player.playerY, player.playerWidth, player.playerHeight);
         Rectangle enemyRect = new Rectangle(enemy.enemyX, enemy.enemyY, enemy.enemyWidth, enemy.enemyHeight);
 
+        // Kiểm tra va chạm giữa người chơi và kẻ địch
         if (playerRect.IntersectsWith(enemyRect))
         {
-            if (player.currentHealth > 0)
+            if (player.Health > 0)
             {
-                player.currentHealth -= 1;
-                healBar.Value = player.currentHealth;
+                player.TakeDamage(0); // Gây sát thương cho người chơi
+                healBar.Value = player.Health;
             }
             else
             {
                 isGameOver = true;
-                ((Form1)Application.OpenForms["Form1"]).EndGame(player.currentHealth, healBar);
+                ((Form1)Application.OpenForms["Form1"]).EndGame(player.Health, healBar);
             }
         }
 
+        // Kiểm tra va chạm giữa người chơi và vật cản
         foreach (var obstacle in obstacles)
         {
-            Rectangle obstacleRect = new Rectangle(obstacle.Location, obstacle.Size);
+            Rectangle obstacleRect = new Rectangle(obstacle.Location.X, obstacle.Location.Y, obstacle.Width, obstacle.Height);
 
             if (playerRect.IntersectsWith(obstacleRect))
             {
-                if (player.goLeft)
+                if (player.GoLeft)
                 {
                     player.playerX = obstacle.Right;
-                    player.goLeft = false;
+                    player.GoLeft = false;
                 }
-                if (player.goRight)
+                if (player.GoRight)
                 {
                     player.playerX = obstacle.Left - player.playerWidth;
-                    player.goRight = false;
+                    player.GoRight = false;
                 }
-            }
-
-            if (playerRect.IntersectsWith(obstacleRect))
-            {
-                if (player.goUp)
+                if (player.GoUp)
                 {
                     player.playerY = obstacle.Bottom;
-                    player.goUp = false;
+                    player.GoUp = false;
                 }
-                if (player.goDown)
+                if (player.GoDown)
                 {
                     player.playerY = obstacle.Top - player.playerHeight;
-                    player.goDown = false;
+                    player.GoDown = false;
                 }
             }
         }
@@ -102,23 +100,32 @@ public class GameLogic
     {
         if (isGameOver) return;
 
-        if (player.goLeft && player.playerX > 0) player.playerX -= player.playerSpeed;
-        if (player.goRight && player.playerX + player.playerWidth < 2000) player.playerX += player.playerSpeed;
-        if (player.goUp && player.playerY > 0) player.playerY -= player.playerSpeed;
-        if (player.goDown && player.playerY + player.playerHeight < 6000) player.playerY += player.playerSpeed;
+        // Di chuyển người chơi
+        if (player.GoLeft && player.playerX > 0) player.playerX -= player.playerSpeed;
+        if (player.GoRight && player.playerX + player.playerWidth < 2000) player.playerX += player.playerSpeed;
+        if (player.GoUp && player.playerY > 0) player.playerY -= player.playerSpeed;
+        if (player.GoDown && player.playerY + player.playerHeight < 6000) player.playerY += player.playerSpeed;
 
-        if (player.goLeft || player.goRight || player.goUp || player.goDown)
-            player.AnimatePlayer(0, 5);
+        // Cập nhật hoạt ảnh của người chơi
+        if (player.GoLeft || player.GoRight || player.GoUp || player.GoDown)
+        {
+            player.movementAnimation.UpdateAnimation();
+        }
         else
-            player.AnimateIdle(0, player.idleMovements.Count - 1);
+        {
+            player.AnimateIdle();
+        }
 
+        // Tạo danh sách GameObject từ obstacles
         List<GameObject> gameObjects = obstacles
             .Select(obstacle => new GameObject(obstacle.Location.X, obstacle.Location.Y, obstacle.Width, obstacle.Height, obstacle.Name))
             .ToList();
 
+        // Di chuyển và cập nhật hoạt ảnh của kẻ địch
         enemy.Move(player.playerX, player.playerY, 2000, 6000, gameObjects);
         enemy.AnimateEnemy(0, 5);
 
+        // Kiểm tra va chạm
         CheckCollision(healBar);
     }
 }
