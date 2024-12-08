@@ -32,6 +32,7 @@ public class Player
         idleAnimation = new AnimationManager(frameRate: 8);
         attackAnimation = new AnimationManager(frameRate: 4);
 
+        // Load default animations
         movementAnimation.LoadFrames("Char_MoveMent/MoveDown");
         idleAnimation.LoadFrames("Char_Idle/Down");
     }
@@ -49,7 +50,9 @@ public class Player
 
     public void Move()
     {
-        if (IsAttacking) return;
+        if (IsAttacking) return; // Không di chuyển khi đang tấn công
+
+        bool isMoving = false;
 
         if (GoLeft)
         {
@@ -59,7 +62,7 @@ public class Player
                 currentDirection = "Left";
             }
             playerX -= playerSpeed;
-            movementAnimation.UpdateAnimation();
+            isMoving = true;
         }
         else if (GoRight)
         {
@@ -69,7 +72,7 @@ public class Player
                 currentDirection = "Right";
             }
             playerX += playerSpeed;
-            movementAnimation.UpdateAnimation();
+            isMoving = true;
         }
         else if (GoUp)
         {
@@ -79,7 +82,7 @@ public class Player
                 currentDirection = "Up";
             }
             playerY -= playerSpeed;
-            movementAnimation.UpdateAnimation();
+            isMoving = true;
         }
         else if (GoDown)
         {
@@ -89,13 +92,21 @@ public class Player
                 currentDirection = "Down";
             }
             playerY += playerSpeed;
-            movementAnimation.UpdateAnimation();
+            isMoving = true;
+        }
+
+        if (isMoving)
+        {
+            movementAnimation.UpdateAnimation(); // Cập nhật khung hình di chuyển
         }
         else
         {
+            UpdateIdleAnimation();
             AnimateIdle();
         }
     }
+
+
 
     public void AnimateIdle()
     {
@@ -138,6 +149,26 @@ public class Player
         }
     }
 
+    private void UpdateIdleAnimation()
+    {
+        // Đảm bảo hoạt ảnh Idle khớp với hướng di chuyển cuối cùng
+        switch (currentDirection)
+        {
+            case "Left":
+                idleAnimation.LoadFrames("Char_Idle/Left");
+                break;
+            case "Right":
+                idleAnimation.LoadFrames("Char_Idle/Right");
+                break;
+            case "Up":
+                idleAnimation.LoadFrames("Char_Idle/Up");
+                break;
+            case "Down":
+                idleAnimation.LoadFrames("Char_Idle/Down");
+                break;
+        }
+        idleAnimation.ResetAnimation();
+    }
 
     public Image GetCurrentFrame()
     {

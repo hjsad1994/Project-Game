@@ -71,13 +71,19 @@ namespace Project_Game
                 canvas.DrawImage(bg, 0, 0, this.Width, this.Height);
             }
 
-            // Vẽ người chơi
-            canvas.DrawImage(player.GetCurrentFrame(), player.playerX, player.playerY, player.playerWidth, player.playerHeight);
+            var playerFrame = player.GetCurrentFrame();
+            if (playerFrame != null)
+            {
+                canvas.DrawImage(playerFrame, player.playerX, player.playerY, player.playerWidth, player.playerHeight);
+            }
 
-            // Chỉ vẽ kẻ địch nếu kẻ địch tồn tại và chưa chết
             if (enemy != null && !enemy.IsDead())
             {
-                canvas.DrawImage(enemy.GetCurrentFrame(), enemy.enemyX, enemy.enemyY, enemy.enemyWidth, enemy.enemyHeight);
+                var enemyFrame = enemy.GetCurrentFrame();
+                if (enemyFrame != null)
+                {
+                    canvas.DrawImage(enemyFrame, enemy.enemyX, enemy.enemyY, enemy.enemyWidth, enemy.enemyHeight);
+                }
             }
 
             if (gameOverState)
@@ -90,26 +96,19 @@ namespace Project_Game
         }
 
 
+
         private void TimerEvent(object sender, EventArgs e)
         {
             if (!gameOverState)
             {
-                // Nếu đang tấn công, cập nhật hoạt ảnh tấn công
                 if (player.IsAttacking)
                 {
                     player.UpdateAttack();
                 }
                 else
                 {
-                    // Nếu không tấn công, cho phép di chuyển
+                    player.Move(); // Gọi phương thức di chuyển của player
                     gameLogic.TimerEvent(sender, e, healBar);
-                }
-
-                // Kiểm tra nếu kẻ địch cần xóa
-                if (enemy != null && enemy.IsDead())
-                {
-                    Console.WriteLine("Enemy defeated and removed.");
-                    enemy = null; // Xóa tham chiếu đến kẻ địch
                 }
 
                 UpdateMap();
@@ -122,6 +121,7 @@ namespace Project_Game
                 needsRedraw = false;
             }
         }
+
 
 
 
@@ -197,11 +197,6 @@ namespace Project_Game
 
             // Vẽ lại giao diện
             Invalidate();
-        }
-
-        private void Test1_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }

@@ -43,10 +43,9 @@
             // 
             this.lblMovement.AutoSize = true;
             this.lblMovement.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMovement.Location = new System.Drawing.Point(16, 587);
-            this.lblMovement.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblMovement.Location = new System.Drawing.Point(12, 477);
             this.lblMovement.Name = "lblMovement";
-            this.lblMovement.Size = new System.Drawing.Size(157, 31);
+            this.lblMovement.Size = new System.Drawing.Size(127, 25);
             this.lblMovement.TabIndex = 0;
             this.lblMovement.Text = "Movement:";
             // 
@@ -60,10 +59,9 @@
             // 
             this.healBar.BackColor = System.Drawing.Color.Lime;
             this.healBar.ForeColor = System.Drawing.Color.LimeGreen;
-            this.healBar.Location = new System.Drawing.Point(1273, 26);
-            this.healBar.Margin = new System.Windows.Forms.Padding(4);
+            this.healBar.Location = new System.Drawing.Point(955, 21);
             this.healBar.Name = "healBar";
-            this.healBar.Size = new System.Drawing.Size(211, 28);
+            this.healBar.Size = new System.Drawing.Size(158, 23);
             this.healBar.TabIndex = 1;
             this.healBar.Value = 100;
             // 
@@ -77,37 +75,33 @@
             this.Test1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.Test1.BackgroundImage = global::Project_Game.Properties.Resources.House_1_1;
             this.Test1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.Test1.Location = new System.Drawing.Point(365, 229);
-            this.Test1.Margin = new System.Windows.Forms.Padding(4);
+            this.Test1.Location = new System.Drawing.Point(274, 186);
             this.Test1.Name = "Test1";
-            this.Test1.Size = new System.Drawing.Size(111, 145);
+            this.Test1.Size = new System.Drawing.Size(83, 118);
             this.Test1.TabIndex = 2;
             this.Test1.TabStop = false;
-            this.Test1.Click += new System.EventHandler(this.Test1_Click);
             // 
             // Test2
             // 
             this.Test2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.Test2.BackgroundImage = global::Project_Game.Properties.Resources.House_1_1;
             this.Test2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.Test2.Location = new System.Drawing.Point(979, 240);
-            this.Test2.Margin = new System.Windows.Forms.Padding(4);
+            this.Test2.Location = new System.Drawing.Point(734, 195);
             this.Test2.Name = "Test2";
-            this.Test2.Size = new System.Drawing.Size(111, 145);
+            this.Test2.Size = new System.Drawing.Size(83, 118);
             this.Test2.TabIndex = 3;
             this.Test2.TabStop = false;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1579, 678);
+            this.ClientSize = new System.Drawing.Size(1184, 551);
             this.Controls.Add(this.Test2);
             this.Controls.Add(this.Test1);
             this.Controls.Add(this.healBar);
             this.Controls.Add(this.lblMovement);
             this.DoubleBuffered = true;
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";

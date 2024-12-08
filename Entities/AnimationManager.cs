@@ -24,14 +24,20 @@ public class AnimationManager
             frames = new List<string>(Directory.GetFiles(folderPath, "*.png"));
             if (frames.Count > 0)
             {
-                CurrentFrame = Image.FromFile(frames[0]); // Đặt khung hình đầu tiên
+                CurrentFrame = Image.FromFile(frames[0]);
+                Console.WriteLine($"Loaded {frames.Count} frames from {folderPath}");
+            }
+            else
+            {
+                Console.WriteLine($"No frames found in {folderPath}");
             }
         }
         else
         {
-            throw new DirectoryNotFoundException($"Folder not found: {folderPath}");
+            Console.WriteLine($"Folder not found: {folderPath}");
         }
     }
+
 
     public void UpdateAnimation()
     {
@@ -43,8 +49,10 @@ public class AnimationManager
             currentFrameIndex = (currentFrameIndex + 1) % frames.Count;
             CurrentFrame = Image.FromFile(frames[currentFrameIndex]);
             frameRateCounter = 0;
+            Console.WriteLine($"Switched to frame {currentFrameIndex} in animation.");
         }
     }
+
 
     public void ResetAnimation()
     {
