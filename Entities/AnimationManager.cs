@@ -20,27 +20,32 @@ public class AnimationManager
 
     public void LoadFrames(string folderPath)
     {
-        if (Directory.Exists(folderPath))
-        {
-            var filePaths = Directory.GetFiles(folderPath, "*.png");
-            frames.Clear();
-
-            foreach (var filePath in filePaths)
-            {
-                frames.Add(Image.FromFile(filePath));
-            }
-
-            if (frames.Count > 0)
-            {
-                CurrentFrame = frames[0];
-                isComplete = false;
-            }
-        }
-        else
+        if (!Directory.Exists(folderPath))
         {
             throw new DirectoryNotFoundException($"Folder not found: {folderPath}");
         }
+
+        var filePaths = Directory.GetFiles(folderPath, "*.png");
+        frames.Clear();
+
+        foreach (var filePath in filePaths)
+        {
+            try
+            {
+                using (Image img = Image.FromFile(filePath))
+                {
+                    Bitmap bmp = new Bitmap(img);
+                    frames.Add(bmp);
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                // Log ra tên file gây lỗi
+                Console.WriteLine($"Không thể load ảnh từ {filePath}. File có thể hỏng hoặc không phải ảnh.");
+            }
+        }
     }
+
 
     public void UpdateAnimation(bool loop = true)
     {

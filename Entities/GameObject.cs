@@ -22,10 +22,10 @@ namespace Project_Game.Entities
             Health = health;
         }
 
-        public bool CheckCollision(Rectangle playerRect)
+        public bool CheckCollision(Rectangle rect)
         {
             Rectangle objectRect = new Rectangle(X, Y, Width, Height);
-            return playerRect.IntersectsWith(objectRect);
+            return rect.IntersectsWith(objectRect);
         }
 
         public virtual void TakeDamage(int damage)

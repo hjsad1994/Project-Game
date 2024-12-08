@@ -9,15 +9,15 @@ using System.Windows.Forms;
 public class GameLogic
 {
     private Player player;
-    private Enemy enemy;
-    private List<PictureBox> obstacles;
+    private List<Enemy> enemies;
+    private List<GameObject> obstacles;
     private bool isGameOver = false;
     public Player PlayerInstance => player;
 
-    public GameLogic(Player player, Enemy enemy, List<PictureBox> obstacles)
+    public GameLogic(Player player, List<Enemy> enemies, List<GameObject> obstacles)
     {
         this.player = player;
-        this.enemy = enemy;
+        this.enemies = enemies;
         this.obstacles = obstacles;
     }
 
@@ -45,51 +45,53 @@ public class GameLogic
     {
         Rectangle playerRect = new Rectangle(player.playerX, player.playerY, player.playerWidth, player.playerHeight);
 
-        // Chỉ kiểm tra va chạm với enemy nếu enemy chưa chết
-        if (enemy != null && !enemy.IsDead())
+        // Check collision with enemies
+        foreach (var enemy in enemies)
         {
-            Rectangle enemyRect = new Rectangle(enemy.X, enemy.Y, enemy.Width, enemy.Height);
-
-            if (playerRect.IntersectsWith(enemyRect))
+            if (!enemy.IsDead())
             {
-                if (player.Health > 0)
+                Rectangle enemyRect = new Rectangle(enemy.X, enemy.Y, enemy.Width, enemy.Height);
+                if (playerRect.IntersectsWith(enemyRect))
                 {
-                    player.TakeDamage(0); // damage 0 tạm thời
-                    healBar.Value = player.Health;
-                }
-                else
-                {
-                    isGameOver = true;
-                    ((Form1)Application.OpenForms["Form1"]).EndGame(player.Health, healBar);
+                    if (player.Health > 0)
+                    {
+                        player.TakeDamage(0);
+                        healBar.Value = player.Health;
+                    }
+                    else
+                    {
+                        isGameOver = true;
+                        ((Form1)Application.OpenForms["Form1"]).EndGame(player.Health, healBar);
+                        return;
+                    }
                 }
             }
         }
 
-        // Kiểm tra va chạm giữa player và obstacles
+        // Check collision with obstacles for player
         foreach (var obstacle in obstacles)
         {
-            Rectangle obstacleRect = new Rectangle(obstacle.Location.X, obstacle.Location.Y, obstacle.Width, obstacle.Height);
-
+            Rectangle obstacleRect = new Rectangle(obstacle.X, obstacle.Y, obstacle.Width, obstacle.Height);
             if (playerRect.IntersectsWith(obstacleRect))
             {
                 if (player.GoLeft)
                 {
-                    player.playerX = obstacle.Right;
+                    player.playerX = obstacle.X + obstacle.Width;
                     player.GoLeft = false;
                 }
                 if (player.GoRight)
                 {
-                    player.playerX = obstacle.Left - player.playerWidth;
+                    player.playerX = obstacle.X - player.playerWidth;
                     player.GoRight = false;
                 }
                 if (player.GoUp)
                 {
-                    player.playerY = obstacle.Bottom;
+                    player.playerY = obstacle.Y + obstacle.Height;
                     player.GoUp = false;
                 }
                 if (player.GoDown)
                 {
-                    player.playerY = obstacle.Top - player.playerHeight;
+                    player.playerY = obstacle.Y - player.playerHeight;
                     player.GoDown = false;
                 }
             }
@@ -101,48 +103,33 @@ public class GameLogic
         isGameOver = false;
     }
 
+    public void SetEnemies(List<Enemy> newEnemies)
+    {
+        this.enemies = newEnemies;
+    }
+
     public void TimerEvent(object sender, EventArgs e, ProgressBar healBar)
     {
         if (isGameOver) return;
 
-        // Di chuyển người chơi
-        // Player đã có logic di chuyển riêng trong Player.Move(), 
-        // nhưng ở đây bạn có di chuyển thô, có thể bỏ nếu đã di chuyển trong Player
-        // Hoặc giữ logic này nếu bạn muốn Player di chuyển bằng GameLogic
-        // Ở đây có vẻ bạn đang dùng Player.Move() ở nơi khác, nên có thể bỏ đoạn này:
-        // if (player.GoLeft && player.playerX > 0) player.playerX -= player.playerSpeed;
-        // if (player.GoRight && player.playerX + player.playerWidth < 2000) player.playerX += player.playerSpeed;
-        // if (player.GoUp && player.playerY > 0) player.playerY -= player.playerSpeed;
-        // if (player.GoDown && player.playerY + player.playerHeight < 6000) player.playerY += player.playerSpeed;
-
-        // Nếu bạn đã gọi player.Move() ở Form1 thì ở đây không cần gọi thêm.
-        // Đảm bảo chỉ gọi Move() một nơi.
-
-        // Cập nhật hoạt ảnh người chơi (nếu bạn không gọi Move() ở đây, không cần đoạn này)
-        // if (player.GoLeft || player.GoRight || player.GoUp || player.GoDown)
-        // {
-        //     player.movementAnimation.UpdateAnimation();
-        // }
-        // else
-        // {
-        //     player.AnimateIdle();
-        // }
-
-        // Hành vi kẻ địch
-        if (enemy != null && !enemy.IsDead())
+        foreach (var enemy in enemies)
         {
-            if (enemy.IsAttacking)
+            if (!enemy.IsDead())
             {
-                enemy.UpdateAttack(); // Cập nhật trạng thái tấn công
-            }
-            else
-            {
-                enemy.HandleAttack(player); // Kiểm tra tấn công hoặc di chuyển tới player
-            }
+                if (enemy.IsAttacking)
+                {
+                    enemy.UpdateAttack();
+                }
+                else
+                {
+                    // Truyền obstacles vào HandleAttack
+                    enemy.HandleAttack(player, obstacles);
+                }
 
-            enemy.Animate(); // Cập nhật hoạt ảnh
+                enemy.Animate();
+            }
         }
 
-        CheckCollision(healBar); // Kiểm tra va chạm
+        CheckCollision(healBar);
     }
 }

@@ -12,9 +12,9 @@ public class Player
 
     public int playerX { get; set; } = 100;
     public int playerY { get; set; } = 100;
-    public int playerWidth { get; set; } = 32;
-    public int playerHeight { get; set; } = 50;
-    public int playerSpeed { get; set; } = 10;
+    public int playerWidth { get; set; } = 22;
+    public int playerHeight { get; set; } = 40;
+    public int playerSpeed { get; set; } = 5;
 
     public int Health { get; private set; } = 100;
     public int MaxHealth { get; private set; } = 100;
@@ -28,9 +28,9 @@ public class Player
 
     public Player(List<PictureBox> obstacles)
     {
-        movementAnimation = new AnimationManager(frameRate: 5);
-        idleAnimation = new AnimationManager(frameRate: 8);
-        attackAnimation = new AnimationManager(frameRate: 4);
+        movementAnimation = new AnimationManager(frameRate: 3);
+        idleAnimation = new AnimationManager(frameRate: 3);
+        attackAnimation = new AnimationManager(frameRate: 3);
 
         // Load default animations
         movementAnimation.LoadFrames("Char_MoveMent/MoveDown");
@@ -138,7 +138,7 @@ public class Player
             attackAnimation.LoadFrames($"Player_Attack/{currentDirection}");
             attackAnimation.ResetAnimation();
 
-            target.TakeDamage(10);
+            target.TakeDamage(50);
         }
     }
 

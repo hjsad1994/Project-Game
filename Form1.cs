@@ -1,16 +1,17 @@
-﻿using System;
+﻿using Project_Game;
+using Project_Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using Project_Game.Entities;
 
 namespace Project_Game
 {
     public partial class Form1 : Form
     {
         private Player player;
-        private TestEnemy enemy;
+        private List<TestEnemy> enemies;
         private GameLogic gameLogic;
         private GameOver gameOver;
         private bool gameOverState = false;
@@ -18,26 +19,41 @@ namespace Project_Game
         private bool needsRedraw = false;
         private int currentMap = 1;
 
-        private List<PictureBox> obstacles;
+        private List<GameObject> obstacles;
 
         public Form1()
         {
             InitializeComponent();
 
-            obstacles = new List<PictureBox> { Test1, Test2 };
+            // Chuyển PictureBox thành GameObject
+            obstacles = new List<GameObject> {
+                new GameObject(Test1.Location.X, Test1.Location.Y, Test1.Width, Test1.Height, "Obstacle1"),
+                new GameObject(Test2.Location.X, Test2.Location.Y, Test2.Width, Test2.Height, "Obstacle2")
+            };
 
-            player = new Player(obstacles);
-            enemy = new TestEnemy();
-            gameLogic = new GameLogic(player, enemy, obstacles);
+            player = new Player(new List<PictureBox>());
+
+            // Tạo ít quái hơn để kiểm tra
+            enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 2, 500, 100);
+            var enemyList = enemies.Cast<Enemy>().ToList();
+
+            gameLogic = new GameLogic(player, enemyList, obstacles);
             gameOver = new GameOver(gameOverTimer, ResetGameAction, Invalidate);
 
             bg = Image.FromFile("bg.jpg");
 
             this.DoubleBuffered = true;
             this.KeyPreview = true;
+            movementTimer.Interval = 33; // 30fps hoặc tùy chỉnh
+
             this.KeyDown += KeyIsDown;
             this.KeyUp += KeyIsUp;
+            this.Paint += FormPaintEvent;
             this.MouseClick += FormMouseClick;
+
+            // Bắt đầu Timer
+            movementTimer.Tick += TimerEvent;
+            movementTimer.Start();
         }
 
         private void KeyIsDown(object sender, KeyEventArgs e)
@@ -77,12 +93,12 @@ namespace Project_Game
                 canvas.DrawImage(playerFrame, player.playerX, player.playerY, player.playerWidth, player.playerHeight);
             }
 
-            if (enemy != null && !enemy.IsDead())
+            foreach (var en in enemies)
             {
-                var enemyFrame = enemy.GetCurrentFrame();
+                var enemyFrame = en.GetCurrentFrame();
                 if (enemyFrame != null)
                 {
-                    canvas.DrawImage(enemyFrame, enemy.X, enemy.Y, enemy.Width, enemy.Height);
+                    canvas.DrawImage(enemyFrame, en.X, en.Y, en.Width, en.Height);
                 }
             }
 
@@ -94,6 +110,7 @@ namespace Project_Game
                 }
             }
         }
+
         private void TimerEvent(object sender, EventArgs e)
         {
             if (!gameOverState)
@@ -104,14 +121,12 @@ namespace Project_Game
                 }
                 else
                 {
-                    player.Move(); // Di chuyển người chơi
+                    player.Move();
                 }
 
-                // Gọi logic kẻ địch
-                if (!enemy.IsDead())
-                {
-                    gameLogic.TimerEvent(sender, e, healBar); // Sử dụng logic chung từ GameLogic
-                }
+                gameLogic.TimerEvent(sender, e, healBar);
+
+                enemies.RemoveAll(en => en.ShouldRemove);
 
                 needsRedraw = true;
             }
@@ -122,59 +137,64 @@ namespace Project_Game
                 needsRedraw = false;
             }
         }
+
         private void UpdateMap()
         {
             if (player.playerX > 400 && currentMap == 1)
             {
                 currentMap = 2;
-                bg = Image.FromFile("bg2.jpg");
+                // bg = cached image if needed
             }
             else if (player.playerX <= 400 && currentMap == 2)
             {
                 currentMap = 1;
-                bg = Image.FromFile("bg.jpg");
+                // bg = cached image if needed
             }
         }
 
         private void ResetGameAction()
         {
             player.ResetPlayer();
-            enemy.SetPosition(500, 100);
+            enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 2, 500, 100);
 
             gameOverState = false;
             healBar.Value = 100;
 
             this.KeyPreview = true;
             gameLogic.ResetGameState();
+
+            var enemyList = enemies.Cast<Enemy>().ToList();
+            gameLogic.SetEnemies(enemyList);
         }
 
         private void FormMouseClick(object sender, MouseEventArgs e)
         {
             if (gameOverState || player.IsAttacking) return;
 
-            // Tính khoảng cách giữa chuột và kẻ địch
-            double distance = Math.Sqrt(Math.Pow(e.X - enemy.X, 2) + Math.Pow(e.Y - enemy.Y, 2)); // Use X and Y instead of enemyX and enemyY
+            const int attackRange = 100;
+            double attackRangeSquared = attackRange * attackRange;
+            TestEnemy targetEnemy = null;
+            double minDistance = double.MaxValue;
 
-            const int attackRange = 100; // Phạm vi tấn công
-
-            if (distance <= attackRange && !enemy.IsDead())
+            foreach (var en in enemies)
             {
-                Console.WriteLine("Player attacks!");
-                player.PerformAttack(enemy); // Tấn công kẻ địch
-
-                if (enemy.IsDead())
+                double dx = e.X - en.X;
+                double dy = e.Y - en.Y;
+                double distSquared = dx * dx + dy * dy;
+                if (distSquared <= attackRangeSquared && distSquared < minDistance && !en.IsDead())
                 {
-                    Console.WriteLine("Enemy defeated!");
+                    minDistance = distSquared;
+                    targetEnemy = en;
                 }
             }
-            else
+
+            if (targetEnemy != null)
             {
-                Console.WriteLine("Target is out of range or already dead!");
+                player.PerformAttack(targetEnemy);
             }
 
-            Invalidate(); // Cập nhật giao diện
+            Invalidate();
         }
-
 
         public void EndGame(int currentHealth, ProgressBar healBar)
         {
@@ -184,15 +204,11 @@ namespace Project_Game
 
             gameOver.ResetGame();
         }
+
         private void GameOverTimer_Tick(object sender, EventArgs e)
         {
-            // Tắt bộ đếm thời gian khi game over
             gameOverTimer.Stop();
-
-            // Thực hiện hành động reset game
             ResetGameAction();
-
-            // Vẽ lại giao diện
             Invalidate();
         }
     }

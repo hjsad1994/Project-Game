@@ -10,7 +10,6 @@ namespace Project_Game.Entities
         public string Direction { get; protected set; } = "Down";
         public int Speed { get; protected set; } = 4;
 
-        // Cho phép override
         public virtual bool IsAttacking { get; protected set; } = false;
         public virtual bool ShouldRemove { get; protected set; } = false;
 
@@ -70,31 +69,8 @@ namespace Project_Game.Entities
             return new List<string>();
         }
 
-        public virtual void Move(int playerX, int playerY, int screenWidth, int screenHeight, List<GameObject> obstacles)
-        {
-            int deltaX = playerX - X;
-            int deltaY = playerY - Y;
-
-            if (Math.Abs(deltaX) > Speed)
-            {
-                int newX = X + Math.Sign(deltaX) * Speed;
-                if (!CheckCollisionWithObstacles(newX, Y, obstacles))
-                {
-                    X = newX;
-                    Direction = deltaX < 0 ? "Left" : "Right";
-                }
-            }
-
-            if (Math.Abs(deltaY) > Speed)
-            {
-                int newY = Y + Math.Sign(deltaY) * Speed;
-                if (!CheckCollisionWithObstacles(X, newY, obstacles))
-                {
-                    Y = newY;
-                    Direction = deltaY < 0 ? "Up" : "Down";
-                }
-            }
-        }
+        // Thêm tham số obstacles vào phương thức HandleAttack
+        public virtual void HandleAttack(Player player, List<GameObject> obstacles) { }
 
         protected bool CheckCollisionWithObstacles(int newX, int newY, List<GameObject> obstacles)
         {
@@ -108,24 +84,10 @@ namespace Project_Game.Entities
             return false;
         }
 
-        public virtual void PerformAttack(Player target)
-        {
-            // Default: không có hành vi tấn công
-        }
+        public virtual void PerformAttack(Player target) { }
 
-        public virtual void UpdateAttack()
-        {
-            // Default: không có cập nhật tấn công
-        }
+        public virtual void UpdateAttack() { }
 
-        public virtual void HandleAttack(Player player)
-        {
-            // Sẽ được ghi đè trong TestEnemy
-        }
-
-        public virtual Image GetCurrentFrame()
-        {
-            return null; // Lớp con sẽ override
-        }
+        public virtual Image GetCurrentFrame() { return null; }
     }
 }
