@@ -133,7 +133,10 @@ namespace Project_Game.Entities
             enemyX = x;
             enemyY = y;
         }
-
+        public virtual Image GetCurrentFrame()
+        {
+            return EnemyImage;
+        }
         protected bool CheckCollisionWithObstacles(int newX, int newY, List<GameObject> obstacles)
         {
             Rectangle enemyRect = new Rectangle(newX, newY, enemyWidth, enemyHeight);

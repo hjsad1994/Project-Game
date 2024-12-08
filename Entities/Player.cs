@@ -14,7 +14,7 @@ public class Player
     public int playerY { get; set; } = 100;
     public int playerWidth { get; set; } = 32;
     public int playerHeight { get; set; } = 50;
-    public int playerSpeed { get; set; } = 10;
+    public int playerSpeed { get; set; } = 5;
 
     public int Health { get; private set; } = 100;
     public int MaxHealth { get; private set; } = 100;
