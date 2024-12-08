@@ -12,6 +12,7 @@ public class GameLogic
     private Enemy enemy;
     private List<PictureBox> obstacles;
     private bool isGameOver = false;
+    public Player PlayerInstance => player;
 
     public GameLogic(Player player, Enemy enemy, List<PictureBox> obstacles)
     {
@@ -43,24 +44,28 @@ public class GameLogic
     public void CheckCollision(ProgressBar healBar)
     {
         Rectangle playerRect = new Rectangle(player.playerX, player.playerY, player.playerWidth, player.playerHeight);
-        Rectangle enemyRect = new Rectangle(enemy.enemyX, enemy.enemyY, enemy.enemyWidth, enemy.enemyHeight);
 
-        // Kiểm tra va chạm giữa người chơi và kẻ địch
-        if (playerRect.IntersectsWith(enemyRect))
+        // Chỉ kiểm tra va chạm với enemy nếu enemy chưa chết
+        if (enemy != null && !enemy.IsDead())
         {
-            if (player.Health > 0)
+            Rectangle enemyRect = new Rectangle(enemy.X, enemy.Y, enemy.Width, enemy.Height);
+
+            if (playerRect.IntersectsWith(enemyRect))
             {
-                player.TakeDamage(0); // Gây sát thương cho người chơi
-                healBar.Value = player.Health;
-            }
-            else
-            {
-                isGameOver = true;
-                ((Form1)Application.OpenForms["Form1"]).EndGame(player.Health, healBar);
+                if (player.Health > 0)
+                {
+                    player.TakeDamage(0); // damage 0 tạm thời
+                    healBar.Value = player.Health;
+                }
+                else
+                {
+                    isGameOver = true;
+                    ((Form1)Application.OpenForms["Form1"]).EndGame(player.Health, healBar);
+                }
             }
         }
 
-        // Kiểm tra va chạm giữa người chơi và vật cản
+        // Kiểm tra va chạm giữa player và obstacles
         foreach (var obstacle in obstacles)
         {
             Rectangle obstacleRect = new Rectangle(obstacle.Location.X, obstacle.Location.Y, obstacle.Width, obstacle.Height);
@@ -101,31 +106,43 @@ public class GameLogic
         if (isGameOver) return;
 
         // Di chuyển người chơi
-        if (player.GoLeft && player.playerX > 0) player.playerX -= player.playerSpeed;
-        if (player.GoRight && player.playerX + player.playerWidth < 2000) player.playerX += player.playerSpeed;
-        if (player.GoUp && player.playerY > 0) player.playerY -= player.playerSpeed;
-        if (player.GoDown && player.playerY + player.playerHeight < 6000) player.playerY += player.playerSpeed;
+        // Player đã có logic di chuyển riêng trong Player.Move(), 
+        // nhưng ở đây bạn có di chuyển thô, có thể bỏ nếu đã di chuyển trong Player
+        // Hoặc giữ logic này nếu bạn muốn Player di chuyển bằng GameLogic
+        // Ở đây có vẻ bạn đang dùng Player.Move() ở nơi khác, nên có thể bỏ đoạn này:
+        // if (player.GoLeft && player.playerX > 0) player.playerX -= player.playerSpeed;
+        // if (player.GoRight && player.playerX + player.playerWidth < 2000) player.playerX += player.playerSpeed;
+        // if (player.GoUp && player.playerY > 0) player.playerY -= player.playerSpeed;
+        // if (player.GoDown && player.playerY + player.playerHeight < 6000) player.playerY += player.playerSpeed;
 
-        // Cập nhật hoạt ảnh của người chơi
-        if (player.GoLeft || player.GoRight || player.GoUp || player.GoDown)
+        // Nếu bạn đã gọi player.Move() ở Form1 thì ở đây không cần gọi thêm.
+        // Đảm bảo chỉ gọi Move() một nơi.
+
+        // Cập nhật hoạt ảnh người chơi (nếu bạn không gọi Move() ở đây, không cần đoạn này)
+        // if (player.GoLeft || player.GoRight || player.GoUp || player.GoDown)
+        // {
+        //     player.movementAnimation.UpdateAnimation();
+        // }
+        // else
+        // {
+        //     player.AnimateIdle();
+        // }
+
+        // Hành vi kẻ địch
+        if (enemy != null && !enemy.IsDead())
         {
-            player.movementAnimation.UpdateAnimation();
+            if (enemy.IsAttacking)
+            {
+                enemy.UpdateAttack(); // Cập nhật trạng thái tấn công
+            }
+            else
+            {
+                enemy.HandleAttack(player); // Kiểm tra tấn công hoặc di chuyển tới player
+            }
+
+            enemy.Animate(); // Cập nhật hoạt ảnh
         }
-        else
-        {
-            player.AnimateIdle();
-        }
 
-        // Tạo danh sách GameObject từ obstacles
-        List<GameObject> gameObjects = obstacles
-            .Select(obstacle => new GameObject(obstacle.Location.X, obstacle.Location.Y, obstacle.Width, obstacle.Height, obstacle.Name))
-            .ToList();
-
-        // Di chuyển và cập nhật hoạt ảnh của kẻ địch
-        enemy.Move(player.playerX, player.playerY, 2000, 6000, gameObjects);
-        enemy.AnimateEnemy(0, 5);
-
-        // Kiểm tra va chạm
-        CheckCollision(healBar);
+        CheckCollision(healBar); // Kiểm tra va chạm
     }
 }

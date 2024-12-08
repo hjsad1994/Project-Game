@@ -14,7 +14,7 @@ public class Player
     public int playerY { get; set; } = 100;
     public int playerWidth { get; set; } = 32;
     public int playerHeight { get; set; } = 50;
-    public int playerSpeed { get; set; } = 5;
+    public int playerSpeed { get; set; } = 10;
 
     public int Health { get; private set; } = 100;
     public int MaxHealth { get; private set; } = 100;
@@ -22,7 +22,7 @@ public class Player
     public AnimationManager movementAnimation { get; private set; }
     private AnimationManager idleAnimation;
     private AnimationManager attackAnimation;
-
+    private bool wasMovingPreviously = false;
     public bool IsAttacking { get; private set; } = false;
     private string currentDirection = "Down";
 
@@ -50,7 +50,7 @@ public class Player
 
     public void Move()
     {
-        if (IsAttacking) return; // Không di chuyển khi đang tấn công
+        if (IsAttacking) return;
 
         bool isMoving = false;
 
@@ -97,14 +97,22 @@ public class Player
 
         if (isMoving)
         {
-            movementAnimation.UpdateAnimation(); // Cập nhật khung hình di chuyển
+            movementAnimation.UpdateAnimation();
         }
         else
         {
-            UpdateIdleAnimation();
+            // Nếu frame trước đang di chuyển, còn frame này không di chuyển nữa, nghĩa là vừa dừng
+            if (wasMovingPreviously)
+            {
+                UpdateIdleAnimation();
+            }
             AnimateIdle();
         }
+
+        // Cập nhật trạng thái wasMovingPreviously cho frame tiếp theo
+        wasMovingPreviously = isMoving;
     }
+
 
 
 
@@ -127,21 +135,20 @@ public class Player
         if (!IsAttacking)
         {
             IsAttacking = true;
-
-            // Gây sát thương cho kẻ địch
-            target.TakeDamage(10);
-
-            // Hiển thị hoạt ảnh tấn công
             attackAnimation.LoadFrames($"Player_Attack/{currentDirection}");
-            attackAnimation.ResetAnimation(); // Reset để hoạt ảnh bắt đầu từ đầu
+            attackAnimation.ResetAnimation();
+
+            target.TakeDamage(10);
         }
     }
+
 
     public void UpdateAttack()
     {
         if (IsAttacking)
         {
-            attackAnimation.UpdateAnimation();
+            // Đảm bảo animation attack không loop
+            attackAnimation.UpdateAnimation(loop: false);
             if (attackAnimation.IsComplete())
             {
                 IsAttacking = false;
@@ -151,7 +158,6 @@ public class Player
 
     private void UpdateIdleAnimation()
     {
-        // Đảm bảo hoạt ảnh Idle khớp với hướng di chuyển cuối cùng
         switch (currentDirection)
         {
             case "Left":
@@ -169,6 +175,8 @@ public class Player
         }
         idleAnimation.ResetAnimation();
     }
+
+
 
     public Image GetCurrentFrame()
     {

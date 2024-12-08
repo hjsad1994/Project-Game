@@ -5,161 +5,127 @@ using System.IO;
 
 namespace Project_Game.Entities
 {
-    public class Enemy
+    public class Enemy : GameObject
     {
-        public string Name { get; protected set; } // Tên của Enemy
-        public int Health { get; protected set; } // Máu của Enemy
-        public int MaxHealth { get; protected set; } // Máu tối đa
+        public string Direction { get; protected set; } = "Down";
+        public int Speed { get; protected set; } = 4;
 
-        public int enemyX { get; protected set; } = 0;
-        public int enemyY { get; protected set; } = 0;
-        public int enemySpeed { get; protected set; } = 4;
+        // Cho phép override
+        public virtual bool IsAttacking { get; protected set; } = false;
+        public virtual bool ShouldRemove { get; protected set; } = false;
 
-        public int enemyWidth { get; protected set; } = 32;
-        public int enemyHeight { get; protected set; } = 50;
+        private List<string> MovementsLeft = new List<string>();
+        private List<string> MovementsRight = new List<string>();
+        private List<string> MovementsUp = new List<string>();
+        private List<string> MovementsDown = new List<string>();
 
-        public string enemyDirection { get; protected set; } = "Down";
-
-        public Image EnemyImage { get; protected set; }
-
-        protected List<string> EnemyMovementsLeft = new List<string>();
-        protected List<string> EnemyMovementsRight = new List<string>();
-        protected List<string> EnemyMovementsUp = new List<string>();
-        protected List<string> EnemyMovementsDown = new List<string>();
-
-        private int enemySteps = 0;
-        private int enemyFrameRate = 0;
+        private int animationIndex = 0;
+        private int frameCounter = 0;
+        private int frameRate = 5;
 
         public Enemy(string name, int maxHealth = 100)
+            : base(0, 0, 32, 50, name, maxHealth) { }
+
+        public virtual void SetPosition(int x, int y)
         {
-            Name = name;
-            Health = maxHealth;
-            MaxHealth = maxHealth;
+            X = x;
+            Y = y;
         }
 
-        public virtual void LoadEnemyImages(string baseFolderPath = "Char_MoveMent")
+        public virtual void LoadEnemyImages(string baseFolderPath)
         {
-            LoadEnemyDirectionImages("Left", EnemyMovementsLeft, baseFolderPath);
-            LoadEnemyDirectionImages("Right", EnemyMovementsRight, baseFolderPath);
-            LoadEnemyDirectionImages("Up", EnemyMovementsUp, baseFolderPath);
-            LoadEnemyDirectionImages("Down", EnemyMovementsDown, baseFolderPath);
-
-            if (EnemyMovementsDown.Count > 0)
-            {
-                EnemyImage = Image.FromFile(EnemyMovementsDown[0]);
-            }
+            LoadDirectionImages("Left", MovementsLeft, baseFolderPath);
+            LoadDirectionImages("Right", MovementsRight, baseFolderPath);
+            LoadDirectionImages("Up", MovementsUp, baseFolderPath);
+            LoadDirectionImages("Down", MovementsDown, baseFolderPath);
         }
 
-        protected void LoadEnemyDirectionImages(string direction, List<string> movementList, string baseFolderPath)
+        private void LoadDirectionImages(string direction, List<string> movements, string baseFolderPath)
         {
-            string folderPath = Path.Combine(baseFolderPath, direction);
-            if (Directory.Exists(folderPath))
-            {
-                movementList.AddRange(Directory.GetFiles(folderPath, "*.png"));
-            }
+            string path = Path.Combine(baseFolderPath, direction);
+            if (Directory.Exists(path))
+                movements.AddRange(Directory.GetFiles(path, "*.png"));
         }
 
-        public virtual void AnimateEnemy(int start, int end)
+        public void Animate()
         {
-            enemyFrameRate++;
-            if (enemyFrameRate >= 5)
+            frameCounter++;
+            if (frameCounter >= frameRate)
             {
-                enemySteps = (enemySteps + 1) % (end - start + 1);
-                enemyFrameRate = 0;
-            }
-
-            string imagePath = null;
-
-            if (enemyDirection == "Left" && EnemyMovementsLeft.Count > 0)
-            {
-                imagePath = EnemyMovementsLeft[enemySteps % EnemyMovementsLeft.Count];
-            }
-            else if (enemyDirection == "Right" && EnemyMovementsRight.Count > 0)
-            {
-                imagePath = EnemyMovementsRight[enemySteps % EnemyMovementsRight.Count];
-            }
-            else if (enemyDirection == "Up" && EnemyMovementsUp.Count > 0)
-            {
-                imagePath = EnemyMovementsUp[enemySteps % EnemyMovementsUp.Count];
-            }
-            else if (enemyDirection == "Down" && EnemyMovementsDown.Count > 0)
-            {
-                imagePath = EnemyMovementsDown[enemySteps % EnemyMovementsDown.Count];
-            }
-            else
-            {
-                Console.WriteLine("No images available for current direction.");
-                return; // Thoát nếu không có hình ảnh
-            }
-
-            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
-            {
-                using (Image img = Image.FromFile(imagePath))
+                frameCounter = 0;
+                List<string> currentMovements = GetCurrentMovementList();
+                if (currentMovements.Count > 0)
                 {
-                    EnemyImage = new Bitmap(img);
+                    animationIndex = (animationIndex + 1) % currentMovements.Count;
                 }
             }
         }
 
+        private List<string> GetCurrentMovementList()
+        {
+            if (Direction == "Left") return MovementsLeft;
+            if (Direction == "Right") return MovementsRight;
+            if (Direction == "Up") return MovementsUp;
+            if (Direction == "Down") return MovementsDown;
+            return new List<string>();
+        }
 
         public virtual void Move(int playerX, int playerY, int screenWidth, int screenHeight, List<GameObject> obstacles)
         {
-            int deltaX = playerX - enemyX;
-            int deltaY = playerY - enemyY;
+            int deltaX = playerX - X;
+            int deltaY = playerY - Y;
 
-            if (Math.Abs(deltaX) > enemySpeed)
+            if (Math.Abs(deltaX) > Speed)
             {
-                int newX = enemyX + Math.Sign(deltaX) * enemySpeed;
-                if (!CheckCollisionWithObstacles(newX, enemyY, obstacles))
+                int newX = X + Math.Sign(deltaX) * Speed;
+                if (!CheckCollisionWithObstacles(newX, Y, obstacles))
                 {
-                    enemyX = newX;
-                    enemyDirection = deltaX < 0 ? "Left" : "Right";
+                    X = newX;
+                    Direction = deltaX < 0 ? "Left" : "Right";
                 }
             }
 
-            if (Math.Abs(deltaY) > enemySpeed)
+            if (Math.Abs(deltaY) > Speed)
             {
-                int newY = enemyY + Math.Sign(deltaY) * enemySpeed;
-                if (!CheckCollisionWithObstacles(enemyX, newY, obstacles))
+                int newY = Y + Math.Sign(deltaY) * Speed;
+                if (!CheckCollisionWithObstacles(X, newY, obstacles))
                 {
-                    enemyY = newY;
-                    enemyDirection = deltaY < 0 ? "Up" : "Down";
+                    Y = newY;
+                    Direction = deltaY < 0 ? "Up" : "Down";
                 }
             }
         }
 
-        public void SetPosition(int x, int y)
-        {
-            enemyX = x;
-            enemyY = y;
-        }
-        public virtual Image GetCurrentFrame()
-        {
-            return EnemyImage;
-        }
         protected bool CheckCollisionWithObstacles(int newX, int newY, List<GameObject> obstacles)
         {
-            Rectangle enemyRect = new Rectangle(newX, newY, enemyWidth, enemyHeight);
-
-            foreach (var obstacle in obstacles)
+            Rectangle rect = new Rectangle(newX, newY, Width, Height);
+            foreach (var obj in obstacles)
             {
-                Rectangle obstacleRect = new Rectangle(obstacle.X, obstacle.Y, obstacle.Width, obstacle.Height);
-                if (enemyRect.IntersectsWith(obstacleRect))
-                {
+                Rectangle objRect = new Rectangle(obj.X, obj.Y, obj.Width, obj.Height);
+                if (rect.IntersectsWith(objRect))
                     return true;
-                }
             }
             return false;
         }
 
-        public virtual void TakeDamage(int damage)
+        public virtual void PerformAttack(Player target)
         {
-            Health -= damage;
-            if (Health < 0) Health = 0;
+            // Default: không có hành vi tấn công
         }
-        public bool IsDead()
+
+        public virtual void UpdateAttack()
         {
-            return Health <= 0;
+            // Default: không có cập nhật tấn công
+        }
+
+        public virtual void HandleAttack(Player player)
+        {
+            // Sẽ được ghi đè trong TestEnemy
+        }
+
+        public virtual Image GetCurrentFrame()
+        {
+            return null; // Lớp con sẽ override
         }
     }
 }

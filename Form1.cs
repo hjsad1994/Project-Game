@@ -82,7 +82,7 @@ namespace Project_Game
                 var enemyFrame = enemy.GetCurrentFrame();
                 if (enemyFrame != null)
                 {
-                    canvas.DrawImage(enemyFrame, enemy.enemyX, enemy.enemyY, enemy.enemyWidth, enemy.enemyHeight);
+                    canvas.DrawImage(enemyFrame, enemy.X, enemy.Y, enemy.Width, enemy.Height);
                 }
             }
 
@@ -94,9 +94,6 @@ namespace Project_Game
                 }
             }
         }
-
-
-
         private void TimerEvent(object sender, EventArgs e)
         {
             if (!gameOverState)
@@ -107,11 +104,15 @@ namespace Project_Game
                 }
                 else
                 {
-                    player.Move(); // Gọi phương thức di chuyển của player
-                    gameLogic.TimerEvent(sender, e, healBar);
+                    player.Move(); // Di chuyển người chơi
                 }
 
-                UpdateMap();
+                // Gọi logic kẻ địch
+                if (!enemy.IsDead())
+                {
+                    gameLogic.TimerEvent(sender, e, healBar); // Sử dụng logic chung từ GameLogic
+                }
+
                 needsRedraw = true;
             }
 
@@ -121,11 +122,6 @@ namespace Project_Game
                 needsRedraw = false;
             }
         }
-
-
-
-
-
         private void UpdateMap()
         {
             if (player.playerX > 400 && currentMap == 1)
@@ -157,7 +153,7 @@ namespace Project_Game
             if (gameOverState || player.IsAttacking) return;
 
             // Tính khoảng cách giữa chuột và kẻ địch
-            double distance = Math.Sqrt(Math.Pow(e.X - enemy.enemyX, 2) + Math.Pow(e.Y - enemy.enemyY, 2));
+            double distance = Math.Sqrt(Math.Pow(e.X - enemy.X, 2) + Math.Pow(e.Y - enemy.Y, 2)); // Use X and Y instead of enemyX and enemyY
 
             const int attackRange = 100; // Phạm vi tấn công
 
@@ -178,6 +174,7 @@ namespace Project_Game
 
             Invalidate(); // Cập nhật giao diện
         }
+
 
         public void EndGame(int currentHealth, ProgressBar healBar)
         {

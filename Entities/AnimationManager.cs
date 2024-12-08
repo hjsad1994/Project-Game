@@ -5,12 +5,13 @@ using System.IO;
 
 public class AnimationManager
 {
-    private List<string> frames = new List<string>(); // Các khung hình của animation
+    private List<Image> frames = new List<Image>();
     private int currentFrameIndex = 0;
     private int frameRateCounter = 0;
     private int frameRateLimit;
+    private bool isComplete = false;
 
-    public Image CurrentFrame { get; private set; } // Khung hình hiện tại
+    public Image CurrentFrame { get; private set; }
 
     public AnimationManager(int frameRate = 5)
     {
@@ -21,51 +22,76 @@ public class AnimationManager
     {
         if (Directory.Exists(folderPath))
         {
-            frames = new List<string>(Directory.GetFiles(folderPath, "*.png"));
+            var filePaths = Directory.GetFiles(folderPath, "*.png");
+            frames.Clear();
+
+            foreach (var filePath in filePaths)
+            {
+                frames.Add(Image.FromFile(filePath));
+            }
+
             if (frames.Count > 0)
             {
-                CurrentFrame = Image.FromFile(frames[0]);
-                Console.WriteLine($"Loaded {frames.Count} frames from {folderPath}");
-            }
-            else
-            {
-                Console.WriteLine($"No frames found in {folderPath}");
+                CurrentFrame = frames[0];
+                isComplete = false;
             }
         }
         else
         {
-            Console.WriteLine($"Folder not found: {folderPath}");
+            throw new DirectoryNotFoundException($"Folder not found: {folderPath}");
         }
     }
 
-
-    public void UpdateAnimation()
+    public void UpdateAnimation(bool loop = true)
     {
         if (frames.Count == 0) return;
 
         frameRateCounter++;
         if (frameRateCounter >= frameRateLimit)
         {
-            currentFrameIndex = (currentFrameIndex + 1) % frames.Count;
-            CurrentFrame = Image.FromFile(frames[currentFrameIndex]);
             frameRateCounter = 0;
-            Console.WriteLine($"Switched to frame {currentFrameIndex} in animation.");
+            currentFrameIndex++;
+
+            if (currentFrameIndex >= frames.Count)
+            {
+                if (loop)
+                {
+                    currentFrameIndex = 0;
+                }
+                else
+                {
+                    currentFrameIndex = frames.Count - 1;
+                    isComplete = true;
+                }
+            }
+
+            CurrentFrame = frames[currentFrameIndex];
         }
     }
-
 
     public void ResetAnimation()
     {
         currentFrameIndex = 0;
         frameRateCounter = 0;
+        isComplete = false;
         if (frames.Count > 0)
         {
-            CurrentFrame = Image.FromFile(frames[0]);
+            CurrentFrame = frames[0];
         }
     }
 
     public bool IsComplete()
     {
-        return currentFrameIndex == frames.Count - 1 && frameRateCounter == 0;
+        return isComplete;
+    }
+
+    public int GetFrameCount()
+    {
+        return frames.Count;
+    }
+
+    public Image GetCurrentFrame()
+    {
+        return CurrentFrame;
     }
 }
