@@ -15,6 +15,7 @@ namespace Project_Game.Entities
             this.gameOverTimer = gameOverTimer;
             this.resetGameAction = resetGameAction;
             this.invalidateAction = invalidateAction;
+            // a
         }
 
         // Kiểm tra xem người chơi đã thua chưa
