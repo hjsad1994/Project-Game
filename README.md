@@ -47,9 +47,9 @@ Chúng tôi luôn hoan nghênh ý kiến đóng góp để cải thiện **Kute 
 **Kute Fantasy** được tạo ra bởi đội ngũ đầy sáng tạo:
 
 - **Trần Tấn Tài** – Lập trình chính
-- **Trần Đình Ty** – Build map
-- **Đặng Doanh Toại** – Cắt sprite sheet
-- **Phan Thanh Thiên** – Cắt sprite sheet
+- **Trần Đình Ty** – Build map, tham gia debugging
+- **Đặng Doanh Toại** – Cắt sprite sheet, tham gia debugging
+- **Phan Thanh Thiên** – Cắt sprite sheet, tham gia debugging
 
 ## Liên Hệ
 
