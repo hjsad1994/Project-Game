@@ -40,7 +40,6 @@ public class GameLogic
         if (e.KeyCode == Keys.Up) player.GoUp = false;
         if (e.KeyCode == Keys.Down) player.GoDown = false;
     }
-
     public void CheckCollision(ProgressBar healBar)
     {
         Rectangle playerRect = new Rectangle(player.playerX, player.playerY, player.playerWidth, player.playerHeight);
@@ -55,12 +54,12 @@ public class GameLogic
                 {
                     if (player.Health > 0)
                     {
-                        player.TakeDamage(0);
-                        healBar.Value = player.Health;
+                        // Xử lý tấn công từ enemy đã được thực hiện trong TestEnemy.HandleAttack()
                         Console.WriteLine("Player bị kẻ địch tấn công!");
                     }
                     else
                     {
+                        Console.WriteLine("Player Health <=0, EndGame được gọi.");
                         isGameOver = true;
                         ((Form1)Application.OpenForms["Form1"]).EndGame(player.Health, healBar);
                         return;
@@ -69,46 +68,78 @@ public class GameLogic
             }
         }
 
-        // Check collision with obstacles for player
-        foreach (var obstacle in obstacles)
-        {
-            Rectangle obstacleRect = new Rectangle(obstacle.X, obstacle.Y, obstacle.Width, obstacle.Height);
-            if (playerRect.IntersectsWith(obstacleRect))
-            {
-                // Xử lý va chạm theo trục X
-                if (player.PreviousX < obstacle.X)
-                {
-                    // Di chuyển từ bên trái
-                    player.playerX = obstacle.X - player.playerWidth;
-                    player.GoLeft = false;
-                    Console.WriteLine("Player không thể đi sang trái vì va chạm với obstacle.");
-                }
-                else if (player.PreviousX > obstacle.X)
-                {
-                    // Di chuyển từ bên phải
-                    player.playerX = obstacle.X + obstacle.Width;
-                    player.GoRight = false;
-                    Console.WriteLine("Player không thể đi sang phải vì va chạm với obstacle.");
-                }
-
-                // Xử lý va chạm theo trục Y
-                if (player.PreviousY < obstacle.Y)
-                {
-                    // Di chuyển từ bên trên
-                    player.playerY = obstacle.Y - player.playerHeight;
-                    player.GoUp = false;
-                    Console.WriteLine("Player không thể đi lên vì va chạm với obstacle.");
-                }
-                else if (player.PreviousY > obstacle.Y)
-                {
-                    // Di chuyển từ bên dưới
-                    player.playerY = obstacle.Y + obstacle.Height;
-                    player.GoDown = false;
-                    Console.WriteLine("Player không thể đi xuống vì va chạm với obstacle.");
-                }
-            }
-        }
+        // Loại bỏ phần xử lý va chạm với obstacles
     }
+
+
+    //public void CheckCollision(ProgressBar healBar)
+    //{
+    //    Rectangle playerRect = new Rectangle(player.playerX, player.playerY, player.playerWidth, player.playerHeight);
+
+    //    // Check collision with enemies
+    //    foreach (var enemy in enemies)
+    //    {
+    //        if (!enemy.IsDead())
+    //        {
+    //            Rectangle enemyRect = new Rectangle(enemy.X, enemy.Y, enemy.Width, enemy.Height);
+    //            if (playerRect.IntersectsWith(enemyRect))
+    //            {
+    //                if (player.Health > 0)
+    //                {
+    //                    player.TakeDamage(0);
+    //                    healBar.Value = player.Health;
+    //                    Console.WriteLine("Player bị kẻ địch tấn công!");
+    //                }
+    //                else
+    //                {
+    //                    isGameOver = true;
+    //                    ((Form1)Application.OpenForms["Form1"]).EndGame(player.Health, healBar);
+    //                    return;
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    // Check collision with obstacles for player
+    //    foreach (var obstacle in obstacles)
+    //    {
+    //        Rectangle obstacleRect = new Rectangle(obstacle.X, obstacle.Y, obstacle.Width, obstacle.Height);
+    //        if (playerRect.IntersectsWith(obstacleRect))
+    //        {
+    //            // Xử lý va chạm theo trục X
+    //            if (player.PreviousX < obstacle.X)
+    //            {
+    //                // Di chuyển từ bên trái
+    //                player.playerX = obstacle.X - player.playerWidth;
+    //                player.GoLeft = false;
+    //                Console.WriteLine("Player không thể đi sang trái vì va chạm với obstacle.");
+    //            }
+    //            else if (player.PreviousX > obstacle.X)
+    //            {
+    //                // Di chuyển từ bên phải
+    //                player.playerX = obstacle.X + obstacle.Width;
+    //                player.GoRight = false;
+    //                Console.WriteLine("Player không thể đi sang phải vì va chạm với obstacle.");
+    //            }
+
+    //            // Xử lý va chạm theo trục Y
+    //            if (player.PreviousY < obstacle.Y)
+    //            {
+    //                // Di chuyển từ bên trên
+    //                player.playerY = obstacle.Y - player.playerHeight;
+    //                player.GoUp = false;
+    //                Console.WriteLine("Player không thể đi lên vì va chạm với obstacle.");
+    //            }
+    //            else if (player.PreviousY > obstacle.Y)
+    //            {
+    //                // Di chuyển từ bên dưới
+    //                player.playerY = obstacle.Y + obstacle.Height;
+    //                player.GoDown = false;
+    //                Console.WriteLine("Player không thể đi xuống vì va chạm với obstacle.");
+    //            }
+    //        }
+    //    }
+    //}
 
     public void ResetGameState()
     {
@@ -120,6 +151,45 @@ public class GameLogic
         this.enemies = newEnemies;
     }
 
+    //public void TimerEvent(object sender, EventArgs e, ProgressBar healBar)
+    //{
+    //    if (isGameOver) return;
+
+    //    // Di chuyển người chơi và lưu vị trí trước khi di chuyển
+    //    player.PreviousX = player.playerX;
+    //    player.PreviousY = player.playerY;
+
+    //    if (player.IsAttacking)
+    //    {
+    //        player.UpdateAttack();
+    //    }
+    //    else
+    //    {
+    //        player.Move();
+    //    }
+
+    //    // Di chuyển và xử lý va chạm của kẻ địch
+    //    foreach (var enemy in enemies)
+    //    {
+    //        if (!enemy.IsDead())
+    //        {
+    //            if (enemy.IsAttacking)
+    //            {
+    //                enemy.UpdateAttack();
+    //            }
+    //            else
+    //            {
+    //                // Truyền obstacles vào HandleAttack
+    //                enemy.HandleAttack(player, obstacles);
+    //            }
+
+    //            enemy.Animate();
+    //        }
+    //    }
+
+    //    // Kiểm tra va chạm sau khi di chuyểnn
+    //    CheckCollision(healBar);
+    //}
     public void TimerEvent(object sender, EventArgs e, ProgressBar healBar)
     {
         if (isGameOver) return;
@@ -156,7 +226,26 @@ public class GameLogic
             }
         }
 
-        // Kiểm tra va chạm sau khi di chuyểnn
+        // Kiểm tra va chạm sau khi di chuyển (chỉ để xử lý Game Over nếu cần)
         CheckCollision(healBar);
+
+        // Cập nhật healBar.Value dựa trên player.Health
+        if (player.Health >= healBar.Minimum && player.Health <= healBar.Maximum)
+        {
+            healBar.Value = player.Health;
+            Console.WriteLine($"healBar.Value được cập nhật thành {player.Health}");
+        }
+        else
+        {
+            Console.WriteLine($"player.Health = {player.Health} không hợp lệ cho healBar.Value");
+        }
+
+        // Kiểm tra Game Over
+        if (player.Health <= 0 && !isGameOver)
+        {
+            isGameOver = true;
+            ((Form1)Application.OpenForms["Form1"]).EndGame(player.Health, healBar);
+        }
     }
+
 }

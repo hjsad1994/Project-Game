@@ -69,7 +69,7 @@ public class Attack
 
             case "Heal":
                 Console.WriteLine($"{target.Name} is healed!");
-                target.TakeDamage(-Damage); // Negative damage to heal
+                target.TakeDamage(-Damage); // Negative damage to heall
                 break;
 
             default:

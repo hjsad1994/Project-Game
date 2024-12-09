@@ -31,12 +31,14 @@ namespace Project_Game
                 new GameObject(Test2.Location.X, Test2.Location.Y, Test2.Width, Test2.Height, "Obstacle2")
             };
 
-            player = new Player(new List<PictureBox>());
-
-            // Tạo ít quái hơn để kiểm tra
+            // Truyền danh sách obstacles vào Player
+            player = new Player(obstacles);
+            player.OnHealthChanged += UpdateHealBar;
+            // Tạo enemies và truyền Player vào nếu cần
             enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 2, 500, 100);
             var enemyList = enemies.Cast<Enemy>().ToList();
 
+            // Khởi tạo GameLogic với Player, enemies và obstacles
             gameLogic = new GameLogic(player, enemyList, obstacles);
             gameOver = new GameOver(gameOverTimer, ResetGameAction, Invalidate);
 
@@ -60,10 +62,10 @@ namespace Project_Game
         {
             if (!gameOverState)
             {
-                if (e.KeyCode == Keys.Left) player.GoLeft = true;
-                if (e.KeyCode == Keys.Right) player.GoRight = true;
-                if (e.KeyCode == Keys.Up) player.GoUp = true;
-                if (e.KeyCode == Keys.Down) player.GoDown = true;
+                if (e.KeyCode == Keys.Left && !player.IsBlockedLeft) player.GoLeft = true;
+                if (e.KeyCode == Keys.Right && !player.IsBlockedRight) player.GoRight = true;
+                if (e.KeyCode == Keys.Up && !player.IsBlockedUp) player.GoUp = true;
+                if (e.KeyCode == Keys.Down && !player.IsBlockedDown) player.GoDown = true;
             }
         }
 
@@ -71,45 +73,42 @@ namespace Project_Game
         {
             if (!gameOverState)
             {
-                if (e.KeyCode == Keys.Left) player.GoLeft = false;
-                if (e.KeyCode == Keys.Right) player.GoRight = false;
-                if (e.KeyCode == Keys.Up) player.GoUp = false;
-                if (e.KeyCode == Keys.Down) player.GoDown = false;
+                if (e.KeyCode == Keys.Left)
+                {
+                    player.GoLeft = false;
+                    player.UnblockDirection("Left");
+                }
+                if (e.KeyCode == Keys.Right)
+                {
+                    player.GoRight = false;
+                    player.UnblockDirection("Right");
+                }
+                if (e.KeyCode == Keys.Up)
+                {
+                    player.GoUp = false;
+                    player.UnblockDirection("Up");
+                }
+                if (e.KeyCode == Keys.Down)
+                {
+                    player.GoDown = false;
+                    player.UnblockDirection("Down");
+                }
             }
         }
+        private void UpdateHealBar(int newHealth)
+        {
+            if (newHealth >= healBar.Minimum && newHealth <= healBar.Maximum)
+            {
+                healBar.Value = newHealth;
+                Console.WriteLine($"healBar.Value được cập nhật thành {newHealth}");
+            }
 
-        //private void FormPaintEvent(object sender, PaintEventArgs e)
-        //{
-        //    Graphics canvas = e.Graphics;
-
-        //    if (bg != null)
-        //    {
-        //        canvas.DrawImage(bg, 0, 0, this.Width, this.Height);
-        //    }
-
-        //    var playerFrame = player.GetCurrentFrame();
-        //    if (playerFrame != null)
-        //    {
-        //        canvas.DrawImage(playerFrame, player.playerX, player.playerY, player.playerWidth, player.playerHeight);
-        //    }
-
-        //    foreach (var en in enemies)
-        //    {
-        //        var enemyFrame = en.GetCurrentFrame();
-        //        if (enemyFrame != null)
-        //        {
-        //            canvas.DrawImage(enemyFrame, en.X, en.Y, en.Width, en.Height);
-        //        }
-        //    }
-
-        //    if (gameOverState)
-        //    {
-        //        using (Font font = new Font("Arial", 24, FontStyle.Bold))
-        //        {
-        //            canvas.DrawString("Game Over", font, Brushes.Red, new PointF(300, 250));
-        //        }
-        //    }
-        //}
+            if (newHealth <= 0 && !gameOverState)
+            {
+                gameOverState = true;
+                EndGame(newHealth, healBar);
+            }
+        }
         private void FormPaintEvent(object sender, PaintEventArgs e)
         {
             Graphics canvas = e.Graphics;
@@ -192,6 +191,7 @@ namespace Project_Game
             }
         }
 
+
         private void UpdateMap()
         {
             if (player.playerX > 400 && currentMap == 1)
@@ -202,7 +202,7 @@ namespace Project_Game
             else if (player.playerX <= 400 && currentMap == 2)
             {
                 currentMap = 1;
-                // bg = cached image if neededd
+                // bg = cached image if needed
             }
         }
 
@@ -210,15 +210,14 @@ namespace Project_Game
         {
             player.ResetPlayer();
             enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 2, 500, 100);
+            var enemyList = enemies.Cast<Enemy>().ToList();
+            gameLogic.SetEnemies(enemyList);
 
             gameOverState = false;
             healBar.Value = 100;
 
             this.KeyPreview = true;
             gameLogic.ResetGameState();
-
-            var enemyList = enemies.Cast<Enemy>().ToList();
-            gameLogic.SetEnemies(enemyList);
         }
 
         private void FormMouseClick(object sender, MouseEventArgs e)
@@ -252,18 +251,31 @@ namespace Project_Game
 
         public void EndGame(int currentHealth, ProgressBar healBar)
         {
+            Console.WriteLine($"EndGame được gọi với currentHealth = {currentHealth}");
             gameOverState = true;
 
+            // Hiển thị thông báo Game Over
             MessageBox.Show("Game Over! Bạn đã thua cuộc!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+            // Chờ cho đến khi người dùng đóng MessageBox trước khi reset game
             gameOver.ResetGame();
+
+            // Optional: Đặt lại `healBar.Value` nếu cần
+            healBar.Value = player.MaxHealth;
         }
+
+
 
         private void GameOverTimer_Tick(object sender, EventArgs e)
         {
             gameOverTimer.Stop();
             ResetGameAction();
             Invalidate();
+        }
+
+        private void Test1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

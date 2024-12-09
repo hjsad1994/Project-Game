@@ -17,7 +17,7 @@ namespace Project_Game.Entities
             this.invalidateAction = invalidateAction;
         }
 
-        // Kiểm tra xem người chơi đã thua chưaa
+        // Kiểm tra xem người chơi đã thua chưaaa
         public void CheckGameOver(int currentHealth, ProgressBar healBar)
         {
             if (currentHealth <= 0)

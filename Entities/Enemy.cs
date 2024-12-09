@@ -21,7 +21,7 @@ namespace Project_Game.Entities
         private int animationIndex = 0;
         private int frameCounter = 0;
         private int frameRate = 5;
-        public virtual int AttackRange { get; } = 25; // Giá trị mặc định, có thể override trong lớp kế thừa
+        public virtual int AttackRange { get; } = 25; // Giá trị mặc định, có thể override trong lớp kế thừaa
         public virtual int DetectionRange { get; } = 300;
         public Enemy(string name, int maxHealth = 100)
             : base(0, 0, 22, 35, name, maxHealth) { }
