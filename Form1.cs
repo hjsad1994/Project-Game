@@ -26,7 +26,7 @@ namespace Project_Game
         {
             InitializeComponent();
 
-            // Chuyển PictureBox thành GameObject
+            // Chuyển PictureBox thành GameObjectt
             obstacles = new List<GameObject> {
 
                 new GameObject(Test1.Location.X, Test1.Location.Y, Test1.Width, Test1.Height, "Obstacle1"),

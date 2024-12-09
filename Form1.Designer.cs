@@ -117,6 +117,7 @@
             this.MinimumSize = new System.Drawing.Size(1280, 720);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Tag = "test";
             this.Text = "Form1";
             this.TransparencyKey = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.FormPaintEvent);
