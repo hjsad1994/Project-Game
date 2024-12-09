@@ -34,7 +34,7 @@ namespace Project_Game.Entities
         public bool IsAttacking { get; private set; } = false;
         private string currentDirection = "Down";
 
-        private List<GameObject> obstacles; // Lưu danh sách obstacles
+        private List<GameObject> obstacles; // Lưu danh sách obstacles                        asdsad          s
 
         // Các cờ bị chặn
         public bool BlockedLeft { get; private set; } = false;
