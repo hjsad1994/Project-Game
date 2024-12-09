@@ -202,7 +202,7 @@ namespace Project_Game
             else if (player.playerX <= 400 && currentMap == 2)
             {
                 currentMap = 1;
-                // bg = cached image if needed
+                // bg = cached image if neededd
             }
         }
 

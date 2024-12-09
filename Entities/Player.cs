@@ -33,7 +33,7 @@ public class Player
         idleAnimation = new AnimationManager(frameRate: 6);
         attackAnimation = new AnimationManager(frameRate: 5);
 
-        // Load default animations
+        // Load default animationss
         movementAnimation.LoadFrames("Char_MoveMent/MoveDown");
         idleAnimation.LoadFrames("Char_Idle/Down");
     }

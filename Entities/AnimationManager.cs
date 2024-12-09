@@ -40,7 +40,7 @@ public class AnimationManager
             }
             catch (OutOfMemoryException)
             {
-                // Log ra tên file gây lỗi
+                // Log ra tên file gây lỗii
                 Console.WriteLine($"Không thể load ảnh từ {filePath}. File có thể hỏng hoặc không phải ảnh.");
             }
         }

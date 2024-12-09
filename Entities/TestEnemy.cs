@@ -488,7 +488,7 @@ namespace Project_Game.Entities
             }
         }
 
-        // Phương thức mới để thay đổi hướng di chuyển
+        // Phương thức mới để thay đổi hướng di chuyểnn
         private void TryChangeDirection(List<GameObject> obstacles)
         {
             var now = DateTime.Now;
