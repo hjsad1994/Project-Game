@@ -153,6 +153,7 @@ namespace Project_Game.Entities
             Console.WriteLine($"Attempting to move to ({newX}, {newY})");
 
             // Kiểm tra va chạm trước khi di chuyển
+            // ai biet gi dau
             Rectangle newRect = new Rectangle(newX, newY, playerWidth, playerHeight);
             bool collisionDetected = false;
             string collisionDirection = ""; // Để xác định hướng va chạm
