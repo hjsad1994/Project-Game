@@ -1,70 +1,62 @@
-# Tựa Game RPG 2D
+# Kute Fantasy
 
 ![Banner Game](path/to/banner.png)
 
 ## Mô Tả
 
-Chào mừng bạn đến với **[Tên Game RPG 2D]**, một tựa game nhập vai 2D đầy màu sắc và lôi cuốn. Hòa mình vào thế giới kỳ diệu nơi bạn sẽ khám phá những vùng đất mới, chiến đấu với quái vật, và hoàn thành các nhiệm vụ đầy thách thức. Với cốt truyện sâu sắc và lối chơi hấp dẫn, **[Tên Game RPG 2D]** hứa hẹn mang đến cho bạn những giờ phút giải trí tuyệt vời.
+**Kute Fantasy** là một tựa game nhập vai 2D mang đến trải nghiệm độc đáo và thú vị. Người chơi sẽ hóa thân vào một nhân vật trong thế giới kỳ diệu, nơi có thể khám phá, chiến đấu với các sinh vật huyền bí, và chinh phục những nhiệm vụ đầy thử thách. Với đồ họa bắt mắt và lối chơi đơn giản nhưng cuốn hút, **Kute Fantasy** phù hợp với mọi lứa tuổi.
 
 ## Tính Năng
 
-- **Đồ Họa 2D Đẹp Mắt:** Thiết kế nghệ thuật độc đáo mang lại trải nghiệm thị giác tuyệt vời.
-- **Hệ Thống Chiến Đấu Chiến Thuật:** Tham gia vào những trận chiến hấp dẫn với các chiến thuật đa dạng.
-- **Cốt Truyện Sâu Sắc:** Khám phá câu chuyện phong phú với nhiều tình tiết ly kỳ.
-- **Nhân Vật Đa Dạng:** Tùy chỉnh nhân vật của bạn với nhiều lựa chọn về kỹ năng và trang bị.
-- **Thế Giới Mở:** Tự do khám phá các khu vực rộng lớn và bí ẩn.
-- **Nhiệm Vụ và Hoạt Động Phong Phú:** Hoàn thành các nhiệm vụ chính và phụ để tiến bộ trong trò chơi.
+- **Đồ Họa 2D Sống Động:** Được thiết kế tỉ mỉ, mang lại trải nghiệm hình ảnh dễ thương và thu hút.
+- **Chiến Đấu Đơn Giản:** Tấn công chỉ bằng cách nhấp chuột, dễ dàng thao tác.
+- **Khám Phá Thế Giới:** Tự do phiêu lưu và tương tác với các NPC.
+- **Inventory Hữu Ích:** Quản lý trang bị và vật phẩm bằng phím `I`.
+- **Hệ Thống Nhiệm Vụ:** Hoàn thành nhiệm vụ để mở khóa những câu chuyện hấp dẫn.
 
 ## Cài Đặt
 
 ### Yêu Cầu Hệ Thống
 
-- **Hệ Điều Hành:** Windows 10 trở lên, macOS 10.12 trở lên
-- **Bộ Xử Lý:** Intel Core i5 hoặc tương đương
-- **RAM:** 8 GB
-- **Đồ Họa:** NVIDIA GTX 960 hoặc tương đương
-- **Dung Lượng Ổ Cứng:** 2 GB
+- **Hệ Điều Hành:** Windows 7 trở lên
+- **Bộ Xử Lý:** Intel Core i3 hoặc cao hơn
+- **RAM:** 4 GB
+- **Card Đồ Họa:** Onboard
+- **Dung Lượng Ổ Cứng:** 1 GB
 
 ### Hướng Dẫn Cài Đặt
 
-1. **Tải Về:** Tải bộ cài đặt từ [liên kết tải về](https://example.com/download).
-2. **Cài Đặt:** Chạy file cài đặt và làm theo hướng dẫn trên màn hình.
-3. **Chạy Game:** Sau khi cài đặt xong, mở ứng dụng và bắt đầu hành trình của bạn!
+1. **Tải Về:** Tải game từ [liên kết tải về](https://example.com/download).
+2. **Cài Đặt:** Chạy tệp cài đặt và làm theo hướng dẫn.
+3. **Chơi Game:** Sau khi cài đặt xong, nhấp vào biểu tượng game để bắt đầu cuộc phiêu lưu.
 
 ## Sử Dụng
 
-### Điều Khiển Cơ Bản
+### Điều Khiển
 
-- **Di chuyển:** Sử dụng phím `W`, `A`, `S`, `D` để di chuyển nhân vật.
-- **Tấn Công:** Nhấn phím `J` để tấn công.
-- **Kỹ Năng Đặc Biệt:** Nhấn phím `K` để sử dụng kỹ năng đặc biệt.
-- **Mở Menu:** Nhấn phím `Esc` để truy cập menu chính.
-
-### Hướng Dẫn Chi Tiết
-
-Để biết thêm chi tiết về cách chơi, vui lòng xem [Hướng Dẫn Chi Tiết](https://example.com/guide).
+- **Di chuyển:** Sử dụng các phím `W`, `A`, `S`, `D` hoặc các phím mũi tên.
+- **Tấn Công:** Nhấp chuột trái để thực hiện tấn công.
+- **Inventory:** Nhấn phím `I` để mở bảng vật phẩm.
 
 ## Đóng Góp
 
-Chúng tôi hoan nghênh mọi ý kiến đóng góp để cải thiện **[Tên Game RPG 2D]**. Vui lòng tạo [issue](https://github.com/your-repo/issues) hoặc gửi [pull request](https://github.com/your-repo/pulls) nếu bạn muốn tham gia phát triển.
+Chúng tôi luôn hoan nghênh ý kiến đóng góp để cải thiện **Kute Fantasy**. Vui lòng tạo [issue](https://github.com/your-repo/issues) hoặc gửi [pull request](https://github.com/your-repo/pulls) nếu bạn muốn tham gia vào dự án.
 
 ## Nhóm Phát Triển
 
-**[Tên Game RPG 2D]** được phát triển bởi một nhóm gồm 4 thành viên nhiệt huyết:
+**Kute Fantasy** được tạo ra bởi đội ngũ đầy sáng tạo:
 
-- **Nguyễn Văn A** – Lập trình viên chính
-- **Trần Thị B** – Nhà thiết kế đồ họa
-- **Lê Văn C** – Nhà biên kịch
-- **Phạm Thị D** – Chuyên viên âm thanh
+- **Trần Tấn Tài** – Lập trình chính
+- **Trần Đình Ty** – Build map
+- **Đặng Doanh Toại** – Cắt sprite sheet
+- **Phan Thanh Thiên** – Cắt sprite sheet
 
 ## Liên Hệ
 
-Nếu bạn có bất kỳ câu hỏi hoặc góp ý nào, vui lòng liên hệ với chúng tôi qua:
+Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi qua email:
 
-- **Email:** contact@example.com
-- **Website:** [www.example.com](https://www.example.com)
-- **Facebook:** [fb.com/example](https://facebook.com/example)
+- **Email:** trantai306@gmail.com
 
 ---
 
-*© 2024 [Tên Công Ty/Đội Nhóm]. Bảo lưu mọi quyền.*
+*© 2024 Kute Fantasy Team. All rights reserved.*
