@@ -44,7 +44,7 @@ namespace Project_Game
 
             this.DoubleBuffered = true;
             this.KeyPreview = true;
-            movementTimer.Interval = 33; // 30fps hoặc tùy chỉnh
+
 
             this.KeyDown += KeyIsDown;
             this.KeyUp += KeyIsUp;
@@ -78,6 +78,38 @@ namespace Project_Game
             }
         }
 
+        //private void FormPaintEvent(object sender, PaintEventArgs e)
+        //{
+        //    Graphics canvas = e.Graphics;
+
+        //    if (bg != null)
+        //    {
+        //        canvas.DrawImage(bg, 0, 0, this.Width, this.Height);
+        //    }
+
+        //    var playerFrame = player.GetCurrentFrame();
+        //    if (playerFrame != null)
+        //    {
+        //        canvas.DrawImage(playerFrame, player.playerX, player.playerY, player.playerWidth, player.playerHeight);
+        //    }
+
+        //    foreach (var en in enemies)
+        //    {
+        //        var enemyFrame = en.GetCurrentFrame();
+        //        if (enemyFrame != null)
+        //        {
+        //            canvas.DrawImage(enemyFrame, en.X, en.Y, en.Width, en.Height);
+        //        }
+        //    }
+
+        //    if (gameOverState)
+        //    {
+        //        using (Font font = new Font("Arial", 24, FontStyle.Bold))
+        //        {
+        //            canvas.DrawString("Game Over", font, Brushes.Red, new PointF(300, 250));
+        //        }
+        //    }
+        //}
         private void FormPaintEvent(object sender, PaintEventArgs e)
         {
             Graphics canvas = e.Graphics;
@@ -99,6 +131,28 @@ namespace Project_Game
                 if (enemyFrame != null)
                 {
                     canvas.DrawImage(enemyFrame, en.X, en.Y, en.Width, en.Height);
+
+                    // Kiểm tra xem enemy có phải là TestEnemy hay không để truy cập AttackRange và DetectionRange
+                    if (en is TestEnemy testEnemy)
+                    {
+                        // Vẽ AttackRange (Vòng tròn đỏ)
+                        using (Pen penAttack = new Pen(Color.Red, 2))
+                        {
+                            // Tính toán vị trí để vẽ vòng tròn
+                            int centerX = testEnemy.X + testEnemy.Width / 2;
+                            int centerY = testEnemy.Y + testEnemy.Height / 2;
+                            canvas.DrawEllipse(penAttack, centerX - testEnemy.AttackRange, centerY - testEnemy.AttackRange, testEnemy.AttackRange * 2, testEnemy.AttackRange * 2);
+                        }
+
+                        // Vẽ DetectionRange (Vòng tròn xanh)
+                        using (Pen penDetect = new Pen(Color.Blue, 2))
+                        {
+                            // Tính toán vị trí để vẽ vòng tròn
+                            int centerX = testEnemy.X + testEnemy.Width / 2;
+                            int centerY = testEnemy.Y + testEnemy.Height / 2;
+                            canvas.DrawEllipse(penDetect, centerX - testEnemy.DetectionRange, centerY - testEnemy.DetectionRange, testEnemy.DetectionRange * 2, testEnemy.DetectionRange * 2);
+                        }
+                    }
                 }
             }
 

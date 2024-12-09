@@ -9,12 +9,13 @@ public class Player
     public bool GoRight { get; set; }
     public bool GoUp { get; set; }
     public bool GoDown { get; set; }
-
+    public int PreviousX { get; set; }
+    public int PreviousY { get; set; }
     public int playerX { get; set; } = 100;
     public int playerY { get; set; } = 100;
     public int playerWidth { get; set; } = 22;
-    public int playerHeight { get; set; } = 40;
-    public int playerSpeed { get; set; } = 5;
+    public int playerHeight { get; set; } = 35;
+    public int playerSpeed { get; set; } = 3;
 
     public int Health { get; private set; } = 100;
     public int MaxHealth { get; private set; } = 100;
@@ -28,9 +29,9 @@ public class Player
 
     public Player(List<PictureBox> obstacles)
     {
-        movementAnimation = new AnimationManager(frameRate: 3);
-        idleAnimation = new AnimationManager(frameRate: 3);
-        attackAnimation = new AnimationManager(frameRate: 3);
+        movementAnimation = new AnimationManager(frameRate: 5);
+        idleAnimation = new AnimationManager(frameRate: 6);
+        attackAnimation = new AnimationManager(frameRate: 5);
 
         // Load default animations
         movementAnimation.LoadFrames("Char_MoveMent/MoveDown");
