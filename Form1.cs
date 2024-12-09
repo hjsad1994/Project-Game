@@ -90,15 +90,16 @@ namespace Project_Game
         {
             if (!gameOverState)
             {
-                // Convert obstacles from PictureBox to GameObject
-                List<GameObject> gameObjects = obstacles
-                    .Select(obstacle => new GameObject(obstacle.Location.X, obstacle.Location.Y, obstacle.Width, obstacle.Height, obstacle.Name))
-                    .ToList();
-
-                // Pass the gameObjects list to the Move method
-                gameLogic.TimerEvent(sender, e, healBar);
-                player.Move();
-                enemy.Move(player.playerX, player.playerY, this.Width, this.Height, gameObjects);  // Pass obstacles as gameObjects
+                // Nếu đang tấn công, cập nhật hoạt ảnh tấn công
+                if (player.IsAttacking)
+                {
+                    player.UpdateAttack();
+                }
+                else
+                {
+                    // Nếu không tấn công, cho phép di chuyển
+                    gameLogic.TimerEvent(sender, e, healBar);
+                }
 
                 // Cập nhật bản đồ khi player di chuyển đến các khu vực khác nhau
                 UpdateMap();

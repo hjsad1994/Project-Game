@@ -1,227 +1,173 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Windows.Forms;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Windows.Forms;
+using Project_Game.Entities;
 
 public class Player
 {
-    public Image playerImage;
-    public List<string> playerMovements = new List<string>();
-    public List<string> idleMovements = new List<string>();
-    public int steps = 0;
-    public int slowDownFrameRate = 0;  // Giảm tốc độ animation khi di chuyển
-    public int idleFrameRate = 0;      // Giảm tốc độ animation khi idle
-    public bool goLeft, goRight, goUp, goDown;
-    public int playerX = 100;
-    public int playerY = 100;
-    public int playerHeight = 50;
-    public int playerWidth = 32;
-    public int playerSpeed = 6; // Tốc độ di chuyển của player
-    public string idleDirection = "Down";
-    public int currentHealth = 100;
-    public int maxHealth = 100;
+    public bool GoLeft { get; set; }
+    public bool GoRight { get; set; }
+    public bool GoUp { get; set; }
+    public bool GoDown { get; set; }
 
-    private List<PictureBox> obstacles;  // Danh sách chứa các vật cản (PictureBox)
+    public int playerX { get; set; } = 100;
+    public int playerY { get; set; } = 100;
+    public int playerWidth { get; set; } = 32;
+    public int playerHeight { get; set; } = 50;
+    public int playerSpeed { get; set; } = 10;
+
+    public int Health { get; private set; } = 100;
+    public int MaxHealth { get; private set; } = 100;
+
+    public AnimationManager movementAnimation { get; private set; }
+    private AnimationManager idleAnimation;
+    private AnimationManager attackAnimation;
+
+    public bool IsAttacking { get; private set; } = false;
+    private string currentDirection = "Down";
 
     public Player(List<PictureBox> obstacles)
     {
-        this.obstacles = obstacles;  // Khởi tạo danh sách vật cản
-        LoadPlayerImages();
+        movementAnimation = new AnimationManager(frameRate: 5);
+        idleAnimation = new AnimationManager(frameRate: 8);
+        attackAnimation = new AnimationManager(frameRate: 4);
+
+        movementAnimation.LoadFrames("Char_MoveMent/MoveDown");
+        idleAnimation.LoadFrames("Char_Idle/Down");
     }
 
-    private void LoadPlayerImages()
+    public void TakeDamage(int damage)
     {
-        LoadMovementImages("MoveDown");
-        LoadIdleImages(idleDirection);
-        if (playerMovements.Count > 0)
-        {
-            playerImage = Image.FromFile(playerMovements[0]);
-        }
+        Health -= damage;
+        if (Health < 0) Health = 0;
     }
 
-    public void LoadMovementImages(string direction)
+    public void ResetHealth()
     {
-        playerMovements.Clear();
-        string movementFolder = $"Char_MoveMent/{direction}";  // Lấy thư mục theo hướng
-        playerMovements = Directory.GetFiles(movementFolder, "*.png").ToList(); // Lấy các ảnh PNG trong thư mục
-    }
-
-    public void LoadIdleImages(string direction)
-    {
-        idleMovements.Clear();
-        string idleFolder = $"Char_Idle/{direction}";
-        idleMovements = Directory.GetFiles(idleFolder, "*.png").ToList();
-    }
-
-    public void ResetPlayer()
-    {
-        // Reset player trạng thái sau khi game reset
-        playerX = 100;
-        playerY = 100;
-        currentHealth = 100;  // Đặt lại máu về 100
-        this.playerSpeed = 6;  // Đặt lại tốc độ player
-        goLeft = goRight = goUp = goDown = false;
-        idleDirection = "Down";  // Đặt lại hướng idle mặc định
-        steps = 0;              // Reset số bước animation
-        slowDownFrameRate = 0;  // Reset frame rate chậm
-        idleFrameRate = 0;      // Reset idle frame rate
-    }
-
-    // Phương thức điều chỉnh tốc độ animation khi di chuyển
-    public void AnimatePlayer(int start, int end)
-    {
-        slowDownFrameRate += 1;  // Tăng dần tốc độ frame rate để tạo hiệu ứng chậm lại khi di chuyển
-        if (slowDownFrameRate == 4)  // Điều chỉnh tốc độ ở đây (ví dụ: mỗi 5 ticks mới thay đổi frame)
-        {
-            steps++;
-            slowDownFrameRate = 0;
-        }
-
-        // Đảm bảo rằng frame không vượt quá chỉ số
-        if (steps > end || steps < start)
-        {
-            steps = start;
-        }
-
-        playerImage = Image.FromFile(playerMovements[steps]);
-    }
-
-    // Phương thức điều chỉnh tốc độ animation khi idle (không di chuyển)
-    public void AnimateIdle(int start, int end)
-    {
-        if (idleMovements.Count > 0)
-        {
-            idleFrameRate++;  // Tăng dần frame rate cho trạng thái idle
-            if (idleFrameRate >= 8)  // Điều chỉnh tốc độ idle animation (mỗi 5 ticks mới thay đổi frame)
-            {
-                steps++;  // Tiến lên frame tiếp theo
-                if (steps >= idleMovements.Count)
-                {
-                    steps = 0;  // Nếu vượt quá số frame thì quay lại từ đầu
-                }
-                idleFrameRate = 0;  // Reset idle frame rate
-            }
-
-            playerImage = Image.FromFile(idleMovements[steps]);  // Cập nhật hình ảnh player
-        }
-    }
-
-    // Kiểm tra va chạm với các PictureBox
-    private bool CheckCollisionWithObstacles(int newX, int newY)
-    {
-        Rectangle playerRect = new Rectangle(newX, newY, playerWidth, playerHeight);
-
-        // Kiểm tra va chạm với từng PictureBox
-        foreach (var obstacle in obstacles)
-        {
-            Rectangle obstacleRect = new Rectangle(obstacle.Location.X, obstacle.Location.Y, obstacle.Width, obstacle.Height);
-            if (playerRect.IntersectsWith(obstacleRect))
-            {
-                return true;  // Có va chạm, không di chuyển
-            }
-        }
-        return false;  // Không có va chạm, có thể di chuyển
+        Health = MaxHealth;
     }
 
     public void Move()
     {
-        // Cập nhật vị trí của player và hướng di chuyển
-        if (goLeft)
+        if (IsAttacking) return; // Không di chuyển khi đang tấn công
+
+        if (GoLeft)
         {
-            if (!CheckCollisionWithObstacles(playerX - playerSpeed, playerY))
+            if (currentDirection != "Left")
             {
-                playerX -= playerSpeed;  // Di chuyển sang trái
-                idleDirection = "Left";  // Cập nhật hướng idle
-                LoadMovementImages("MoveLeft");
-                AnimatePlayer(0, 5);  // Di chuyển từ frame 0 đến 5
+                movementAnimation.LoadFrames("Char_MoveMent/MoveLeft");
+                currentDirection = "Left";
             }
+            playerX -= playerSpeed;
+            movementAnimation.UpdateAnimation(); // Cập nhật khung hình
         }
-        else if (goRight)
+        else if (GoRight)
         {
-            if (!CheckCollisionWithObstacles(playerX + playerSpeed, playerY))
+            if (currentDirection != "Right")
             {
-                playerX += playerSpeed;  // Di chuyển sang phải
-                idleDirection = "Right";  // Cập nhật hướng idle
-                LoadMovementImages("MoveRight");
-                AnimatePlayer(0, 5);  // Di chuyển từ frame 0 đến 5
+                movementAnimation.LoadFrames("Char_MoveMent/MoveRight");
+                currentDirection = "Right";
             }
+            playerX += playerSpeed;
+            movementAnimation.UpdateAnimation(); // Cập nhật khung hình
         }
-        else if (goUp)
+        else if (GoUp)
         {
-            if (!CheckCollisionWithObstacles(playerX, playerY - playerSpeed))
+            if (currentDirection != "Up")
             {
-                playerY -= playerSpeed;  // Di chuyển lên
-                idleDirection = "Up";  // Cập nhật hướng idle
-                LoadMovementImages("MoveUp");
-                AnimatePlayer(0, 5);  // Di chuyển từ frame 0 đến 5
+                movementAnimation.LoadFrames("Char_MoveMent/MoveUp");
+                currentDirection = "Up";
             }
+            playerY -= playerSpeed;
+            movementAnimation.UpdateAnimation(); // Cập nhật khung hình
         }
-        else if (goDown)
+        else if (GoDown)
         {
-            if (!CheckCollisionWithObstacles(playerX, playerY + playerSpeed))
+            if (currentDirection != "Down")
             {
-                playerY += playerSpeed;  // Di chuyển xuống
-                idleDirection = "Down";  // Cập nhật hướng idle
-                LoadMovementImages("MoveDown");
-                AnimatePlayer(0, 5);  // Di chuyển từ frame 0 đến 5
+                movementAnimation.LoadFrames("Char_MoveMent/MoveDown");
+                currentDirection = "Down";
             }
+            playerY += playerSpeed;
+            movementAnimation.UpdateAnimation(); // Cập nhật khung hình
         }
         else
         {
-            // Khi không có phím nào được nhấn, gọi AnimateIdle liên tục
-            //LoadMovementImages(idleDirection);  // Nếu không di chuyển, chỉ tải ảnh idle
-            LoadIdleImages(idleDirection);
-            AnimateIdle(0, 5);  // Animation idle nếu không di chuyển
+            // Cập nhật hoạt ảnh idle khi không di chuyển
+            UpdateIdleAnimation();
+            AnimateIdle();
         }
     }
 
-    public void ResetMovementFlags()
+
+
+    public void AnimateIdle()
     {
-        goLeft = false;
-        goRight = false;
-        goUp = false;
-        goDown = false;
+        idleAnimation.UpdateAnimation();
     }
 
-    public void KeyDownHandler(KeyEventArgs e)
+    public void ResetPlayer()
     {
-        if (e.KeyCode == Keys.Left)
+        playerX = 100;
+        playerY = 100;
+        Health = MaxHealth;
+        GoLeft = GoRight = GoUp = GoDown = false;
+        IsAttacking = false;
+    }
+
+    public void PerformAttack(Enemy target)
+    {
+        if (!IsAttacking)
         {
-            goLeft = true;
-        }
-        else if (e.KeyCode == Keys.Right)
-        {
-            goRight = true;
-        }
-        else if (e.KeyCode == Keys.Up)
-        {
-            goUp = true;
-        }
-        else if (e.KeyCode == Keys.Down)
-        {
-            goDown = true;
+            IsAttacking = true;
+
+            // Gây sát thương cho kẻ địch
+            target.TakeDamage(10);
+
+            // Hiển thị hoạt ảnh tấn công
+            attackAnimation.LoadFrames($"Player_Attack/{currentDirection}");
+            attackAnimation.ResetAnimation(); // Reset để hoạt ảnh bắt đầu từ đầu
         }
     }
 
-    public void KeyUpHandler(KeyEventArgs e)
+    public void UpdateAttack()
     {
-        if (e.KeyCode == Keys.Left)
+        if (IsAttacking)
         {
-            goLeft = false;
-        }
-        else if (e.KeyCode == Keys.Right)
-        {
-            goRight = false;
-        }
-        else if (e.KeyCode == Keys.Up)
-        {
-            goUp = false;
-        }
-        else if (e.KeyCode == Keys.Down)
-        {
-            goDown = false;
+            attackAnimation.UpdateAnimation();
+            if (attackAnimation.IsComplete())
+            {
+                IsAttacking = false;
+            }
         }
     }
+
+    private void UpdateIdleAnimation()
+    {
+        switch (currentDirection)
+        {
+            case "Left":
+                idleAnimation.LoadFrames("Char_Idle/Left");
+                break;
+            case "Right":
+                idleAnimation.LoadFrames("Char_Idle/Right");
+                break;
+            case "Up":
+                idleAnimation.LoadFrames("Char_Idle/Up");
+                break;
+            case "Down":
+                idleAnimation.LoadFrames("Char_Idle/Down");
+                break;
+        }
+        idleAnimation.ResetAnimation(); // Đảm bảo khung hình bắt đầu từ đầu
+    }
+    public Image GetCurrentFrame()
+    {
+        if (IsAttacking)
+        {
+            return attackAnimation.CurrentFrame; // Trả về khung hình tấn công nếu đang tấn công
+        }
+        return GoLeft || GoRight || GoUp || GoDown ? movementAnimation.CurrentFrame : idleAnimation.CurrentFrame;
+    }
+
 }
