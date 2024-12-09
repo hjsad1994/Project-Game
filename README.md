@@ -1,6 +1,6 @@
 # Kute Fantasy
 
-![Banner Game](path/to/banner.png)
+![Banner Game](banner.gif)
 
 ## Mô Tả
 
