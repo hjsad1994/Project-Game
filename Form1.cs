@@ -121,7 +121,7 @@ namespace Project_Game
             }
             // ahhihih
             string imagePath = @"C:\Users\trant\Source\Repos\Project-Game\Resources\House_4_4.png";
-            // ahhihih
+            // ahhihihj
             Image houseImage = Image.FromFile(imagePath);
 
             // Vẽ Test1 tại vị trí (100, 100)
