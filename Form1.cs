@@ -119,8 +119,9 @@ namespace Project_Game
             {
                 canvas.DrawImage(bg, 0, 0, this.Width, this.Height);
             }
-
+            // ahhihih
             string imagePath = @"C:\Users\trant\Source\Repos\Project-Game\Resources\House_4_4.png";
+            // ahhihih
             Image houseImage = Image.FromFile(imagePath);
 
             // Vẽ Test1 tại vị trí (100, 100)
