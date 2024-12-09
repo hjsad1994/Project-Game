@@ -33,10 +33,12 @@
             this.movementTimer = new System.Windows.Forms.Timer(this.components);
             this.healBar = new System.Windows.Forms.ProgressBar();
             this.gameOverTimer = new System.Windows.Forms.Timer(this.components);
-            this.Test2 = new System.Windows.Forms.PictureBox();
             this.Test1 = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.Test2)).BeginInit();
+            this.Test2 = new System.Windows.Forms.PictureBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.Test1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Test2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // lblMovement
@@ -52,7 +54,7 @@
             // movementTimer
             // 
             this.movementTimer.Enabled = true;
-            this.movementTimer.Interval = 33;
+            this.movementTimer.Interval = 20;
             this.movementTimer.Tick += new System.EventHandler(this.TimerEvent);
             // 
             // healBar
@@ -70,33 +72,49 @@
             this.gameOverTimer.Interval = 4000;
             this.gameOverTimer.Tick += new System.EventHandler(this.GameOverTimer_Tick);
             // 
-            // Test2
-            // 
-            this.Test2.Location = new System.Drawing.Point(424, 196);
-            this.Test2.Name = "Test2";
-            this.Test2.Size = new System.Drawing.Size(100, 50);
-            this.Test2.TabIndex = 2;
-            this.Test2.TabStop = false;
-            // 
             // Test1
             // 
-            this.Test1.Location = new System.Drawing.Point(616, 196);
+            this.Test1.Location = new System.Drawing.Point(398, 138);
             this.Test1.Name = "Test1";
             this.Test1.Size = new System.Drawing.Size(100, 50);
-            this.Test1.TabIndex = 3;
+            this.Test1.TabIndex = 2;
             this.Test1.TabStop = false;
+            // 
+            // Test2
+            // 
+            this.Test2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.Test2.BackgroundImage = global::Project_Game.Properties.Resources.House_4_4;
+            this.Test2.Location = new System.Drawing.Point(696, 186);
+            this.Test2.Name = "Test2";
+            this.Test2.Size = new System.Drawing.Size(110, 85);
+            this.Test2.TabIndex = 3;
+            this.Test2.TabStop = false;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.pictureBox1.BackgroundImage = global::Project_Game.Properties.Resources.House_4_4;
+            this.pictureBox1.Location = new System.Drawing.Point(500, 244);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(112, 85);
+            this.pictureBox1.TabIndex = 4;
+            this.pictureBox1.TabStop = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(946, 547);
-            this.Controls.Add(this.Test1);
+            this.ClientSize = new System.Drawing.Size(1264, 681);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.Test2);
+            this.Controls.Add(this.Test1);
             this.Controls.Add(this.healBar);
             this.Controls.Add(this.lblMovement);
             this.DoubleBuffered = true;
+            this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(1280, 720);
+            this.MinimumSize = new System.Drawing.Size(1280, 720);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
@@ -105,8 +123,9 @@
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.KeyIsDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.KeyIsUp);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.FormMouseClick);
-            ((System.ComponentModel.ISupportInitialize)(this.Test2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Test1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Test2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -118,8 +137,9 @@
         private System.Windows.Forms.Timer movementTimer;
         private System.Windows.Forms.Timer gameOverTimer;
         private System.Windows.Forms.ProgressBar healBar;
-        private System.Windows.Forms.PictureBox Test2;
         private System.Windows.Forms.PictureBox Test1;
+        private System.Windows.Forms.PictureBox Test2;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 

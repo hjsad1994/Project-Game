@@ -3,6 +3,7 @@ using Project_Game.Entities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -27,6 +28,7 @@ namespace Project_Game
 
             // Chuyển PictureBox thành GameObject
             obstacles = new List<GameObject> {
+
                 new GameObject(Test1.Location.X, Test1.Location.Y, Test1.Width, Test1.Height, "Obstacle1"),
                 new GameObject(Test2.Location.X, Test2.Location.Y, Test2.Width, Test2.Height, "Obstacle2")
             };
@@ -35,7 +37,7 @@ namespace Project_Game
             player = new Player(obstacles);
             player.OnHealthChanged += UpdateHealBar;
             // Tạo enemies và truyền Player vào nếu cần
-            enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 2, 500, 100);
+            enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 0, 500, 100);
             var enemyList = enemies.Cast<Enemy>().ToList();
 
             // Khởi tạo GameLogic với Player, enemies và obstacles
@@ -117,6 +119,19 @@ namespace Project_Game
             {
                 canvas.DrawImage(bg, 0, 0, this.Width, this.Height);
             }
+
+            string imagePath = @"C:\Users\trant\Source\Repos\Project-Game\Resources\House_4_4.png";
+            Image houseImage = Image.FromFile(imagePath);
+
+            // Vẽ Test1 tại vị trí (100, 100)
+            Rectangle rectTest1 = new Rectangle(100, 100, 100, 100);
+            canvas.DrawImage(houseImage, rectTest1);
+
+            // Vẽ Test2 chồng lên Test1 khoảng 50%
+            Rectangle rectTest2 = new Rectangle(100 + 50, 100 + 50, 100, 100);
+            canvas.DrawImage(houseImage, rectTest2);
+
+
 
             var playerFrame = player.GetCurrentFrame();
             if (playerFrame != null)
