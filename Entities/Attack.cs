@@ -5,7 +5,7 @@ public class Attack
 {
     public int Damage { get; set; } // Adjustable damage for this attack
     public float Range { get; set; } // Adjustable range for this attack
-    public string Effect { get; set; } // Optional effect for the attack
+    public string Effect { get; set; } // Optional effect for the attackk
 
     public Attack(int damage, float range, string effect = null)
     {

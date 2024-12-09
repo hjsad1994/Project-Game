@@ -70,7 +70,7 @@ namespace Project_Game.Entities
             return new List<string>();
         }
 
-        // Thêm tham số obstacles vào phương thức HandleAttack
+        // Thêm tham số obstacles vào phương thức HandleAttackk
         public virtual void HandleAttack(Player player, List<GameObject> obstacles) { }
 
         protected bool CheckCollisionWithObstacles(int newX, int newY, List<GameObject> obstacles)

@@ -156,7 +156,7 @@ public class GameLogic
             }
         }
 
-        // Kiểm tra va chạm sau khi di chuyển
+        // Kiểm tra va chạm sau khi di chuyểnn
         CheckCollision(healBar);
     }
 }
