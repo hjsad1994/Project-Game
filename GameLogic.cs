@@ -233,7 +233,7 @@ public class GameLogic
         if (player.Health >= healBar.Minimum && player.Health <= healBar.Maximum)
         {
             healBar.Value = player.Health;
-            Console.WriteLine($"healBar.Value được cập nhật thành {player.Health}");
+            //Console.WriteLine($"healBar.Value được cập nhật thành {player.Health}");
         }
         else
         {

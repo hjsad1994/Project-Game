@@ -47,6 +47,8 @@ namespace Project_Game.Entities
         public bool IsBlockedRight => BlockedRight;
         public bool IsBlockedUp => BlockedUp;
         public bool IsBlockedDown => BlockedDown;
+        public string CurrentDirection => currentDirection;
+
 
         // Phương thức để bỏ chặn hướng khi phím được thả
         public void UnblockDirection(string direction)
@@ -252,7 +254,8 @@ namespace Project_Game.Entities
             BlockedLeft = BlockedRight = BlockedUp = BlockedDown = false;
         }
 
-        public void PerformAttack(Enemy target)
+        // Trong Player.cs
+        public void PerformAttack(List<Enemy> targets)
         {
             if (!IsAttacking)
             {
@@ -260,9 +263,22 @@ namespace Project_Game.Entities
                 attackAnimation.LoadFrames($"Player_Attack/{currentDirection}");
                 attackAnimation.ResetAnimation();
 
-                target.TakeDamage(50);
+                if (targets.Any()) // Nếu có kẻ địch trong danh sách
+                {
+                    foreach (var target in targets)
+                    {
+                        target.TakeDamage(10); // Ví dụ, gây 10 sát thương
+                        Console.WriteLine($"Player đã tấn công {target.Name}!");
+                    }
+                }
+                else
+                {
+                    // Nếu không có kẻ địch, chỉ đơn giản thực hiện hoạt ảnh tấn công mà không gây sát thương
+                    Console.WriteLine("Không có kẻ địch, chỉ thực hiện hoạt ảnh tấn công.");
+                }
             }
         }
+
 
 
 

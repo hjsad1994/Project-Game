@@ -37,7 +37,7 @@ namespace Project_Game
             player = new Player(obstacles);
             player.OnHealthChanged += UpdateHealBar;
             // Tạo enemies và truyền Player vào nếu cần
-            enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 0, 500, 100);
+            enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 1, 500, 100);
             var enemyList = enemies.Cast<Enemy>().ToList();
 
             // Khởi tạo GameLogic với Player, enemies và obstacles
@@ -240,30 +240,69 @@ namespace Project_Game
         {
             if (gameOverState || player.IsAttacking) return;
 
-            const int attackRange = 100;
-            double attackRangeSquared = attackRange * attackRange;
-            TestEnemy targetEnemy = null;
-            double minDistance = double.MaxValue;
+            // Xác định hướng hiện tại của người chơi
+            string direction = player.CurrentDirection; // Đảm bảo rằng bạn đã thêm thuộc tính này trong Player.cs
+            if (string.IsNullOrEmpty(direction))
+            {
+                direction = "Down"; // Mặc định nếu chưa có hướng
+            }
 
+            // Định nghĩa khoảng cách tấn công
+            int attackRange = 50; // Bạn có thể điều chỉnh giá trị này theo ý muốn
+
+            // Xác định vùng tấn công dựa trên hướng
+            Rectangle attackArea = new Rectangle();
+            switch (direction)
+            {
+                case "Left":
+                    attackArea = new Rectangle(player.playerX - attackRange, player.playerY, attackRange, player.playerHeight);
+                    break;
+                case "Right":
+                    attackArea = new Rectangle(player.playerX + player.playerWidth, player.playerY, attackRange, player.playerHeight);
+                    break;
+                case "Up":
+                    attackArea = new Rectangle(player.playerX, player.playerY - attackRange, player.playerWidth, attackRange);
+                    break;
+                case "Down":
+                    attackArea = new Rectangle(player.playerX, player.playerY + player.playerHeight, player.playerWidth, attackRange);
+                    break;
+                default:
+                    // Mặc định tấn công xuống dưới nếu không xác định được hướng
+                    attackArea = new Rectangle(player.playerX, player.playerY + player.playerHeight, player.playerWidth, attackRange);
+                    break;
+            }
+
+            // Tìm tất cả kẻ địch trong vùng tấn công
+            List<TestEnemy> enemiesToAttack = new List<TestEnemy>();
             foreach (var en in enemies)
             {
-                double dx = e.X - en.X;
-                double dy = e.Y - en.Y;
-                double distSquared = dx * dx + dy * dy;
-                if (distSquared <= attackRangeSquared && distSquared < minDistance && !en.IsDead())
+                if (!en.IsDead())
                 {
-                    minDistance = distSquared;
-                    targetEnemy = en;
+                    Rectangle enemyRect = new Rectangle(en.X, en.Y, en.Width, en.Height);
+                    if (attackArea.IntersectsWith(enemyRect))
+                    {
+                        enemiesToAttack.Add(en);
+                    }
                 }
             }
 
-            if (targetEnemy != null)
+            // Dù không có kẻ địch trong vùng tấn công, vẫn thực hiện hoạt ảnh tấn công
+            if (enemiesToAttack.Count > 0)
             {
-                player.PerformAttack(targetEnemy);
+                // Chuyển danh sách TestEnemy thành List<Enemy>
+                List<Enemy> enemiesToAttackList = enemiesToAttack.Cast<Enemy>().ToList();
+                player.PerformAttack(enemiesToAttackList);
+            }
+            else
+            {
+                // Không có kẻ địch, nhưng vẫn thực hiện hoạt ảnh tấn công
+                player.PerformAttack(new List<Enemy>());
             }
 
+            // Cập nhật lại giao diện
             Invalidate();
         }
+
 
         public void EndGame(int currentHealth, ProgressBar healBar)
         {
@@ -290,6 +329,11 @@ namespace Project_Game
         }
 
         private void Test1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
         {
 
         }
