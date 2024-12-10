@@ -21,15 +21,21 @@ namespace Project_Game
         private int currentMap = 1;
 
         private List<GameObject> obstacles;
+        private List<AnimatedObject> animatedObjects;  // Thêm danh sách AnimatedObject
 
         public Form1()
         {
             InitializeComponent();
             this.FormClosing += Form1_FormClosing;
-
-            // Chuyển PictureBox thành GameObjectt
+            int AnimatedObjectWid = 25;
+            int AnimatedObjectHeight = 25;
+        // Chuyển các PictureBox thành GameObject
+        animatedObjects = new List<AnimatedObject>
+            {
+                new AnimatedObject("Flower_Grass_2_Anim_cuts", 200, 180, AnimatedObjectWid, AnimatedObjectHeight, 15), // Chỉ ví dụ, sửa đường dẫn và kích thước
+                new AnimatedObject("Flower_Grass_2_Anim_cuts", 400, 150, AnimatedObjectWid, AnimatedObjectHeight, 15)
+            };
             obstacles = new List<GameObject> {
-
                 new GameObject(Test1.Location.X, Test1.Location.Y, Test1.Width, Test1.Height, "Obstacle1"),
                 new GameObject(Test2.Location.X, Test2.Location.Y, Test2.Width, Test2.Height, "Obstacle2")
             };
@@ -37,6 +43,7 @@ namespace Project_Game
             // Truyền danh sách obstacles vào Player
             player = new Player(obstacles);
             player.OnHealthChanged += UpdateHealBar;
+
             // Tạo enemies và truyền Player vào nếu cần
             enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 1, 500, 100);
             var enemyList = enemies.Cast<Enemy>().ToList();
@@ -45,11 +52,11 @@ namespace Project_Game
             gameLogic = new GameLogic(player, enemyList, obstacles);
             gameOver = new GameOver(gameOverTimer, ResetGameAction, Invalidate);
 
-            bg = Image.FromFile("bg.jpg");
+            // Đặt nền (background)
+            bg = Image.FromFile("bg3.png");
 
             this.DoubleBuffered = true;
             this.KeyPreview = true;
-
 
             this.KeyDown += KeyIsDown;
             this.KeyUp += KeyIsUp;
@@ -60,11 +67,13 @@ namespace Project_Game
             movementTimer.Tick += TimerEvent;
             movementTimer.Start();
         }
+
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             // Thoát toàn bộ ứng dụng khi đóng Form1
             Application.Exit();
         }
+
         private void KeyIsDown(object sender, KeyEventArgs e)
         {
             if (!gameOverState)
@@ -102,6 +111,7 @@ namespace Project_Game
                 }
             }
         }
+
         private void UpdateHealBar(int newHealth)
         {
             if (newHealth >= healBar.Minimum && newHealth <= healBar.Maximum)
@@ -116,35 +126,41 @@ namespace Project_Game
                 EndGame(newHealth, healBar);
             }
         }
+
         private void FormPaintEvent(object sender, PaintEventArgs e)
         {
             Graphics canvas = e.Graphics;
 
+            // Vẽ nền
             if (bg != null)
             {
-                canvas.DrawImage(bg, 0, 0, this.Width, this.Height);
+                canvas.DrawImage(bg, 0, 0, 800, 600);
             }
-            // ahhihih
-            string imagePath = @"C:\Users\trant\Source\Repos\Project-Game\Resources\House_4_4.png";
-            // ahhihihj
-            Image houseImage = Image.FromFile(imagePath);
+            foreach (var animatedObject in animatedObjects)
+            {
+                animatedObject.Update();  // Cập nhật animation
+                animatedObject.Draw(canvas);  // Vẽ đối tượng
+            }
+            // Vẽ các đối tượng trong game
+            //string imagePath = @"C:\Users\trant\Source\Repos\Project-Game\Resources\House_4_4.png";
+            //Image houseImage = Image.FromFile(imagePath);
 
-            // Vẽ Test1 tại vị trí (100, 100)
-            Rectangle rectTest1 = new Rectangle(100, 100, 100, 100);
-            canvas.DrawImage(houseImage, rectTest1);
+            //// Vẽ Test1 tại vị trí (100, 100)
+            //Rectangle rectTest1 = new Rectangle(100, 100, 100, 100);
+            //canvas.DrawImage(houseImage, rectTest1);
 
-            // Vẽ Test2 chồng lên Test1 khoảng 50%
-            Rectangle rectTest2 = new Rectangle(100 + 50, 100 + 50, 100, 100);
-            canvas.DrawImage(houseImage, rectTest2);
+            //// Vẽ Test2 chồng lên Test1 khoảng 50%
+            //Rectangle rectTest2 = new Rectangle(100 + 50, 100 + 50, 100, 100);
+            //canvas.DrawImage(houseImage, rectTest2);
 
-
-
+            // Vẽ player
             var playerFrame = player.GetCurrentFrame();
             if (playerFrame != null)
             {
                 canvas.DrawImage(playerFrame, player.playerX, player.playerY, player.playerWidth, player.playerHeight);
             }
 
+            // Vẽ các kẻ địch
             foreach (var en in enemies)
             {
                 var enemyFrame = en.GetCurrentFrame();
@@ -158,7 +174,6 @@ namespace Project_Game
                         // Vẽ AttackRange (Vòng tròn đỏ)
                         using (Pen penAttack = new Pen(Color.Red, 2))
                         {
-                            // Tính toán vị trí để vẽ vòng tròn
                             int centerX = testEnemy.X + testEnemy.Width / 2;
                             int centerY = testEnemy.Y + testEnemy.Height / 2;
                             canvas.DrawEllipse(penAttack, centerX - testEnemy.AttackRange, centerY - testEnemy.AttackRange, testEnemy.AttackRange * 2, testEnemy.AttackRange * 2);
@@ -167,7 +182,6 @@ namespace Project_Game
                         // Vẽ DetectionRange (Vòng tròn xanh)
                         using (Pen penDetect = new Pen(Color.Blue, 2))
                         {
-                            // Tính toán vị trí để vẽ vòng tròn
                             int centerX = testEnemy.X + testEnemy.Width / 2;
                             int centerY = testEnemy.Y + testEnemy.Height / 2;
                             canvas.DrawEllipse(penDetect, centerX - testEnemy.DetectionRange, centerY - testEnemy.DetectionRange, testEnemy.DetectionRange * 2, testEnemy.DetectionRange * 2);
@@ -176,6 +190,7 @@ namespace Project_Game
                 }
             }
 
+            // Kiểm tra trạng thái game over
             if (gameOverState)
             {
                 using (Font font = new Font("Arial", 24, FontStyle.Bold))
@@ -211,7 +226,6 @@ namespace Project_Game
                 needsRedraw = false;
             }
         }
-
 
         private void UpdateMap()
         {

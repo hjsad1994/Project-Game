@@ -13,7 +13,7 @@ namespace Project_Game
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormMenu()); // Khởi động bằng menu thay vì Form1
+            Application.Run(new Form1()); // Khởi động bằng menu thay vì Form1
         }
     }
 }

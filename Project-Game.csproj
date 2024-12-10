@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\AnimatedObject.cs" />
     <Compile Include="Entities\AnimationManager.cs" />
     <Compile Include="Entities\Attack.cs" />
     <Compile Include="Entities\Enemy.cs" />
