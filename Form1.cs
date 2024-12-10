@@ -25,6 +25,7 @@ namespace Project_Game
         public Form1()
         {
             InitializeComponent();
+            this.FormClosing += Form1_FormClosing;
 
             // Chuyển PictureBox thành GameObjectt
             obstacles = new List<GameObject> {
@@ -59,7 +60,11 @@ namespace Project_Game
             movementTimer.Tick += TimerEvent;
             movementTimer.Start();
         }
-
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Thoát toàn bộ ứng dụng khi đóng Form1
+            Application.Exit();
+        }
         private void KeyIsDown(object sender, KeyEventArgs e)
         {
             if (!gameOverState)
