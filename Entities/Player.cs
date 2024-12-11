@@ -22,7 +22,7 @@ namespace Project_Game.Entities
         public int playerY { get; set; } = 100;
         public int playerWidth { get; set; } = 22;
         public int playerHeight { get; set; } = 35;
-        public int playerSpeed { get; set; } = 3;
+        public int playerSpeed { get; set; } = 4;
 
         public int Health { get; private set; } = 100;
         public int MaxHealth { get; private set; } = 100;
@@ -73,9 +73,9 @@ namespace Project_Game.Entities
         public Player(List<GameObject> obstacles) // Constructor nhận List<GameObject>
         {
             this.obstacles = obstacles; // Gán danh sách obstacles vào trường
-            movementAnimation = new AnimationManager(frameRate: 5);
-            idleAnimation = new AnimationManager(frameRate: 6);
-            attackAnimation = new AnimationManager(frameRate: 5);
+            movementAnimation = new AnimationManager(frameRate: 10);
+            idleAnimation = new AnimationManager(frameRate: 10);
+            attackAnimation = new AnimationManager(frameRate: 10);
 
             // Load default animations
             movementAnimation.LoadFrames("Char_MoveMent/MoveDown");
@@ -99,6 +99,143 @@ namespace Project_Game.Entities
             Health = MaxHealth;
         }
 
+        //public void Move()
+        //{
+        //    if (IsAttacking) return;
+
+        //    bool isMoving = false;
+        //    int newX = playerX;
+        //    int newY = playerY;
+
+        //    // Lưu lại vị trí trước khi di chuyển
+        //    PreviousX = playerX;
+        //    PreviousY = playerY;
+
+        //    if (GoLeft)
+        //    {
+        //        if (currentDirection != "Left")
+        //        {
+        //            movementAnimation.LoadFrames("Char_MoveMent/MoveLeft");
+        //            currentDirection = "Left";
+        //        }
+        //        newX -= playerSpeed;
+        //        isMoving = true;
+        //    }
+        //    else if (GoRight)
+        //    {
+        //        if (currentDirection != "Right")
+        //        {
+        //            movementAnimation.LoadFrames("Char_MoveMent/MoveRight");
+        //            currentDirection = "Right";
+        //        }
+        //        newX += playerSpeed;
+        //        isMoving = true;
+        //    }
+        //    else if (GoUp)
+        //    {
+        //        if (currentDirection != "Up")
+        //        {
+        //            movementAnimation.LoadFrames("Char_MoveMent/MoveUp");
+        //            currentDirection = "Up";
+        //        }
+        //        newY -= playerSpeed;
+        //        isMoving = true;
+        //    }
+        //    else if (GoDown)
+        //    {
+        //        if (currentDirection != "Down")
+        //        {
+        //            movementAnimation.LoadFrames("Char_MoveMent/MoveDown");
+        //            currentDirection = "Down";
+        //        }
+        //        newY += playerSpeed;
+        //        isMoving = true;
+        //    }
+
+        //    Console.WriteLine($"Attempting to move to ({newX}, {newY})");
+
+        //    // Kiểm tra va chạm trước khi di chuyển
+        //    // ai biet gi dau
+        //    Rectangle newRect = new Rectangle(newX, newY, playerWidth, playerHeight);
+        //    bool collisionDetected = false;
+        //    string collisionDirection = ""; // Để xác định hướng va chạm
+
+        //    foreach (var obstacle in obstacles)
+        //    {
+        //        Rectangle obstacleRect = new Rectangle(obstacle.X, obstacle.Y, obstacle.Width, obstacle.Height);
+        //        if (newRect.IntersectsWith(obstacleRect))
+        //        {
+        //            // Va chạm xảy ra, khôi phục vị trí trước đó
+        //            Console.WriteLine($"Player gặp obstacle tại ({obstacle.X}, {obstacle.Y})");
+        //            playerX = PreviousX;
+        //            playerY = PreviousY;
+        //            collisionDetected = true;
+
+        //            // Xác định hướng va chạm dựa trên sự di chuyển
+        //            if (GoLeft)
+        //                collisionDirection = "Left";
+        //            else if (GoRight)
+        //                collisionDirection = "Right";
+        //            else if (GoUp)
+        //                collisionDirection = "Up";
+        //            else if (GoDown)
+        //                collisionDirection = "Down";
+
+        //            break; // Thoát khỏi vòng lặp sau khi phát hiện va chạm
+        //        }
+        //    }
+
+        //    if (collisionDetected)
+        //    {
+        //        // Đặt animation về trạng thái idle theo hướng hiện tại
+        //        UpdateIdleAnimation();
+
+        //        // Đánh dấu hướng bị chặn và đặt lại cờ di chuyển
+        //        switch (collisionDirection)
+        //        {
+        //            case "Left":
+        //                BlockedLeft = true;
+        //                GoLeft = false;
+        //                break;
+        //            case "Right":
+        //                BlockedRight = true;
+        //                GoRight = false;
+        //                break;
+        //            case "Up":
+        //                BlockedUp = true;
+        //                GoUp = false;
+        //                break;
+        //            case "Down":
+        //                BlockedDown = true;
+        //                GoDown = false;
+        //                break;
+        //        }
+
+        //        wasMovingPreviously = false; // Player đang ở trạng thái idle
+        //        return; // Thoát khỏi phương thức Move
+        //    }
+
+        //    // Nếu không va chạm, cập nhật vị trí
+        //    if (isMoving)
+        //    {
+        //        playerX = newX;
+        //        playerY = newY;
+        //        movementAnimation.UpdateAnimation();
+        //        Console.WriteLine($"Player moved to ({playerX}, {playerY})");
+        //    }
+        //    else
+        //    {
+        //        // Nếu frame trước đang di chuyển, còn frame này không di chuyển nữa, nghĩa là vừa dừng
+        //        if (wasMovingPreviously)
+        //        {
+        //            UpdateIdleAnimation();
+        //        }
+        //        AnimateIdle();
+        //    }
+
+        //    // Cập nhật trạng thái wasMovingPreviously cho frame tiếp theo
+        //    wasMovingPreviously = isMoving;
+        //}
         public void Move()
         {
             if (IsAttacking) return;
@@ -152,10 +289,15 @@ namespace Project_Game.Entities
                 isMoving = true;
             }
 
-            Console.WriteLine($"Attempting to move to ({newX}, {newY})");
+            //Console.WriteLine($"Attempting to move to ({newX}, {newY})");
 
-            // Kiểm tra va chạm trước khi di chuyển
-            // ai biet gi dau
+            // Giới hạn di chuyển trong vùng 800x600
+            if (newX < 0) newX = 0; // Không cho đi ra ngoài trái
+            if (newX + playerWidth > 800) newX = 800 - playerWidth; // Không cho đi ra ngoài phải
+            if (newY < 0) newY = 0; // Không cho đi ra ngoài trên
+            if (newY + playerHeight > 600) newY = 600 - playerHeight; // Không cho đi ra ngoài dưới
+
+            // Kiểm tra va chạm với các obstacles
             Rectangle newRect = new Rectangle(newX, newY, playerWidth, playerHeight);
             bool collisionDetected = false;
             string collisionDirection = ""; // Để xác định hướng va chạm
@@ -221,7 +363,7 @@ namespace Project_Game.Entities
                 playerX = newX;
                 playerY = newY;
                 movementAnimation.UpdateAnimation();
-                Console.WriteLine($"Player moved to ({playerX}, {playerY})");
+                //Console.WriteLine($"Player moved to ({playerX}, {playerY})");
             }
             else
             {

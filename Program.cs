@@ -12,7 +12,7 @@ namespace Project_Game
         static void Main()
         {
             Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            Application.SetCompatibleTextRenderingDefault(false);   
             Application.Run(new Form1()); // Khởi động bằng menu thay vì Form1
         }
     }

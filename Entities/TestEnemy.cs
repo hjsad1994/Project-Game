@@ -22,7 +22,7 @@ namespace Project_Game.Entities
 
         // Các thuộc tính công cộng
         public int AttackRange { get; private set; } = 26; // Tăng AttackRange
-        public int DetectionRange { get; private set; } = 200; // Tăng DetectionRange
+        public int DetectionRange { get; private set; } = 120; // Tăng DetectionRange
 
         private int attackCooldown = 1000; // Thời gian nghỉ giữa các đòn tấn công (ms)
         private DateTime lastAttackTime = DateTime.MinValue;
@@ -38,13 +38,13 @@ namespace Project_Game.Entities
         public TestEnemy(string baseFolder, int maxHealth = 50, int startX = 500, int startY = 100)
             : base("TestEnemy", maxHealth)
         {
-            Speed = 5; // Tăng tốc độ di chuyển
+            Speed = 2; // Tăng tốc độ di chuyển
             X = startX;
             Y = startY;
             baseFolderPath = baseFolder;
 
-            movementAnimation = new AnimationManager(frameRate: 1); // Giảm frame rate để tăng tốc độ
-            attackAnimation = new AnimationManager(frameRate: 2);
+            movementAnimation = new AnimationManager(frameRate: 6); // Giảm frame rate để tăng tốc độ
+            attackAnimation = new AnimationManager(frameRate: 6);
             idleAnimations = new Dictionary<string, AnimationManager>();
 
             LoadEnemyImages(Path.Combine(baseFolderPath, "Movement"));

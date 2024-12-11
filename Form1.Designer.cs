@@ -52,7 +52,7 @@
             // movementTimer
             // 
             this.movementTimer.Enabled = true;
-            this.movementTimer.Interval = 20;
+            this.movementTimer.Interval = 16;
             this.movementTimer.Tick += new System.EventHandler(this.TimerEvent);
             // 
             // healBar
@@ -72,9 +72,9 @@
             // 
             // Test1
             // 
-            this.Test1.Location = new System.Drawing.Point(216, 55);
+            this.Test1.Location = new System.Drawing.Point(719, 12);
             this.Test1.Name = "Test1";
-            this.Test1.Size = new System.Drawing.Size(100, 50);
+            this.Test1.Size = new System.Drawing.Size(31, 22);
             this.Test1.TabIndex = 2;
             this.Test1.TabStop = false;
             // 
@@ -93,15 +93,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(784, 596);
+            this.ClientSize = new System.Drawing.Size(784, 591);
             this.Controls.Add(this.Test2);
             this.Controls.Add(this.Test1);
             this.Controls.Add(this.healBar);
             this.Controls.Add(this.lblMovement);
             this.DoubleBuffered = true;
-            this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(800, 635);
-            this.MinimumSize = new System.Drawing.Size(800, 635);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Tag = "test";
