@@ -72,9 +72,9 @@
             // 
             // Test1
             // 
-            this.Test1.Location = new System.Drawing.Point(719, 12);
+            this.Test1.Location = new System.Drawing.Point(541, 340);
             this.Test1.Name = "Test1";
-            this.Test1.Size = new System.Drawing.Size(31, 22);
+            this.Test1.Size = new System.Drawing.Size(21, 18);
             this.Test1.TabIndex = 2;
             this.Test1.TabStop = false;
             // 
@@ -99,6 +99,9 @@
             this.Controls.Add(this.healBar);
             this.Controls.Add(this.lblMovement);
             this.DoubleBuffered = true;
+            this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(800, 630);
+            this.MinimumSize = new System.Drawing.Size(800, 630);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Tag = "test";

@@ -22,7 +22,7 @@ namespace Project_Game.Entities
         public int playerY { get; set; } = 100;
         public int playerWidth { get; set; } = 22;
         public int playerHeight { get; set; } = 35;
-        public int playerSpeed { get; set; } = 4;
+        public int playerSpeed { get; set; } = 2;
 
         public int Health { get; private set; } = 100;
         public int MaxHealth { get; private set; } = 100;

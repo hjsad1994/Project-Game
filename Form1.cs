@@ -25,11 +25,11 @@
 
 //        // Transition zones for map switching
 //        // Đảm bảo các khu vực chuyển đổi nằm hoàn toàn trong phạm vi màn hình (800x600)
-//        private Rectangle map1ToMap2Zone = new Rectangle(750, 275, 50, 50); // Right edge of Map1 to Map2
-//        private Rectangle map2ToMap1Zone = new Rectangle(0, 275, 50, 50);   // Left edge of Map2 to Map1
+//        private Rectangle map1ToMap2Zone = new Rectangle(780, 270, 10, 35); // Right edge of Map1 to Map2
+//        private Rectangle map2ToMap1Zone = new Rectangle(0, 310, 2, 32);   // Left edge of Map2 to Map1
 
-//        private Rectangle map1ToMap3Zone = new Rectangle(375, 550, 50, 50); // Bottom edge of Map1 to Map3
-//        private Rectangle map3ToMap1Zone = new Rectangle(500, 80, 50, 50);  // Top edge of Map3 to Map1 (Đã điều chỉnh)
+//        private Rectangle map1ToMap3Zone = new Rectangle(375, 590, 50, 5); // Bottom edge of Map1 to Map3
+//        private Rectangle map3ToMap1Zone = new Rectangle(430, 100, 50, 5);  // Top edge of Map3 to Map1 (Đã điều chỉnh) // 440, 86
 
 //        private Rectangle map1ToMap4Zone = new Rectangle(0, 275, 50, 10);    // Left edge of Map1 for Map4 (Chiều cao giảm xuống 10)
 //        private Rectangle map4ToMap1Zone = new Rectangle(750, 275, 50, 10);  // Right edge of Map4 to Map1 (Chiều cao giảm xuống 10)
@@ -67,7 +67,7 @@
 //            player.OnHealthChanged += UpdateHealBar;
 
 //            // Create enemies
-//            enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 0, 500, 100);
+//            enemies = new List<TestEnemy>(); // Danh sách quái ban đầu trống
 //            var enemyList = enemies.Cast<Enemy>().ToList();
 
 //            // Initialize game logic
@@ -183,12 +183,14 @@
 //                    new AnimatedObject("Flower_Grass_12_Anim_cuts", 150, 120, 30, 30, 10),
 //                    new AnimatedObject("Flower_Grass_3_Anim_cuts", 500, 300, 30, 30, 10)
 //                };
-//                enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 2, 600, 120);  // Add enemies for Map2
-//                Console.WriteLine("Enemies for Map2 created.");
+//                enemies.Clear();  // Clear enemies for Map2
+//                Console.WriteLine("Enemies for Map2 cleared.");
 
-//                // Set player position to the target position
-//                player.playerX = targetPosition.X;
-//                player.playerY = targetPosition.Y;
+//                // 37, 320
+//                //player.playerX = targetPosition.X;
+//                //player.playerY = targetPosition.Y;
+//                player.playerX = 37;
+//                player.playerY = 310;
 //                Console.WriteLine($"Player positioned at Map2 entrance: ({player.playerX}, {player.playerY})");
 //            }
 //            else if (currentMap == 1)
@@ -203,9 +205,11 @@
 //                enemies.Clear();  // Clear enemies for Map1
 //                Console.WriteLine("Enemies for Map1 cleared.");
 
-//                // Set player position to the target position
-//                player.playerX = targetPosition.X;
-//                player.playerY = targetPosition.Y;
+//                // 730, 280
+//                //player.playerX = targetPosition.X;
+//                //player.playerY = targetPosition.Y;
+//                player.playerX = 725;
+//                player.playerY = 270;
 //                Console.WriteLine($"Player positioned at Map1 entrance: ({player.playerX}, {player.playerY})");
 //            }
 //            else if (currentMap == 3)
@@ -217,11 +221,12 @@
 //                    new AnimatedObject("Flower_Grass_12_Anim_cuts", 200, 200, 40, 40, 12),
 //                    new AnimatedObject("Flower_Grass_3_Anim_cuts", 600, 350, 40, 40, 12)
 //                };
-//                // enemies = TestEnemy.CreateEnemies("Enemy/Goblin", 3, 700, 150);  // Add enemies for Map3
+//                enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 3, 700, 150);  // Add enemies for Map3
+//                Console.WriteLine("Enemies for Map3 (Goblin) created.");
 
-//                // Set player position to the target position (437, 66)
-//                player.playerX = targetPosition.X;
-//                player.playerY = targetPosition.Y;
+//                // Set player position to the target position (437, 66) 430, 100
+//                player.playerX = 430;
+//                player.playerY = 120;
 //                Console.WriteLine($"Player positioned at Map3 entrance: ({player.playerX}, {player.playerY})");
 //            }
 //            else if (currentMap == 4)
@@ -233,10 +238,10 @@
 //                    new AnimatedObject("Flower_Grass_12_Anim_cuts", 250, 250, 35, 35, 9),
 //                    new AnimatedObject("Flower_Grass_3_Anim_cuts", 650, 400, 35, 35, 9)
 //                };
-//                // enemies = TestEnemy.CreateEnemies("Enemy/Orc", 4, 750, 200);  // Add enemies for Map4
-//                Console.WriteLine("Enemies for Map4 (Orc) not created yet.");
+//                enemies.Clear();  // Clear enemies for Map4
+//                Console.WriteLine("Enemies for Map4 cleared.");
 
-//                // Đặt vị trí nhân vật tại (752, 292) để đảm bảo ngoài khu vực chuyển đổi
+//                // Set player position to the target position
 //                player.playerX = 752;
 //                player.playerY = 292;
 //                Console.WriteLine($"Player positioned at Map4 entrance: ({player.playerX}, {player.playerY})");
@@ -247,6 +252,9 @@
 
 //            // Reset the transitioning flag after switching
 //            isTransitioning = false;
+
+//            // Update GameLogic with the new enemies list
+//            gameLogic.SetEnemies(enemies.Cast<Enemy>().ToList());
 //        }
 
 //        private void UpdateMap()
@@ -337,7 +345,6 @@
 //            }
 
 //            // **Visualize Transition Zones (Development Only)**
-
 //            using (Brush brushMap1ToMap2 = new SolidBrush(Color.FromArgb(100, Color.Red))) // Semi-transparent red
 //            {
 //                canvas.FillRectangle(brushMap1ToMap2, map1ToMap2Zone);
@@ -362,7 +369,6 @@
 //            {
 //                canvas.FillRectangle(brushMap4ToMap1, map4ToMap1Zone);
 //            }
-
 
 //            // Draw player
 //            var playerFrame = player.GetCurrentFrame();
@@ -444,9 +450,8 @@
 //        private void ResetGameAction()
 //        {
 //            player.ResetPlayer();
-//            enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 2, 500, 100);
-//            var enemyList = enemies.Cast<Enemy>().ToList();
-//            gameLogic.SetEnemies(enemyList);
+//            enemies = new List<TestEnemy>(); // Reset enemies to trống
+//            gameLogic.SetEnemies(enemies.Cast<Enemy>().ToList());
 
 //            gameOverState = false;
 //            healBar.Value = 100;
@@ -609,14 +614,14 @@ namespace Project_Game
 
         // Transition zones for map switching
         // Đảm bảo các khu vực chuyển đổi nằm hoàn toàn trong phạm vi màn hình (800x600)
-        private Rectangle map1ToMap2Zone = new Rectangle(750, 275, 50, 50); // Right edge of Map1 to Map2
-        private Rectangle map2ToMap1Zone = new Rectangle(0, 275, 50, 50);   // Left edge of Map2 to Map1
+        private Rectangle map1ToMap2Zone = new Rectangle(780, 270, 10, 35); // Right edge of Map1 to Map2
+        private Rectangle map2ToMap1Zone = new Rectangle(0, 310, 2, 32);   // Left edge of Map2 to Map1
 
-        private Rectangle map1ToMap3Zone = new Rectangle(375, 550, 50, 50); // Bottom edge of Map1 to Map3
-        private Rectangle map3ToMap1Zone = new Rectangle(500, 80, 50, 50);  // Top edge of Map3 to Map1 (Đã điều chỉnh)
+        private Rectangle map1ToMap3Zone = new Rectangle(375, 590, 50, 5); // Bottom edge of Map1 to Map3
+        private Rectangle map3ToMap1Zone = new Rectangle(430, 100, 50, 5);  // Top edge of Map3 to Map1 (Đã điều chỉnh)
 
-        private Rectangle map1ToMap4Zone = new Rectangle(0, 275, 50, 10);    // Left edge of Map1 for Map4 (Chiều cao giảm xuống 10)
-        private Rectangle map4ToMap1Zone = new Rectangle(750, 275, 50, 10);  // Right edge of Map4 to Map1 (Chiều cao giảm xuống 10)
+        private Rectangle map1ToMap4Zone = new Rectangle(0, 215, 5, 40);    // Left edge of Map1 for Map4 (Chiều cao giảm xuống 10)
+        private Rectangle map4ToMap1Zone = new Rectangle(780, 295, 10, 40);  // Right edge of Map4 to Map1 (Chiều cao giảm xuống 10)
 
         // Flag to prevent multiple rapid transitions
         private bool isTransitioning = false;
@@ -802,9 +807,9 @@ namespace Project_Game
                     new AnimatedObject("Flower_Grass_3_Anim_cuts", 600, 350, 40, 40, 12)
                 };
                 enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 3, 700, 150);  // Add enemies for Map3
-                Console.WriteLine("Enemies for Map3 (Goblin) created.");
+                Console.WriteLine("Enemies for Map3 (Skeleton_Swordman) created.");
 
-                // Set player position to the target position (437, 66)
+                // Set player position to the target position
                 player.playerX = targetPosition.X;
                 player.playerY = targetPosition.Y;
                 Console.WriteLine($"Player positioned at Map3 entrance: ({player.playerX}, {player.playerY})");
@@ -822,8 +827,8 @@ namespace Project_Game
                 Console.WriteLine("Enemies for Map4 cleared.");
 
                 // Set player position to the target position
-                player.playerX = 752;
-                player.playerY = 292;
+                player.playerX = targetPosition.X;
+                player.playerY = targetPosition.Y;
                 Console.WriteLine($"Player positioned at Map4 entrance: ({player.playerX}, {player.playerY})");
             }
 
@@ -852,7 +857,7 @@ namespace Project_Game
                 Console.WriteLine("Player entered map1ToMap2Zone.");
                 isTransitioning = true;
                 // Position the player just inside Map2, outside the transition zone
-                Point targetPosition = new Point(map2ToMap1Zone.Right, player.playerY);
+                Point targetPosition = new Point(30, 310);
                 SwitchMap(2, targetPosition);
             }
             // Check transitions from Map2 to Map1
@@ -861,7 +866,7 @@ namespace Project_Game
                 Console.WriteLine("Player entered map2ToMap1Zone.");
                 isTransitioning = true;
                 // Position the player just inside Map1, outside the transition zone
-                Point targetPosition = new Point(map1ToMap2Zone.X - PlayerWidth, player.playerY); // 750 - 50 = 700
+                Point targetPosition = new Point(740, 270); // 750 - 50 = 700
                 SwitchMap(1, targetPosition);
             }
             // Check transitions from Map1 to Map3 (Dungeon)
@@ -869,8 +874,8 @@ namespace Project_Game
             {
                 Console.WriteLine("Player entered map1ToMap3Zone.");
                 isTransitioning = true;
-                // Position the player just inside Map3, tại (437, 66)
-                Point targetPosition = new Point(437, 66);
+                // Position the player just inside Map3
+                Point targetPosition = new Point(435, 120); // Bạn có thể điều chỉnh lại nếu cần
                 SwitchMap(3, targetPosition);
             }
             // Check transitions from Map3 to Map1 (Dungeon to Base)
@@ -878,8 +883,8 @@ namespace Project_Game
             {
                 Console.WriteLine("Player entered map3ToMap1Zone.");
                 isTransitioning = true;
-                // Đặt vị trí nhân vật vào Map1 tại (100, 100) để xuất hiện gần vị trí vừa vào dungeon
-                Point targetPosition = new Point(100, 100);
+                // Đặt vị trí nhân vật vào Map1 tại (393, 410)
+                Point targetPosition = new Point(385, 550);
                 SwitchMap(1, targetPosition);
             }
             // Check transitions from Map1 to Map4
@@ -897,7 +902,7 @@ namespace Project_Game
                 Console.WriteLine("Player entered map4ToMap1Zone.");
                 isTransitioning = true;
                 // Đặt vị trí nhân vật vào Map1 tại (50, 292) để xuất hiện gần vị trí vừa vào farm
-                Point targetPosition = new Point(50, 292);
+                Point targetPosition = new Point(50, 220);
                 SwitchMap(1, targetPosition);
             }
         }
@@ -925,6 +930,7 @@ namespace Project_Game
             }
 
             // **Visualize Transition Zones (Development Only)**
+
             using (Brush brushMap1ToMap2 = new SolidBrush(Color.FromArgb(100, Color.Red))) // Semi-transparent red
             {
                 canvas.FillRectangle(brushMap1ToMap2, map1ToMap2Zone);
@@ -949,6 +955,7 @@ namespace Project_Game
             {
                 canvas.FillRectangle(brushMap4ToMap1, map4ToMap1Zone);
             }
+
 
             // Draw player
             var playerFrame = player.GetCurrentFrame();
@@ -1061,6 +1068,11 @@ namespace Project_Game
                 Console.WriteLine("Background reset to base.png (Map1).");
             }
 
+            // Đặt lại vị trí của nhân vật tại vị trí khởi đầu của Map1
+            player.playerX = 393;
+            player.playerY = 410;
+            Console.WriteLine($"Player reset to starting position: ({player.playerX}, {player.playerY})");
+
             // Redraw the form
             Invalidate();
         }
@@ -1145,8 +1157,11 @@ namespace Project_Game
             // Wait for the user to close the MessageBox before resetting the game
             gameOver.ResetGame();
 
-            // Optional: Reset healBar.Value if needed
+            // Reset healBar.Value if needed
             healBar.Value = player.MaxHealth;
+
+            // Reset game state
+            ResetGameAction();
         }
 
         private void GameOverTimer_Tick(object sender, EventArgs e)
