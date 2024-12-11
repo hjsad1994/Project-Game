@@ -81,7 +81,7 @@
             // Test2
             // 
             this.Test2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.Test2.BackgroundImage = global::Project_Game.Properties.Resources.House_4_4;
+            //this.Test2.BackgroundImage = global::Project_Game.Properties.Resources.House_4_4;
             this.Test2.Location = new System.Drawing.Point(877, 38);
             this.Test2.Name = "Test2";
             this.Test2.Size = new System.Drawing.Size(110, 85);

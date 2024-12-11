@@ -49,6 +49,8 @@ namespace Project_Game.Entities
         public bool IsBlockedDown => BlockedDown;
         public string CurrentDirection => currentDirection;
 
+        private List<TestEnemy> enemies; // Danh sách TestEnemy
+        private List<Chicken> chickens; // Danh sách Chicken
 
         // Phương thức để bỏ chặn hướng khi phím được thả
         public void UnblockDirection(string direction)
@@ -70,12 +72,16 @@ namespace Project_Game.Entities
             }
         }
 
-        public Player(List<GameObject> obstacles) // Constructor nhận List<GameObject>
+        public Player(List<GameObject> obstacles, List<TestEnemy> enemies, List<Chicken> chickens)
         {
             this.obstacles = obstacles; // Gán danh sách obstacles vào trường
             movementAnimation = new AnimationManager(frameRate: 10);
             idleAnimation = new AnimationManager(frameRate: 10);
             attackAnimation = new AnimationManager(frameRate: 10);
+
+            this.obstacles = obstacles;
+            this.enemies = enemies;
+            this.chickens = chickens;
 
             // Load default animations
             movementAnimation.LoadFrames("Char_MoveMent/MoveDown");
@@ -289,31 +295,25 @@ namespace Project_Game.Entities
                 isMoving = true;
             }
 
-            //Console.WriteLine($"Attempting to move to ({newX}, {newY})");
-
             // Giới hạn di chuyển trong vùng 800x600
-            if (newX < 0) newX = 0; // Không cho đi ra ngoài trái
-            if (newX + playerWidth > 800) newX = 800 - playerWidth; // Không cho đi ra ngoài phải
-            if (newY < 0) newY = 0; // Không cho đi ra ngoài trên
-            if (newY + playerHeight > 600) newY = 600 - playerHeight; // Không cho đi ra ngoài dưới
+            if (newX < 0) newX = 0;
+            if (newX + playerWidth > 800) newX = 800 - playerWidth;
+            if (newY < 0) newY = 0;
+            if (newY + playerHeight > 600) newY = 600 - playerHeight;
 
-            // Kiểm tra va chạm với các obstacles
+            // Kiểm tra va chạm với các chướng ngại vật tĩnh
             Rectangle newRect = new Rectangle(newX, newY, playerWidth, playerHeight);
             bool collisionDetected = false;
-            string collisionDirection = ""; // Để xác định hướng va chạm
+            string collisionDirection = "";
 
             foreach (var obstacle in obstacles)
             {
                 Rectangle obstacleRect = new Rectangle(obstacle.X, obstacle.Y, obstacle.Width, obstacle.Height);
                 if (newRect.IntersectsWith(obstacleRect))
                 {
-                    // Va chạm xảy ra, khôi phục vị trí trước đó
                     Console.WriteLine($"Player gặp obstacle tại ({obstacle.X}, {obstacle.Y})");
-                    playerX = PreviousX;
-                    playerY = PreviousY;
                     collisionDetected = true;
 
-                    // Xác định hướng va chạm dựa trên sự di chuyển
                     if (GoLeft)
                         collisionDirection = "Left";
                     else if (GoRight)
@@ -323,7 +323,57 @@ namespace Project_Game.Entities
                     else if (GoDown)
                         collisionDirection = "Down";
 
-                    break; // Thoát khỏi vòng lặp sau khi phát hiện va chạm
+                    break;
+                }
+            }
+
+            // Kiểm tra va chạm với TestEnemy
+            if (!collisionDetected)
+            {
+                foreach (var enemy in enemies)
+                {
+                    Rectangle enemyRect = new Rectangle(enemy.X, enemy.Y, enemy.Width, enemy.Height);
+                    if (newRect.IntersectsWith(enemyRect))
+                    {
+                        Console.WriteLine($"Player gặp TestEnemy tại ({enemy.X}, {enemy.Y})");
+                        collisionDetected = true;
+
+                        if (GoLeft)
+                            collisionDirection = "Left";
+                        else if (GoRight)
+                            collisionDirection = "Right";
+                        else if (GoUp)
+                            collisionDirection = "Up";
+                        else if (GoDown)
+                            collisionDirection = "Down";
+
+                        break;
+                    }
+                }
+            }
+
+            // Kiểm tra va chạm với Chicken
+            if (!collisionDetected)
+            {
+                foreach (var chicken in chickens)
+                {
+                    Rectangle chickenRect = new Rectangle(chicken.X, chicken.Y, chicken.Width, chicken.Height);
+                    if (newRect.IntersectsWith(chickenRect))
+                    {
+                        Console.WriteLine($"Player gặp Chicken tại ({chicken.X}, {chicken.Y})");
+                        collisionDetected = true;
+
+                        if (GoLeft)
+                            collisionDirection = "Left";
+                        else if (GoRight)
+                            collisionDirection = "Right";
+                        else if (GoUp)
+                            collisionDirection = "Up";
+                        else if (GoDown)
+                            collisionDirection = "Down";
+
+                        break;
+                    }
                 }
             }
 
@@ -357,13 +407,13 @@ namespace Project_Game.Entities
                 return; // Thoát khỏi phương thức Move
             }
 
-            // Nếu không va chạm, cập nhật vị trí
+            // Nếu không va chạm, cập nhật vị trí mới
             if (isMoving)
             {
                 playerX = newX;
                 playerY = newY;
                 movementAnimation.UpdateAnimation();
-                //Console.WriteLine($"Player moved to ({playerX}, {playerY})");
+                Console.WriteLine($"Player moved to ({playerX}, {playerY})");
             }
             else
             {
@@ -378,6 +428,8 @@ namespace Project_Game.Entities
             // Cập nhật trạng thái wasMovingPreviously cho frame tiếp theo
             wasMovingPreviously = isMoving;
         }
+
+        // ... Các phương thức khác của Player như PerformAttack, UpdateAttack, etc. ..
 
         public void AnimateIdle()
         {

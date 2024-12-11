@@ -38,7 +38,7 @@ namespace Project_Game.Entities
         public TestEnemy(string baseFolder, int maxHealth = 50, int startX = 500, int startY = 100)
             : base("TestEnemy", maxHealth)
         {
-            Speed = 2; // Tăng tốc độ di chuyển
+            Speed = 1; // Tăng tốc độ di chuyển
             X = startX;
             Y = startY;
             baseFolderPath = baseFolder;
@@ -109,14 +109,25 @@ namespace Project_Game.Entities
         {
             if (isDead || IsAttacking) return;
 
+            // Kiểm tra xem player có trong phạm vi phát hiện không
             int deltaX = playerX - X;
             int deltaY = playerY - Y;
+            int distanceSquared = deltaX * deltaX + deltaY * deltaY;
+
+            // Nếu player không trong phạm vi DetectionRange, dừng di chuyển
+            if (distanceSquared > DetectionRange * DetectionRange)
+            {
+                isMoving = false;
+                return; // Dừng lại nếu player ra ngoài phạm vi
+            }
+
             int absDeltaX = Math.Abs(deltaX);
             int absDeltaY = Math.Abs(deltaY);
 
             const int directionThreshold = 5; // Điều chỉnh để di chuyển khi gần hơn
             if (absDeltaX < directionThreshold && absDeltaY < directionThreshold)
             {
+                // Nếu player rất gần, dừng di chuyển
                 isMoving = false;
                 return;
             }
@@ -170,8 +181,6 @@ namespace Project_Game.Entities
             else if (stepX != 0)
             {
                 Console.WriteLine($"Enemy không thể di chuyển X tới ({X + stepX}, {Y}) vì va chạm");
-                // Thay đổi hướng di chuyển khi va chạm trục X
-                TryChangeDirection(obstacles);
             }
 
             // Kiểm tra va chạm trục Y
@@ -184,8 +193,6 @@ namespace Project_Game.Entities
             else if (stepY != 0)
             {
                 Console.WriteLine($"Enemy không thể di chuyển Y tới ({X}, {Y + stepY}) vì va chạm");
-                // Thay đổi hướng di chuyển khi va chạm trục Y
-                TryChangeDirection(obstacles);
             }
 
             isMoving = moved;
@@ -194,6 +201,7 @@ namespace Project_Game.Entities
                 movementAnimation.UpdateAnimation();
             }
         }
+
 
         // Phương thức mới để thay đổi hướng di chuyểnn
         private void TryChangeDirection(List<GameObject> obstacles)
@@ -394,5 +402,28 @@ namespace Project_Game.Entities
             }
             return enemies;
         }
+        public void Update(List<GameObject> obstacles, Player target)
+        {
+            if (isDead) return;
+
+            // Update animations if not attacking
+            if (!IsAttacking)
+            {
+                movementAnimation.UpdateAnimation();
+            }
+
+            // Check for attack status and perform attack if in range
+            HandleAttack(target, obstacles);
+
+            // Handle movement if the enemy is not attacking
+            if (!IsAttacking)
+            {
+                Move(target.playerX, target.playerY, 2000, 6000, obstacles);
+            }
+
+            // Update the attack animation if needed
+            UpdateAttack();
+        }
+
     }
 }
