@@ -88,7 +88,6 @@ namespace Project_Game.Entities
         public virtual void PerformAttack(Player target) { }
 
         public virtual void UpdateAttack() { }
-
         public virtual Image GetCurrentFrame() { return null; }
     }
 }

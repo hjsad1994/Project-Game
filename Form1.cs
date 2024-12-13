@@ -145,9 +145,11 @@ namespace Project_Game
                 objectManager.Enemies,
                 objectManager.Chickens,
                 objectManager.AnimatedObjects,
+                objectManager.Kapybaras, // Truyền danh sách Kapybaras vào
                 gameOverState
             );
         }
+
 
         private void TimerEvent(object sender, EventArgs e)
         {
@@ -296,5 +298,9 @@ namespace Project_Game
         {
         }
 
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

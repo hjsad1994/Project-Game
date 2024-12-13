@@ -36,7 +36,7 @@ namespace Project_Game.Entities
         private int nextSleepTime = 0;
 
         public Chicken(string name, int startX, int startY, int minX, int maxX)
-            : base(startX, startY, 20, 20, name)
+            : base(startX, startY, 14, 25, name)
         {
             this.minX = minX;
             this.maxX = maxX;
