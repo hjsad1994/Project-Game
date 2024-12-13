@@ -64,8 +64,8 @@ namespace Project_Game.Entities
             eatAnimationLeft = new AnimationManager(frameRate: 10);
             eatAnimationRight = new AnimationManager(frameRate: 10);
 
-            resetAnimationLeft = new AnimationManager(frameRate: 25);
-            resetAnimationRight = new AnimationManager(frameRate: 25);
+            resetAnimationLeft = new AnimationManager(frameRate: 10);
+            resetAnimationRight = new AnimationManager(frameRate: 10);
 
             LoadMovementFrames();
             LoadIdleFrames();
@@ -187,7 +187,7 @@ namespace Project_Game.Entities
             if (currentState == "Sleep")
             {
                 this.Width = 16;
-                this.Height = 40;
+                this.Height = 35;
 
                 if (Environment.TickCount >= sleepEndTime)
                 {
