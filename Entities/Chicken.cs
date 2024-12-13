@@ -1,5 +1,4 @@
-﻿// File: Chicken.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -8,139 +7,305 @@ namespace Project_Game.Entities
 {
     public class Chicken : GameObject
     {
-        private AnimationManager movementAnimation;
-        private AnimationManager idleAnimation;
-        private AnimationManager sleepAnimation;
-        private bool isSleeping = false;
+        private AnimationManager movementAnimationLeft;
+        private AnimationManager movementAnimationRight;
+        private AnimationManager idleAnimationLeft;
+        private AnimationManager idleAnimationRight;
+        private AnimationManager sleepAnimationLeft;
+        private AnimationManager sleepAnimationRight;
+
         private int movementSpeed = 2;
-        private string currentState = "Idle"; // "Idle", "MoveLeft", "MoveRight", "Sleep"
+        private string currentState = "Idle";
+        private string currentDirection = "Right";
+        private int minX, maxX;
+        private int movedDistance = 0;
+        private int moveLimit = 50;
+        private bool isIdle = true;
+        private int idleTime = 0;
 
-        private int minX, maxX; // Define the movement range for the chicken
-        private bool isMovingRight = true; // Flag to determine direction of movement
+        public bool IsAttacking => false;
+        public bool ShouldRemove => false;
 
-        public bool IsAttacking => false; // Chicken không tấn công
-        public bool ShouldRemove => false; // Chicken không bị loại bỏ
+        private static Random rand = new Random();
 
-        // Constructor with minX and maxX parameters to define movement range
+        // Thời gian ngủ cố định: 5 giây
+        private int sleepDuration = 5000;
+        private int sleepEndTime = 0;
+
+        // Thời điểm vào Sleep tiếp theo (5-10s)
+        private int nextSleepTime = 0;
+
         public Chicken(string name, int startX, int startY, int minX, int maxX)
-            : base(startX, startY, 32, 32, name)
+            : base(startX, startY, 20, 20, name)
         {
             this.minX = minX;
             this.maxX = maxX;
-            movementAnimation = new AnimationManager(frameRate: 10);
-            idleAnimation = new AnimationManager(frameRate: 10);
-            sleepAnimation = new AnimationManager(frameRate: 10);
+            movementAnimationLeft = new AnimationManager(frameRate: 20);
+            movementAnimationRight = new AnimationManager(frameRate: 20);
+            idleAnimationLeft = new AnimationManager(frameRate: 20);
+            idleAnimationRight = new AnimationManager(frameRate: 20);
+            sleepAnimationLeft = new AnimationManager(frameRate: 15);
+            sleepAnimationRight = new AnimationManager(frameRate: 15);
 
-            // Load frames for the states
             LoadMovementFrames();
             LoadIdleFrames();
             LoadSleepFrames();
+
+            // Random hướng ban đầu
+            if (rand.Next(2) == 0)
+                currentDirection = "Right";
+            else
+                currentDirection = "Left";
+
+            // Random thời gian idle ban đầu
+            int initialIdleDuration = rand.Next(1000, 3000);
+            idleTime = Environment.TickCount + initialIdleDuration;
+
+            // Lên lịch Sleep lần đầu
+            ScheduleNextSleep();
         }
 
         private void LoadMovementFrames()
         {
-            movementAnimation.LoadFrames(Path.Combine("Assets", "Chicken", "Chicken_Movement", "MoveLeft"));
-            movementAnimation.LoadFrames(Path.Combine("Assets", "Chicken", "Chicken_Movement", "MoveRight"));
+            var moveLeftFrames = Path.Combine("Assets", "Chicken", "Chicken_Movement", "MoveLeft");
+            var moveRightFrames = Path.Combine("Assets", "Chicken", "Chicken_Movement", "MoveRight");
+
+            if (Directory.Exists(moveLeftFrames))
+            {
+                movementAnimationLeft.LoadFrames(moveLeftFrames);
+                Console.WriteLine("Loaded MoveLeft frames");
+            }
+
+            if (Directory.Exists(moveRightFrames))
+            {
+                movementAnimationRight.LoadFrames(moveRightFrames);
+                Console.WriteLine("Loaded MoveRight frames");
+            }
         }
 
         private void LoadIdleFrames()
         {
-            idleAnimation.LoadFrames(Path.Combine("Assets", "Chicken", "Chicken_Idle", "IdleLeft"));
-            idleAnimation.LoadFrames(Path.Combine("Assets", "Chicken", "Chicken_Idle", "IdleRight"));
-            idleAnimation.LoadFrames(Path.Combine("Assets", "Chicken", "Chicken_Idle", "EatLeft"));
-            idleAnimation.LoadFrames(Path.Combine("Assets", "Chicken", "Chicken_Idle", "EatRight"));
+            var idleLeftFrames = Path.Combine("Assets", "Chicken", "Chicken_Idle", "IdleLeft");
+            var idleRightFrames = Path.Combine("Assets", "Chicken", "Chicken_Idle", "IdleRight");
+
+            if (Directory.Exists(idleLeftFrames))
+            {
+                idleAnimationLeft.LoadFrames(idleLeftFrames);
+                Console.WriteLine("Loaded IdleLeft frames");
+            }
+
+            if (Directory.Exists(idleRightFrames))
+            {
+                idleAnimationRight.LoadFrames(idleRightFrames);
+                Console.WriteLine("Loaded IdleRight frames");
+            }
         }
 
         private void LoadSleepFrames()
         {
-            sleepAnimation.LoadFrames(Path.Combine("Assets", "Chicken", "Chicken_Sleep", "SleepLeft"));
-            sleepAnimation.LoadFrames(Path.Combine("Assets", "Chicken", "Chicken_Sleep", "SleepRight"));
-        }
+            var sleepLeftFrames = Path.Combine("Assets", "Chicken", "Chicken_Sleep", "SleepLeft");
+            var sleepRightFrames = Path.Combine("Assets", "Chicken", "Chicken_Sleep", "SleepRight");
 
-        public void SetSleeping(bool sleeping)
-        {
-            isSleeping = sleeping;
-            currentState = sleeping ? "Sleep" : "Idle";
-            if (isSleeping)
+            if (Directory.Exists(sleepLeftFrames))
             {
-                sleepAnimation.ResetAnimation();
+                sleepAnimationLeft.LoadFrames(sleepLeftFrames);
+                Console.WriteLine("Loaded SleepLeft frames, count: " + sleepAnimationLeft.GetFrameCount());
             }
             else
             {
-                idleAnimation.ResetAnimation();
+                Console.WriteLine("SleepLeft frames folder not found: " + sleepLeftFrames);
+            }
+
+            if (Directory.Exists(sleepRightFrames))
+            {
+                sleepAnimationRight.LoadFrames(sleepRightFrames);
+                Console.WriteLine("Loaded SleepRight frames, count: " + sleepAnimationRight.GetFrameCount());
+            }
+            else
+            {
+                Console.WriteLine("SleepRight frames folder not found: " + sleepRightFrames);
             }
         }
 
-        public void Update()
+        private void ScheduleNextSleep()
         {
-            if (isSleeping)
+            // 5-10s random
+            int sleepWait = rand.Next(5000, 10001);
+            nextSleepTime = Environment.TickCount + sleepWait;
+            Console.WriteLine($"{Name} will sleep at {nextSleepTime - Environment.TickCount}ms from now.");
+        }
+
+        public void Update(Player player)
+        {
+            // Kiểm tra trạng thái Sleep
+            if (currentState == "Sleep")
             {
-                sleepAnimation.UpdateAnimation();
+                // Đang ngủ
+                if (Environment.TickCount >= sleepEndTime)
+                {
+                    // Hết thời gian ngủ
+                    Console.WriteLine($"{Name} woke up from sleep!");
+                    SwitchToIdle(currentDirection);
+                    ScheduleNextSleep();
+                }
+                else
+                {
+                    // Đang ngủ, update sleep animation
+                    if (currentDirection == "Left")
+                        sleepAnimationLeft.UpdateAnimation(loop: true);
+                    else
+                        sleepAnimationRight.UpdateAnimation(loop: true);
+                }
+                return; // return để không chạy các logic Idle/Move
+            }
+
+            // Kiểm tra xem đã đến lúc Sleep chưa (chỉ sleep khi Idle)
+            if (currentState == "Idle" && Environment.TickCount >= nextSleepTime)
+            {
+                Console.WriteLine($"{Name} is going to sleep now!");
+                currentState = "Sleep";
+                // Reset animation sleep
+                sleepAnimationLeft.ResetAnimation();
+                sleepAnimationRight.ResetAnimation();
+                sleepEndTime = Environment.TickCount + sleepDuration;
                 return;
             }
 
-            // Random chance to change direction or start eating
-            Random rand = new Random();
-            int action = rand.Next(0, 100);
+            if (currentState == "Idle")
+            {
+                if (Environment.TickCount >= idleTime)
+                {
+                    if (currentDirection == "Right")
+                    {
+                        currentState = "MoveRight";
+                        movementAnimationRight.ResetAnimation();
+                        movedDistance = 0;
+                        Console.WriteLine($"{Name} starts moving right.");
+                    }
+                    else
+                    {
+                        currentState = "MoveLeft";
+                        movementAnimationLeft.ResetAnimation();
+                        movedDistance = 0;
+                        Console.WriteLine($"{Name} starts moving left.");
+                    }
+                    isIdle = false;
+                }
+                else
+                {
+                    if (currentDirection == "Right")
+                        idleAnimationRight.UpdateAnimation();
+                    else
+                        idleAnimationLeft.UpdateAnimation();
+                }
+            }
+            else if (currentState == "MoveRight" && !isIdle)
+            {
+                int newX = X + movementSpeed;
+                if (!WillCollideWithPlayer(newX, Y, player))
+                {
+                    X = newX;
+                    movedDistance += movementSpeed;
+                    if (movedDistance >= moveLimit)
+                    {
+                        SwitchToIdle("Left");
+                        movementAnimationRight.ResetAnimation();
+                    }
+                    movementAnimationRight.UpdateAnimation();
+                }
+                else
+                {
+                    SwitchToIdle("Left");
+                    movementAnimationRight.ResetAnimation();
+                    Console.WriteLine($"{Name} collided with player while moving right, switching to idle.");
+                }
+            }
+            else if (currentState == "MoveLeft" && !isIdle)
+            {
+                int newX = X - movementSpeed;
+                if (!WillCollideWithPlayer(newX, Y, player))
+                {
+                    X = newX;
+                    movedDistance += movementSpeed;
+                    if (movedDistance >= moveLimit)
+                    {
+                        SwitchToIdle("Right");
+                        movementAnimationLeft.ResetAnimation();
+                    }
+                    movementAnimationLeft.UpdateAnimation();
+                }
+                else
+                {
+                    SwitchToIdle("Right");
+                    movementAnimationLeft.ResetAnimation();
+                    Console.WriteLine($"{Name} collided with player while moving left, switching to idle.");
+                }
+            }
 
-            if (action < 2) // 2% chance to change direction
-            {
-                currentState = currentState == "MoveLeft" ? "MoveRight" : "MoveLeft";
-            }
-            else if (action < 10) // 8% chance to switch to eating state
-            {
-                currentState = currentState == "IdleLeft" ? "EatLeft" : "EatRight";
-            }
-
-            // Chicken movement logic
-            if (currentState == "MoveLeft" && X > minX)
-            {
-                X -= movementSpeed;
-                movementAnimation.UpdateAnimation();
-            }
-            else if (currentState == "MoveRight" && X < maxX)
-            {
-                X += movementSpeed;
-                movementAnimation.UpdateAnimation();
-            }
-            else if (currentState == "EatLeft" || currentState == "EatRight")
-            {
-                idleAnimation.UpdateAnimation(); // Use idle animation for eating
-            }
-            else
-            {
-                idleAnimation.UpdateAnimation(); // Default to idle
-            }
-
-            // Ensure chicken stays within the boundaries of the screen (800x600)
             if (X < 0) X = 0;
             if (X + Width > 800) X = 800 - Width;
         }
 
+        private bool WillCollideWithPlayer(int newX, int newY, Player player)
+        {
+            Rectangle chickenRect = new Rectangle(newX, newY, Width, Height);
+            Rectangle playerRect = new Rectangle(player.playerX, player.playerY, player.playerWidth, player.playerHeight);
+
+            return chickenRect.IntersectsWith(playerRect);
+        }
+
+        private void SwitchToIdle(string newDirection)
+        {
+            currentState = "Idle";
+            isIdle = true;
+            int nextIdleDuration = rand.Next(1000, 3000);
+            idleTime = Environment.TickCount + nextIdleDuration;
+            movedDistance = 0;
+            currentDirection = newDirection;
+            Console.WriteLine($"{Name} switched to idle facing {currentDirection}, will idle for {nextIdleDuration}ms.");
+        }
+
         public Image GetCurrentFrame()
         {
-            if (isSleeping)
+            if (currentState == "Sleep")
             {
-                return sleepAnimation.GetCurrentFrame();
+                if (currentDirection == "Left")
+                    return sleepAnimationLeft.GetCurrentFrame();
+                else
+                    return sleepAnimationRight.GetCurrentFrame();
             }
 
-            if (currentState == "MoveLeft" || currentState == "MoveRight")
+            if (currentState == "Idle")
             {
-                return movementAnimation.GetCurrentFrame();
+                if (currentDirection == "Left")
+                {
+                    return idleAnimationLeft.GetCurrentFrame();
+                }
+                else
+                {
+                    return idleAnimationRight.GetCurrentFrame();
+                }
             }
-            else if (currentState == "IdleLeft" || currentState == "IdleRight")
+            else if (currentState == "MoveLeft")
             {
-                return idleAnimation.GetCurrentFrame();
+                return movementAnimationLeft.GetCurrentFrame();
             }
-            else // Idle
+            else if (currentState == "MoveRight")
             {
-                return idleAnimation.GetCurrentFrame();  // Default to Idle
+                return movementAnimationRight.GetCurrentFrame();
             }
+
+            return idleAnimationRight.GetCurrentFrame();
         }
 
         public override void TakeDamage(int damage)
         {
             // Chicken không nhận sát thương
+        }
+
+        public void Move(Player player)
+        {
+            Update(player);
         }
     }
 }

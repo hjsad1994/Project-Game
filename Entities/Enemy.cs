@@ -8,7 +8,7 @@ namespace Project_Game.Entities
     public class Enemy : GameObject
     {
         public string Direction { get; protected set; } = "Down";
-        public int Speed { get; protected set; } = 4;
+        public float Speed { get; protected set; } = 1f;
 
         public virtual bool IsAttacking { get; protected set; } = false;
         public virtual bool ShouldRemove { get; protected set; } = false;

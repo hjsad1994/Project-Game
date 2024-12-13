@@ -5,12 +5,12 @@ namespace Project_Game.Entities
 {
     public class GameObject
     {
-        public int X { get; set; }
-        public int Y { get; set; }
+        public virtual int X { get; set; }
+        public virtual int Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
         public string Name { get; set; }
-        public int Health { get; private set; } // Health
+        public int Health { get; private set; }
 
         public GameObject(int x, int y, int width, int height, string name, int health = 100)
         {

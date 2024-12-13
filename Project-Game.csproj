@@ -52,8 +52,11 @@
     <Compile Include="Entities\Chicken.cs" />
     <Compile Include="Entities\Enemy.cs" />
     <Compile Include="Entities\GameObject.cs" />
+    <Compile Include="Entities\GameObjectManager.cs" />
     <Compile Include="Entities\GameOver.cs" />
+    <Compile Include="Entities\MapManager.cs" />
     <Compile Include="Entities\Player.cs" />
+    <Compile Include="Entities\Renderer.cs" />
     <Compile Include="Entities\TestEnemy.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

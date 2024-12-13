@@ -29,25 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.lblMovement = new System.Windows.Forms.Label();
             this.movementTimer = new System.Windows.Forms.Timer(this.components);
             this.healBar = new System.Windows.Forms.ProgressBar();
             this.gameOverTimer = new System.Windows.Forms.Timer(this.components);
             this.Test1 = new System.Windows.Forms.PictureBox();
-            this.Test2 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.Test1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Test2)).BeginInit();
             this.SuspendLayout();
-            // 
-            // lblMovement
-            // 
-            this.lblMovement.AutoSize = true;
-            this.lblMovement.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMovement.Location = new System.Drawing.Point(12, 477);
-            this.lblMovement.Name = "lblMovement";
-            this.lblMovement.Size = new System.Drawing.Size(127, 25);
-            this.lblMovement.TabIndex = 0;
-            this.lblMovement.Text = "Movement:";
             // 
             // movementTimer
             // 
@@ -72,21 +59,12 @@
             // 
             // Test1
             // 
-            this.Test1.Location = new System.Drawing.Point(541, 340);
+            this.Test1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.Test1.Location = new System.Drawing.Point(553, 111);
             this.Test1.Name = "Test1";
-            this.Test1.Size = new System.Drawing.Size(21, 18);
+            this.Test1.Size = new System.Drawing.Size(63, 22);
             this.Test1.TabIndex = 2;
             this.Test1.TabStop = false;
-            // 
-            // Test2
-            // 
-            this.Test2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            //this.Test2.BackgroundImage = global::Project_Game.Properties.Resources.House_4_4;
-            this.Test2.Location = new System.Drawing.Point(877, 38);
-            this.Test2.Name = "Test2";
-            this.Test2.Size = new System.Drawing.Size(110, 85);
-            this.Test2.TabIndex = 3;
-            this.Test2.TabStop = false;
             // 
             // Form1
             // 
@@ -94,10 +72,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(784, 591);
-            this.Controls.Add(this.Test2);
             this.Controls.Add(this.Test1);
             this.Controls.Add(this.healBar);
-            this.Controls.Add(this.lblMovement);
             this.DoubleBuffered = true;
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(800, 630);
@@ -108,26 +84,20 @@
             this.Text = "Form1";
             this.TopMost = true;
             this.TransparencyKey = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.FormPaintEvent);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.KeyIsDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.KeyIsUp);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.FormMouseClick);
             ((System.ComponentModel.ISupportInitialize)(this.Test1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Test2)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.Label lblMovement;
         private System.Windows.Forms.Timer movementTimer;
         private System.Windows.Forms.Timer gameOverTimer;
         private System.Windows.Forms.ProgressBar healBar;
         private System.Windows.Forms.PictureBox Test1;
-        private System.Windows.Forms.PictureBox Test2;
     }
 }
 

@@ -20,37 +20,46 @@ namespace Project_Game.Entities
         public override bool IsAttacking { get; protected set; } = false;
         public override bool ShouldRemove { get; protected set; } = false;
 
-        // Các thuộc tính công cộng
-        public int AttackRange { get; private set; } = 26; // Tăng AttackRange
-        public int DetectionRange { get; private set; } = 120; // Tăng DetectionRange
+        public int AttackRange { get; private set; } = 26;
+        public int DetectionRange { get; private set; } = 120;
 
-        private int attackCooldown = 1000; // Thời gian nghỉ giữa các đòn tấn công (ms)
+        private int attackCooldown = 1000;
         private DateTime lastAttackTime = DateTime.MinValue;
 
-        // Thuộc tính mới để quản lý hướng di chuyển
         private List<string> possibleDirections = new List<string> { "Left", "Right", "Up", "Down" };
-        private string previousDirection = "";
-        private int directionChangeCooldown = 500; // Thời gian chờ trước khi thay đổi hướng (ms)
+        private int directionChangeCooldown = 1500;
         private DateTime lastDirectionChangeTime = DateTime.MinValue;
 
-        private static Random random = new Random(); // Sử dụng Random tĩnh để tránh tạo nhiều instance
+        private static Random random = new Random();
+
+        // Tốc độ
+        private float chaseSpeed = 0.5f;
+        private float roamSpeed = 0.3f;
+
+        // Lưu vị trí dưới dạng float để di chuyển mượt mà
+        private float posX, posY;
 
         public TestEnemy(string baseFolder, int maxHealth = 50, int startX = 500, int startY = 100)
             : base("TestEnemy", maxHealth)
         {
-            Speed = 1; // Tăng tốc độ di chuyển
-            X = startX;
-            Y = startY;
+            Speed = roamSpeed;
+            posX = startX;
+            posY = startY;
             baseFolderPath = baseFolder;
 
-            movementAnimation = new AnimationManager(frameRate: 6); // Giảm frame rate để tăng tốc độ
-            attackAnimation = new AnimationManager(frameRate: 6);
+            movementAnimation = new AnimationManager(frameRate: 15);
+            attackAnimation = new AnimationManager(frameRate: 15);
             idleAnimations = new Dictionary<string, AnimationManager>();
 
             LoadEnemyImages(Path.Combine(baseFolderPath, "Movement"));
             LoadIdleAnimations(Path.Combine(baseFolderPath, "Idle"));
             LoadDeadAnimation(Path.Combine(baseFolderPath, "Dead"));
         }
+
+        // Ghi đè X, Y để lấy từ posX, posY
+        public override int X { get { return (int)posX; } set { posX = value; } }
+        public override int Y { get { return (int)posY; } set { posY = value; } }
+
 
         public override void LoadEnemyImages(string baseFolderPath)
         {
@@ -65,7 +74,7 @@ namespace Project_Game.Entities
             string[] directions = { "Down", "Up", "Left", "Right" };
             foreach (var dir in directions)
             {
-                var anim = new AnimationManager(frameRate: 12);
+                var anim = new AnimationManager(frameRate: 15);
                 anim.LoadFrames(Path.Combine(baseFolderPath, dir));
                 idleAnimations[dir] = anim;
             }
@@ -73,11 +82,10 @@ namespace Project_Game.Entities
 
         private void LoadDeadAnimation(string baseFolderPath)
         {
-            deadAnimation = new AnimationManager(frameRate: 13);
+            deadAnimation = new AnimationManager(frameRate: 15);
             deadAnimation.LoadFrames(baseFolderPath);
         }
 
-        // Override HandleAttack để nhận obstacles
         public override void HandleAttack(Player target, List<GameObject> obstacles)
         {
             if (IsDead()) return;
@@ -95,39 +103,37 @@ namespace Project_Game.Entities
             }
             else if (distanceSquared <= DetectionRange * DetectionRange)
             {
-                // Gọi Move với obstacles thực tế
-                Move(target.playerX, target.playerY, 2000, 6000, obstacles);
+                // Khi thấy player, tăng tốc
+                Speed = chaseSpeed;
+                MoveTowardsPlayer(target.playerX, target.playerY, obstacles);
             }
             else
             {
-                isMoving = false;
+                // Không thấy player -> roam chậm
+                Roam(obstacles);
             }
         }
 
-
-        public void Move(int playerX, int playerY, int screenWidth, int screenHeight, List<GameObject> obstacles)
+        private void MoveTowardsPlayer(int playerX, int playerY, List<GameObject> obstacles)
         {
             if (isDead || IsAttacking) return;
 
-            // Kiểm tra xem player có trong phạm vi phát hiện không
             int deltaX = playerX - X;
             int deltaY = playerY - Y;
             int distanceSquared = deltaX * deltaX + deltaY * deltaY;
 
-            // Nếu player không trong phạm vi DetectionRange, dừng di chuyển
             if (distanceSquared > DetectionRange * DetectionRange)
             {
-                isMoving = false;
-                return; // Dừng lại nếu player ra ngoài phạm vi
+                Roam(obstacles);
+                return;
             }
 
             int absDeltaX = Math.Abs(deltaX);
             int absDeltaY = Math.Abs(deltaY);
 
-            const int directionThreshold = 5; // Điều chỉnh để di chuyển khi gần hơn
+            const int directionThreshold = 5;
             if (absDeltaX < directionThreshold && absDeltaY < directionThreshold)
             {
-                // Nếu player rất gần, dừng di chuyển
                 isMoving = false;
                 return;
             }
@@ -143,56 +149,69 @@ namespace Project_Game.Entities
             {
                 newDirection = (deltaY < 0) ? "Up" : "Down";
             }
-            else
+
+            SetDirectionAndMove(newDirection, deltaX, deltaY, obstacles);
+        }
+
+        private void Roam(List<GameObject> obstacles)
+        {
+            Speed = roamSpeed;
+            var now = DateTime.Now;
+            // Chỉ đổi hướng nếu đã đến cooldown
+            if (!isMoving && (now - lastDirectionChangeTime).TotalMilliseconds > directionChangeCooldown)
             {
-                newDirection = currentAnimationDirection;
+                string newDirection = possibleDirections[random.Next(possibleDirections.Count)];
+                ChangeDirection(newDirection);
+                lastDirectionChangeTime = now;
             }
 
+            int deltaX = 0;
+            int deltaY = 0;
+            switch (Direction)
+            {
+                case "Left":
+                    deltaX = -1;
+                    break;
+                case "Right":
+                    deltaX = 1;
+                    break;
+                case "Up":
+                    deltaY = -1;
+                    break;
+                case "Down":
+                    deltaY = 1;
+                    break;
+            }
+
+            SetDirectionAndMove(Direction, deltaX, deltaY, obstacles, isRoaming: true);
+        }
+
+        private void SetDirectionAndMove(string newDirection, int deltaX, int deltaY, List<GameObject> obstacles, bool isRoaming = false)
+        {
             if (newDirection != currentAnimationDirection)
             {
                 currentAnimationDirection = newDirection;
-                movementAnimation.LoadFrames(Path.Combine(baseFolderPath, "Movement", currentAnimationDirection));
+                ChangeDirection(newDirection);
             }
 
-            Direction = currentAnimationDirection;
-
-            int stepX = 0;
-            int stepY = 0;
-
-            if (currentAnimationDirection == "Left" || currentAnimationDirection == "Right")
-            {
-                stepX = Math.Sign(deltaX) * Speed;
-            }
-
-            if (currentAnimationDirection == "Up" || currentAnimationDirection == "Down")
-            {
-                stepY = Math.Sign(deltaY) * Speed;
-            }
+            // Di chuyển bằng float, không ép kiểu Speed thành int
+            float moveX = Math.Sign(deltaX) * Speed;
+            float moveY = Math.Sign(deltaY) * Speed;
 
             bool moved = false;
 
-            // Kiểm tra va chạm trục X
-            if (stepX != 0 && !CheckCollisionWithObstacles(X + stepX, Y, obstacles))
+            // Kiểm tra va chạm X
+            if (moveX != 0 && !CheckCollisionWithObstacles((int)(posX + moveX), (int)posY, obstacles))
             {
-                X += stepX;
+                posX += moveX;
                 moved = true;
-                Console.WriteLine($"Enemy di chuyển X tới ({X}, {Y})");
-            }
-            else if (stepX != 0)
-            {
-                Console.WriteLine($"Enemy không thể di chuyển X tới ({X + stepX}, {Y}) vì va chạm");
             }
 
-            // Kiểm tra va chạm trục Y
-            if (stepY != 0 && !CheckCollisionWithObstacles(X, Y + stepY, obstacles))
+            // Kiểm tra va chạm Y
+            if (moveY != 0 && !CheckCollisionWithObstacles((int)posX, (int)(posY + moveY), obstacles))
             {
-                Y += stepY;
+                posY += moveY;
                 moved = true;
-                Console.WriteLine($"Enemy di chuyển Y tới ({X}, {Y})");
-            }
-            else if (stepY != 0)
-            {
-                Console.WriteLine($"Enemy không thể di chuyển Y tới ({X}, {Y + stepY}) vì va chạm");
             }
 
             isMoving = moved;
@@ -200,80 +219,20 @@ namespace Project_Game.Entities
             {
                 movementAnimation.UpdateAnimation();
             }
-        }
-
-
-        // Phương thức mới để thay đổi hướng di chuyểnn
-        private void TryChangeDirection(List<GameObject> obstacles)
-        {
-            var now = DateTime.Now;
-            if ((now - lastDirectionChangeTime).TotalMilliseconds < directionChangeCooldown)
-            {
-                // Chưa đủ thời gian để thay đổi hướng
-                return;
-            }
-
-            lastDirectionChangeTime = now;
-
-            // Tạo danh sách các hướng khả thi (không phải hướng trước đó)
-            var availableDirections = new List<string>(possibleDirections);
-            if (!string.IsNullOrEmpty(previousDirection))
-            {
-                availableDirections.Remove(previousDirection);
-            }
-
-            // Loại bỏ hướng hiện tại
-            if (!string.IsNullOrEmpty(currentAnimationDirection))
-            {
-                availableDirections.Remove(currentAnimationDirection);
-            }
-
-            if (availableDirections.Count == 0)
-            {
-                // Nếu không còn hướng nào khả thi, giữ nguyên hướng hiện tại
-                return;
-            }
-
-            // Chọn hướng mới ngẫu nhiên
-            string newDirection = availableDirections[random.Next(availableDirections.Count)];
-
-            // Kiểm tra xem hướng mới có thể di chuyển không
-            int potentialX = X;
-            int potentialY = Y;
-
-            switch (newDirection)
-            {
-                case "Left":
-                    potentialX -= Speed;
-                    break;
-                case "Right":
-                    potentialX += Speed;
-                    break;
-                case "Up":
-                    potentialY -= Speed;
-                    break;
-                case "Down":
-                    potentialY += Speed;
-                    break;
-            }
-
-            if (!CheckCollisionWithObstacles(potentialX, potentialY, obstacles))
-            {
-                // Nếu hướng mới không va chạm, cập nhật hướng di chuyển
-                currentAnimationDirection = newDirection;
-                Direction = newDirection;
-                movementAnimation.LoadFrames(Path.Combine(baseFolderPath, "Movement", Direction));
-                previousDirection = Direction;
-                Console.WriteLine($"Enemy thay đổi hướng di chuyển thành {Direction}");
-            }
             else
             {
-                // Nếu hướng mới vẫn va chạm, thử thay đổi hướng lại sau
-                Console.WriteLine($"Enemy không thể thay đổi hướng thành {newDirection} vì va chạm.");
+                // Không dịch chuyển được, không lập tức đổi hướng 
+                // (Không đặt lại lastDirectionChangeTime)
+                // Kẻ địch sẽ đợi hết cooldown mới đổi hướng khác
             }
         }
 
-        // Phương thức kiểm tra va chạm với obstacles
+        private void ChangeDirection(string newDirection)
+        {
+            Direction = newDirection;
+            movementAnimation.LoadFrames(Path.Combine(baseFolderPath, "Movement", Direction));
+        }
+
         private bool CheckCollisionWithObstacles(int newX, int newY, List<GameObject> obstacles)
         {
             Rectangle newRect = new Rectangle(newX, newY, this.Width, this.Height);
@@ -302,7 +261,7 @@ namespace Project_Game.Entities
                     attackAnimation.LoadFrames(Path.Combine(baseFolderPath, "Attack", Direction));
                     attackAnimation.ResetAnimation();
 
-                    target.TakeDamage(5); // Tăng từ 1 lên 5 hoặc giá trị phù hợp
+                    target.TakeDamage(5);
                     Console.WriteLine($"{Name} đã tấn công Player!");
                 }
             }
@@ -356,6 +315,7 @@ namespace Project_Game.Entities
                 Console.WriteLine($"{Name} đã chết.");
             }
         }
+
         public override Image GetCurrentFrame()
         {
             if (isDead)
@@ -402,28 +362,22 @@ namespace Project_Game.Entities
             }
             return enemies;
         }
+
         public void Update(List<GameObject> obstacles, Player target)
         {
             if (isDead) return;
 
-            // Update animations if not attacking
             if (!IsAttacking)
             {
                 movementAnimation.UpdateAnimation();
             }
 
-            // Check for attack status and perform attack if in range
             HandleAttack(target, obstacles);
 
-            // Handle movement if the enemy is not attacking
-            if (!IsAttacking)
+            if (IsAttacking)
             {
-                Move(target.playerX, target.playerY, 2000, 6000, obstacles);
+                UpdateAttack();
             }
-
-            // Update the attack animation if needed
-            UpdateAttack();
         }
-
     }
 }

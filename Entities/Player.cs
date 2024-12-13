@@ -250,7 +250,10 @@ namespace Project_Game.Entities
             int newX = playerX;
             int newY = playerY;
 
-            // Lưu lại vị trí trước khi di chuyển
+            // Khai báo biến collisionDetected tại đây
+            bool collisionDetected = false;
+            string collisionDirection = "";
+
             PreviousX = playerX;
             PreviousY = playerY;
 
@@ -295,94 +298,35 @@ namespace Project_Game.Entities
                 isMoving = true;
             }
 
-            // Giới hạn di chuyển trong vùng 800x600
+            // Giới hạn mới: 800x630
             if (newX < 0) newX = 0;
             if (newX + playerWidth > 800) newX = 800 - playerWidth;
             if (newY < 0) newY = 0;
-            if (newY + playerHeight > 600) newY = 600 - playerHeight;
+            if (newY + playerHeight > 630) newY = 630 - playerHeight;
 
-            // Kiểm tra va chạm với các chướng ngại vật tĩnh
             Rectangle newRect = new Rectangle(newX, newY, playerWidth, playerHeight);
-            bool collisionDetected = false;
-            string collisionDirection = "";
 
+            // Kiểm tra va chạm obstacles
             foreach (var obstacle in obstacles)
             {
                 Rectangle obstacleRect = new Rectangle(obstacle.X, obstacle.Y, obstacle.Width, obstacle.Height);
                 if (newRect.IntersectsWith(obstacleRect))
                 {
-                    Console.WriteLine($"Player gặp obstacle tại ({obstacle.X}, {obstacle.Y})");
                     collisionDetected = true;
-
-                    if (GoLeft)
-                        collisionDirection = "Left";
-                    else if (GoRight)
-                        collisionDirection = "Right";
-                    else if (GoUp)
-                        collisionDirection = "Up";
-                    else if (GoDown)
-                        collisionDirection = "Down";
-
+                    if (GoLeft) collisionDirection = "Left";
+                    else if (GoRight) collisionDirection = "Right";
+                    else if (GoUp) collisionDirection = "Up";
+                    else if (GoDown) collisionDirection = "Down";
                     break;
                 }
             }
 
-            // Kiểm tra va chạm với TestEnemy
-            if (!collisionDetected)
-            {
-                foreach (var enemy in enemies)
-                {
-                    Rectangle enemyRect = new Rectangle(enemy.X, enemy.Y, enemy.Width, enemy.Height);
-                    if (newRect.IntersectsWith(enemyRect))
-                    {
-                        Console.WriteLine($"Player gặp TestEnemy tại ({enemy.X}, {enemy.Y})");
-                        collisionDetected = true;
-
-                        if (GoLeft)
-                            collisionDirection = "Left";
-                        else if (GoRight)
-                            collisionDirection = "Right";
-                        else if (GoUp)
-                            collisionDirection = "Up";
-                        else if (GoDown)
-                            collisionDirection = "Down";
-
-                        break;
-                    }
-                }
-            }
-
-            // Kiểm tra va chạm với Chicken
-            if (!collisionDetected)
-            {
-                foreach (var chicken in chickens)
-                {
-                    Rectangle chickenRect = new Rectangle(chicken.X, chicken.Y, chicken.Width, chicken.Height);
-                    if (newRect.IntersectsWith(chickenRect))
-                    {
-                        Console.WriteLine($"Player gặp Chicken tại ({chicken.X}, {chicken.Y})");
-                        collisionDetected = true;
-
-                        if (GoLeft)
-                            collisionDirection = "Left";
-                        else if (GoRight)
-                            collisionDirection = "Right";
-                        else if (GoUp)
-                            collisionDirection = "Up";
-                        else if (GoDown)
-                            collisionDirection = "Down";
-
-                        break;
-                    }
-                }
-            }
+            // Kiểm tra va chạm Enemy, Chicken nếu cần (có thể bỏ nếu không muốn chặn)
+            // ...
 
             if (collisionDetected)
             {
-                // Đặt animation về trạng thái idle theo hướng hiện tại
                 UpdateIdleAnimation();
-
-                // Đánh dấu hướng bị chặn và đặt lại cờ di chuyển
                 switch (collisionDirection)
                 {
                     case "Left":
@@ -403,21 +347,18 @@ namespace Project_Game.Entities
                         break;
                 }
 
-                wasMovingPreviously = false; // Player đang ở trạng thái idle
-                return; // Thoát khỏi phương thức Move
+                wasMovingPreviously = false;
+                return;
             }
 
-            // Nếu không va chạm, cập nhật vị trí mới
             if (isMoving)
             {
                 playerX = newX;
                 playerY = newY;
                 movementAnimation.UpdateAnimation();
-                Console.WriteLine($"Player moved to ({playerX}, {playerY})");
             }
             else
             {
-                // Nếu frame trước đang di chuyển, còn frame này không di chuyển nữa, nghĩa là vừa dừng
                 if (wasMovingPreviously)
                 {
                     UpdateIdleAnimation();
@@ -425,11 +366,9 @@ namespace Project_Game.Entities
                 AnimateIdle();
             }
 
-            // Cập nhật trạng thái wasMovingPreviously cho frame tiếp theo
             wasMovingPreviously = isMoving;
         }
 
-        // ... Các phương thức khác của Player như PerformAttack, UpdateAttack, etc. ..
 
         public void AnimateIdle()
         {
@@ -461,7 +400,7 @@ namespace Project_Game.Entities
                 {
                     foreach (var target in targets)
                     {
-                        target.TakeDamage(10); // Ví dụ, gây 10 sát thương
+                        target.TakeDamage(20); // Ví dụ, gây 10 sát thương
                         Console.WriteLine($"Player đã tấn công {target.Name}!");
                     }
                 }
