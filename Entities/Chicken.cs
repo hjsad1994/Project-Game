@@ -13,6 +13,10 @@ namespace Project_Game.Entities
         private AnimationManager idleAnimationRight;
         private AnimationManager sleepAnimationLeft;
         private AnimationManager sleepAnimationRight;
+        private AnimationManager eatAnimationLeft;
+        private AnimationManager eatAnimationRight;
+        private AnimationManager resetAnimationLeft;
+        private AnimationManager resetAnimationRight; // Thêm reset animations
 
         private int movementSpeed = 2;
         private string currentState = "Idle";
@@ -28,35 +32,47 @@ namespace Project_Game.Entities
 
         private static Random rand = new Random();
 
-        // Thời gian ngủ cố định: 5 giây
         private int sleepDuration = 5000;
         private int sleepEndTime = 0;
-
-        // Thời điểm vào Sleep tiếp theo (5-10s)
         private int nextSleepTime = 0;
 
-        // PreIdle tương tự Idle nhưng rất ngắn
         private bool isPreIdle = false;
         private int preIdleDuration = 500; // 0.5s
-        private bool goingToSleep = false; // Chỉ thị xem sau PreIdle có Sleep không
+        private bool goingToSleep = false;
+        private bool goingToEat = false;
+
+        private int originalWidth;
+        private int originalHeight;
+
+        private string nextFinalState = null; // Trạng thái cuối cùng sau Reset
 
         public Chicken(string name, int startX, int startY, int minX, int maxX)
             : base(startX, startY, 16, 25, name)
         {
             this.minX = minX;
             this.maxX = maxX;
+
+            originalWidth = Width;   //16
+            originalHeight = Height; //25
+
             movementAnimationLeft = new AnimationManager(frameRate: 25);
             movementAnimationRight = new AnimationManager(frameRate: 25);
             idleAnimationLeft = new AnimationManager(frameRate: 25);
             idleAnimationRight = new AnimationManager(frameRate: 25);
-            sleepAnimationLeft = new AnimationManager(frameRate: 30);
-            sleepAnimationRight = new AnimationManager(frameRate: 30); //
+            sleepAnimationLeft = new AnimationManager(frameRate: 25);
+            sleepAnimationRight = new AnimationManager(frameRate: 25);
+            eatAnimationLeft = new AnimationManager(frameRate: 10);
+            eatAnimationRight = new AnimationManager(frameRate: 10);
+
+            resetAnimationLeft = new AnimationManager(frameRate: 25);
+            resetAnimationRight = new AnimationManager(frameRate: 25);
 
             LoadMovementFrames();
             LoadIdleFrames();
             LoadSleepFrames();
+            LoadEatFrames();
+            LoadResetFrames(); // Load reset animations
 
-            // Random hướng ban đầu
             if (rand.Next(2) == 0)
                 currentDirection = "Right";
             else
@@ -112,23 +128,52 @@ namespace Project_Game.Entities
             if (Directory.Exists(sleepLeftFrames))
             {
                 sleepAnimationLeft.LoadFrames(sleepLeftFrames);
-                Console.WriteLine("Loaded SleepLeft frames, count: " + sleepAnimationLeft.GetFrameCount());
-            }
-            else
-            {
-                Console.WriteLine("SleepLeft frames folder not found: " + sleepLeftFrames);
+                Console.WriteLine("Loaded SleepLeft frames");
             }
 
             if (Directory.Exists(sleepRightFrames))
             {
                 sleepAnimationRight.LoadFrames(sleepRightFrames);
-                Console.WriteLine("Loaded SleepRight frames, count: " + sleepAnimationRight.GetFrameCount());
-            }
-            else
-            {
-                Console.WriteLine("SleepRight frames folder not found: " + sleepRightFrames);
+                Console.WriteLine("Loaded SleepRight frames");
             }
         }
+
+        private void LoadEatFrames()
+        {
+            var eatLeftFrames = Path.Combine("Assets", "Chicken", "Chicken_Eat", "EatLeft");
+            var eatRightFrames = Path.Combine("Assets", "Chicken", "Chicken_Eat", "EatRight");
+
+            if (Directory.Exists(eatLeftFrames))
+            {
+                eatAnimationLeft.LoadFrames(eatLeftFrames);
+                Console.WriteLine("Loaded EatLeft frames");
+            }
+
+            if (Directory.Exists(eatRightFrames))
+            {
+                eatAnimationRight.LoadFrames(eatRightFrames);
+                Console.WriteLine("Loaded EatRight frames");
+            }
+        }
+
+        private void LoadResetFrames()
+        {
+            var resetLeftFrames = Path.Combine("Assets", "Chicken", "Chicken_Reset", "ResetLeft");
+            var resetRightFrames = Path.Combine("Assets", "Chicken", "Chicken_Reset", "ResetRight");
+
+            if (Directory.Exists(resetLeftFrames))
+            {
+                resetAnimationLeft.LoadFrames(resetLeftFrames);
+                Console.WriteLine("Loaded ResetLeft frames");
+            }
+
+            if (Directory.Exists(resetRightFrames))
+            {
+                resetAnimationRight.LoadFrames(resetRightFrames);
+                Console.WriteLine("Loaded ResetRight frames");
+            }
+        }
+
 
         private void ScheduleNextSleep()
         {
@@ -141,9 +186,14 @@ namespace Project_Game.Entities
         {
             if (currentState == "Sleep")
             {
+                this.Width = 16;
+                this.Height = 40;
+
                 if (Environment.TickCount >= sleepEndTime)
                 {
                     Console.WriteLine($"{Name} woke up from sleep!");
+                    this.Width = originalWidth;
+                    this.Height = originalHeight;
                     SwitchToIdle(currentDirection);
                     ScheduleNextSleep();
                 }
@@ -156,19 +206,71 @@ namespace Project_Game.Entities
                 }
                 return;
             }
+            else if (currentState == "Eat")
+            {
+                this.Width = originalWidth;
+                this.Height = originalHeight;
+
+                if (currentDirection == "Left")
+                    eatAnimationLeft.UpdateAnimation(loop: false);
+                else
+                    eatAnimationRight.UpdateAnimation(loop: false);
+
+                if ((currentDirection == "Left" && eatAnimationLeft.IsComplete()) ||
+                    (currentDirection == "Right" && eatAnimationRight.IsComplete()))
+                {
+                    Console.WriteLine($"{Name} finished eating.");
+                    SwitchToIdle(currentDirection);
+                }
+                return;
+            }
+            else if (currentState == "Reset")
+            {
+                // Reset state: chạy animation ResetLeft/ResetRight một lần
+                this.Width = originalWidth;
+                this.Height = originalHeight;
+
+                if (currentDirection == "Left")
+                {
+                    resetAnimationLeft.UpdateAnimation(loop: false);
+                    if (resetAnimationLeft.IsComplete())
+                    {
+                        OnResetComplete();
+                    }
+                }
+                else
+                {
+                    resetAnimationRight.UpdateAnimation(loop: false);
+                    if (resetAnimationRight.IsComplete())
+                    {
+                        OnResetComplete();
+                    }
+                }
+                return;
+            }
+            else
+            {
+                this.Width = originalWidth;
+                this.Height = originalHeight;
+            }
 
             if (currentState == "Idle")
             {
-                // Idle logic
                 if (Environment.TickCount >= idleTime)
                 {
-                    // Thay vì vào Move thẳng, vào PreIdle
-                    // Kiểm tra xem đã đến lúc Sleep chưa
                     goingToSleep = false;
+                    goingToEat = false;
+
                     if (Environment.TickCount >= nextSleepTime)
                     {
-                        goingToSleep = true; // Sau PreIdle sẽ sleep
+                        goingToSleep = true;
                     }
+                    else
+                    {
+                        if (rand.Next(2) == 0)
+                            goingToEat = true;
+                    }
+
                     SetState("PreIdle");
                 }
                 else
@@ -181,43 +283,33 @@ namespace Project_Game.Entities
             }
             else if (currentState == "PreIdle")
             {
-                // PreIdle giống Idle ngắn
                 if (currentDirection == "Right")
                     idleAnimationRight.UpdateAnimation(loop: true);
                 else
                     idleAnimationLeft.UpdateAnimation(loop: true);
 
-                if (Environment.TickCount >= idleTime) // idleTime bây giờ đại diện cho thời gian PreIdle
+                if (Environment.TickCount >= idleTime)
                 {
-                    // Kết thúc PreIdle
+                    // Kết thúc PreIdle, xác định final action
+                    // Trước khi vào final action (Sleep/Eat/Move), vào Reset
                     if (goingToSleep)
                     {
-                        // Vào Sleep
-                        Console.WriteLine($"{Name} is going to sleep now!");
-                        currentState = "Sleep";
-                        sleepAnimationLeft.ResetAnimation();
-                        sleepAnimationRight.ResetAnimation();
-                        sleepEndTime = Environment.TickCount + sleepDuration;
+                        nextFinalState = "Sleep";
+                    }
+                    else if (goingToEat)
+                    {
+                        nextFinalState = "Eat";
                     }
                     else
                     {
-                        // Chọn MoveRight hoặc MoveLeft tùy vào currentDirection
                         if (currentDirection == "Right")
-                        {
-                            currentState = "MoveRight";
-                            movementAnimationRight.ResetAnimation();
-                            movedDistance = 0;
-                            Console.WriteLine($"{Name} starts moving right after PreIdle.");
-                        }
+                            nextFinalState = "MoveRight";
                         else
-                        {
-                            currentState = "MoveLeft";
-                            movementAnimationLeft.ResetAnimation();
-                            movedDistance = 0;
-                            Console.WriteLine($"{Name} starts moving left after PreIdle.");
-                        }
-                        isIdle = false;
+                            nextFinalState = "MoveLeft";
                     }
+
+                    // Chuyển sang Reset state
+                    SetState("Reset");
                 }
             }
             else if (currentState == "MoveRight" && !isIdle)
@@ -267,6 +359,42 @@ namespace Project_Game.Entities
             if (X + Width > 800) X = 800 - Width;
         }
 
+        private void OnResetComplete()
+        {
+            // Reset animation xong, chuyển sang nextFinalState
+            Console.WriteLine($"{Name} finished reset, going to {nextFinalState}.");
+
+            if (nextFinalState == "Sleep")
+            {
+                currentState = "Sleep";
+                sleepAnimationLeft.ResetAnimation();
+                sleepAnimationRight.ResetAnimation();
+                sleepEndTime = Environment.TickCount + sleepDuration;
+            }
+            else if (nextFinalState == "Eat")
+            {
+                currentState = "Eat";
+                if (currentDirection == "Left")
+                    eatAnimationLeft.ResetAnimation();
+                else
+                    eatAnimationRight.ResetAnimation();
+            }
+            else if (nextFinalState == "MoveRight")
+            {
+                currentState = "MoveRight";
+                movementAnimationRight.ResetAnimation();
+                movedDistance = 0;
+            }
+            else if (nextFinalState == "MoveLeft")
+            {
+                currentState = "MoveLeft";
+                movementAnimationLeft.ResetAnimation();
+                movedDistance = 0;
+            }
+
+            nextFinalState = null; // reset final state
+        }
+
         private void SetState(string state)
         {
             currentState = state;
@@ -274,9 +402,17 @@ namespace Project_Game.Entities
             {
                 isIdle = false;
                 isPreIdle = true;
-                // PreIdle ngắn 500ms
                 int idleTimeShort = preIdleDuration;
                 idleTime = Environment.TickCount + idleTimeShort;
+            }
+            else if (state == "Reset")
+            {
+                // Reset animation
+                // Chạy animation ResetLeft/ResetRight từ đầu
+                if (currentDirection == "Left")
+                    resetAnimationLeft.ResetAnimation();
+                else
+                    resetAnimationRight.ResetAnimation();
             }
         }
 
@@ -311,7 +447,6 @@ namespace Project_Game.Entities
             }
             else if (currentState == "PreIdle")
             {
-                // PreIdle dùng chung animation Idle
                 if (currentDirection == "Left")
                     return idleAnimationLeft.GetCurrentFrame();
                 else
@@ -320,13 +455,9 @@ namespace Project_Game.Entities
             else if (currentState == "Idle")
             {
                 if (currentDirection == "Left")
-                {
                     return idleAnimationLeft.GetCurrentFrame();
-                }
                 else
-                {
                     return idleAnimationRight.GetCurrentFrame();
-                }
             }
             else if (currentState == "MoveLeft")
             {
@@ -335,6 +466,20 @@ namespace Project_Game.Entities
             else if (currentState == "MoveRight")
             {
                 return movementAnimationRight.GetCurrentFrame();
+            }
+            else if (currentState == "Eat")
+            {
+                if (currentDirection == "Left")
+                    return eatAnimationLeft.GetCurrentFrame();
+                else
+                    return eatAnimationRight.GetCurrentFrame();
+            }
+            else if (currentState == "Reset")
+            {
+                if (currentDirection == "Left")
+                    return resetAnimationLeft.GetCurrentFrame();
+                else
+                    return resetAnimationRight.GetCurrentFrame();
             }
 
             return idleAnimationRight.GetCurrentFrame();
