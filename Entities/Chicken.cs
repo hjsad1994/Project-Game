@@ -50,7 +50,7 @@ namespace Project_Game.Entities
             idleAnimationLeft = new AnimationManager(frameRate: 25);
             idleAnimationRight = new AnimationManager(frameRate: 25);
             sleepAnimationLeft = new AnimationManager(frameRate: 30);
-            sleepAnimationRight = new AnimationManager(frameRate: 30);
+            sleepAnimationRight = new AnimationManager(frameRate: 30); //
 
             LoadMovementFrames();
             LoadIdleFrames();
