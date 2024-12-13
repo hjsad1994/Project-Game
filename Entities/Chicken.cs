@@ -35,17 +35,22 @@ namespace Project_Game.Entities
         // Thời điểm vào Sleep tiếp theo (5-10s)
         private int nextSleepTime = 0;
 
+        // PreIdle tương tự Idle nhưng rất ngắn
+        private bool isPreIdle = false;
+        private int preIdleDuration = 500; // 0.5s
+        private bool goingToSleep = false; // Chỉ thị xem sau PreIdle có Sleep không
+
         public Chicken(string name, int startX, int startY, int minX, int maxX)
-            : base(startX, startY, 20, 20, name)
+            : base(startX, startY, 16, 25, name)
         {
             this.minX = minX;
             this.maxX = maxX;
-            movementAnimationLeft = new AnimationManager(frameRate: 20);
-            movementAnimationRight = new AnimationManager(frameRate: 20);
-            idleAnimationLeft = new AnimationManager(frameRate: 20);
-            idleAnimationRight = new AnimationManager(frameRate: 20);
-            sleepAnimationLeft = new AnimationManager(frameRate: 15);
-            sleepAnimationRight = new AnimationManager(frameRate: 15);
+            movementAnimationLeft = new AnimationManager(frameRate: 25);
+            movementAnimationRight = new AnimationManager(frameRate: 25);
+            idleAnimationLeft = new AnimationManager(frameRate: 25);
+            idleAnimationRight = new AnimationManager(frameRate: 25);
+            sleepAnimationLeft = new AnimationManager(frameRate: 30);
+            sleepAnimationRight = new AnimationManager(frameRate: 30);
 
             LoadMovementFrames();
             LoadIdleFrames();
@@ -57,11 +62,9 @@ namespace Project_Game.Entities
             else
                 currentDirection = "Left";
 
-            // Random thời gian idle ban đầu
             int initialIdleDuration = rand.Next(1000, 3000);
             idleTime = Environment.TickCount + initialIdleDuration;
 
-            // Lên lịch Sleep lần đầu
             ScheduleNextSleep();
         }
 
@@ -129,7 +132,6 @@ namespace Project_Game.Entities
 
         private void ScheduleNextSleep()
         {
-            // 5-10s random
             int sleepWait = rand.Next(5000, 10001);
             nextSleepTime = Environment.TickCount + sleepWait;
             Console.WriteLine($"{Name} will sleep at {nextSleepTime - Environment.TickCount}ms from now.");
@@ -137,59 +139,37 @@ namespace Project_Game.Entities
 
         public void Update(Player player)
         {
-            // Kiểm tra trạng thái Sleep
             if (currentState == "Sleep")
             {
-                // Đang ngủ
                 if (Environment.TickCount >= sleepEndTime)
                 {
-                    // Hết thời gian ngủ
                     Console.WriteLine($"{Name} woke up from sleep!");
                     SwitchToIdle(currentDirection);
                     ScheduleNextSleep();
                 }
                 else
                 {
-                    // Đang ngủ, update sleep animation
                     if (currentDirection == "Left")
                         sleepAnimationLeft.UpdateAnimation(loop: true);
                     else
                         sleepAnimationRight.UpdateAnimation(loop: true);
                 }
-                return; // return để không chạy các logic Idle/Move
-            }
-
-            // Kiểm tra xem đã đến lúc Sleep chưa (chỉ sleep khi Idle)
-            if (currentState == "Idle" && Environment.TickCount >= nextSleepTime)
-            {
-                Console.WriteLine($"{Name} is going to sleep now!");
-                currentState = "Sleep";
-                // Reset animation sleep
-                sleepAnimationLeft.ResetAnimation();
-                sleepAnimationRight.ResetAnimation();
-                sleepEndTime = Environment.TickCount + sleepDuration;
                 return;
             }
 
             if (currentState == "Idle")
             {
+                // Idle logic
                 if (Environment.TickCount >= idleTime)
                 {
-                    if (currentDirection == "Right")
+                    // Thay vì vào Move thẳng, vào PreIdle
+                    // Kiểm tra xem đã đến lúc Sleep chưa
+                    goingToSleep = false;
+                    if (Environment.TickCount >= nextSleepTime)
                     {
-                        currentState = "MoveRight";
-                        movementAnimationRight.ResetAnimation();
-                        movedDistance = 0;
-                        Console.WriteLine($"{Name} starts moving right.");
+                        goingToSleep = true; // Sau PreIdle sẽ sleep
                     }
-                    else
-                    {
-                        currentState = "MoveLeft";
-                        movementAnimationLeft.ResetAnimation();
-                        movedDistance = 0;
-                        Console.WriteLine($"{Name} starts moving left.");
-                    }
-                    isIdle = false;
+                    SetState("PreIdle");
                 }
                 else
                 {
@@ -197,6 +177,47 @@ namespace Project_Game.Entities
                         idleAnimationRight.UpdateAnimation();
                     else
                         idleAnimationLeft.UpdateAnimation();
+                }
+            }
+            else if (currentState == "PreIdle")
+            {
+                // PreIdle giống Idle ngắn
+                if (currentDirection == "Right")
+                    idleAnimationRight.UpdateAnimation(loop: true);
+                else
+                    idleAnimationLeft.UpdateAnimation(loop: true);
+
+                if (Environment.TickCount >= idleTime) // idleTime bây giờ đại diện cho thời gian PreIdle
+                {
+                    // Kết thúc PreIdle
+                    if (goingToSleep)
+                    {
+                        // Vào Sleep
+                        Console.WriteLine($"{Name} is going to sleep now!");
+                        currentState = "Sleep";
+                        sleepAnimationLeft.ResetAnimation();
+                        sleepAnimationRight.ResetAnimation();
+                        sleepEndTime = Environment.TickCount + sleepDuration;
+                    }
+                    else
+                    {
+                        // Chọn MoveRight hoặc MoveLeft tùy vào currentDirection
+                        if (currentDirection == "Right")
+                        {
+                            currentState = "MoveRight";
+                            movementAnimationRight.ResetAnimation();
+                            movedDistance = 0;
+                            Console.WriteLine($"{Name} starts moving right after PreIdle.");
+                        }
+                        else
+                        {
+                            currentState = "MoveLeft";
+                            movementAnimationLeft.ResetAnimation();
+                            movedDistance = 0;
+                            Console.WriteLine($"{Name} starts moving left after PreIdle.");
+                        }
+                        isIdle = false;
+                    }
                 }
             }
             else if (currentState == "MoveRight" && !isIdle)
@@ -246,6 +267,19 @@ namespace Project_Game.Entities
             if (X + Width > 800) X = 800 - Width;
         }
 
+        private void SetState(string state)
+        {
+            currentState = state;
+            if (state == "PreIdle")
+            {
+                isIdle = false;
+                isPreIdle = true;
+                // PreIdle ngắn 500ms
+                int idleTimeShort = preIdleDuration;
+                idleTime = Environment.TickCount + idleTimeShort;
+            }
+        }
+
         private bool WillCollideWithPlayer(int newX, int newY, Player player)
         {
             Rectangle chickenRect = new Rectangle(newX, newY, Width, Height);
@@ -258,6 +292,7 @@ namespace Project_Game.Entities
         {
             currentState = "Idle";
             isIdle = true;
+            isPreIdle = false;
             int nextIdleDuration = rand.Next(1000, 3000);
             idleTime = Environment.TickCount + nextIdleDuration;
             movedDistance = 0;
@@ -274,8 +309,15 @@ namespace Project_Game.Entities
                 else
                     return sleepAnimationRight.GetCurrentFrame();
             }
-
-            if (currentState == "Idle")
+            else if (currentState == "PreIdle")
+            {
+                // PreIdle dùng chung animation Idle
+                if (currentDirection == "Left")
+                    return idleAnimationLeft.GetCurrentFrame();
+                else
+                    return idleAnimationRight.GetCurrentFrame();
+            }
+            else if (currentState == "Idle")
             {
                 if (currentDirection == "Left")
                 {
