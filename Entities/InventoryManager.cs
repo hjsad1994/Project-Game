@@ -11,7 +11,6 @@ namespace Project_Game.Entities
         public Item[,] inventoryGrid = new Item[5, 5];
         public Item[] bar = new Item[5];
 
-        // Biến tạm cho việc kéo thả
         public Item draggingItem = null;
         public bool isDragging = false;
         public int dragSourceRow = -1, dragSourceCol = -1;
@@ -42,7 +41,6 @@ namespace Project_Game.Entities
                 }
             }
 
-            // Đặt thử một số item vào inventory và bar
             if (oreItems.Count > 0) inventoryGrid[0, 0] = oreItems[0];
             if (oreItems.Count > 1) inventoryGrid[0, 1] = oreItems[1];
             if (oreItems.Count > 2) bar[0] = oreItems[2];
@@ -51,7 +49,6 @@ namespace Project_Game.Entities
 
         public void PutBackItem(Item item)
         {
-            // Trả item về chỗ nguồn
             if (dragSourceRow != -1 && dragSourceCol != -1)
             {
                 inventoryGrid[dragSourceRow, dragSourceCol] = item;

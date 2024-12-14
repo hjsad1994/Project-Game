@@ -10,41 +10,27 @@ namespace Project_Game.Entities
         private InventoryManager invManager;
         private Form form;
 
-        // Vị trí và kích thước ô
         private int slotSize = 32;
         private int invStartX = 100;
         private int invStartY = 100;
         private int barStartX = 100;
         private int barStartY = 300;
 
-        // UI images
         private Image inventoryUI;
         private Image itemBarUI;
 
-        // Kiểm soát hiển thị Inventory
         public bool showInventory = false;
-
-        // Chỉ số ô đang chọn trên bar (0 đến 4)
         public int selectedBarIndex = 0;
 
-        // Vị trí chuột khi drag item
-        public int dragX, dragY;
+        public bool IsDraggingItem { get { return invManager.isDragging; } }
 
         public UIManager(Form form, InventoryManager invManager)
         {
             this.form = form;
             this.invManager = invManager;
-
             LoadUIImages();
         }
-        public InventoryManager InvManager
-        {
-            get { return invManager; }
-        }
-        public bool IsDraggingItem
-        {
-            get { return invManager.isDragging; }
-        }
+
         private void LoadUIImages()
         {
             string uiPath = Path.Combine(Application.StartupPath, "Assets", "PlayerUI");
@@ -52,7 +38,6 @@ namespace Project_Game.Entities
             string invUIPath = Path.Combine(uiPath, "InventoryUI.png");
             if (File.Exists(invUIPath))
                 inventoryUI = Image.FromFile(invUIPath);
-            Console.WriteLine($"invUIPath: {invUIPath}");
 
             string barUIPath = Path.Combine(uiPath, "ItemBarUI.png");
             if (File.Exists(barUIPath))
@@ -75,14 +60,11 @@ namespace Project_Game.Entities
 
         public void Draw(Graphics g)
         {
-            // Vẽ ItemBarUI luôn
             if (itemBarUI != null)
             {
-                // Giả sử ItemBarUI kích thước phù hợp với 5 ô: 5*slotSize=160x32
                 g.DrawImage(itemBarUI, barStartX, barStartY, slotSize * 5, slotSize);
             }
 
-            // Vẽ item trên bar
             for (int i = 0; i < 5; i++)
             {
                 var rect = GetBarSlotRect(i);
@@ -90,20 +72,15 @@ namespace Project_Game.Entities
                 {
                     g.DrawImage(invManager.bar[i].Icon, rect);
                 }
-                // Highlight ô đang chọn
                 if (i == selectedBarIndex)
                 {
                     g.DrawRectangle(Pens.Yellow, rect);
                 }
             }
 
-            // Vẽ InventoryUI nếu showInventory = true
             if (showInventory && inventoryUI != null)
             {
-                // Giả sử InventoryUI đủ lớn cho 5x5 ô (160x160)
                 g.DrawImage(inventoryUI, invStartX, invStartY, slotSize * 5, slotSize * 5);
-
-                // Vẽ inventory items
                 for (int r = 0; r < 5; r++)
                 {
                     for (int c = 0; c < 5; c++)
@@ -117,16 +94,17 @@ namespace Project_Game.Entities
                 }
             }
 
-            // Vẽ item đang kéo (nếu có)
             if (invManager.isDragging && invManager.draggingItem != null)
             {
                 g.DrawImage(invManager.draggingItem.Icon, dragX - slotSize / 2, dragY - slotSize / 2, slotSize, slotSize);
             }
         }
 
+        public int dragX, dragY;
+
         public void OnMouseDown(MouseEventArgs e)
         {
-            // Nếu ấn chuột vào bar
+            // Kiểm tra bar
             for (int i = 0; i < 5; i++)
             {
                 var rect = GetBarSlotRect(i);
@@ -146,7 +124,7 @@ namespace Project_Game.Entities
                 }
             }
 
-            // Nếu inventory đang mở thì cho kéo thả từ inventory
+            // Kiểm tra Inventory nếu mở
             if (showInventory)
             {
                 for (int r = 0; r < 5; r++)
@@ -210,7 +188,7 @@ namespace Project_Game.Entities
                 }
             }
 
-            // Nếu inventory đang mở, thả vào inventory
+            // Thả vào inventory nếu mở
             if (!placed && showInventory)
             {
                 for (int r = 0; r < 5; r++)
@@ -240,7 +218,6 @@ namespace Project_Game.Entities
 
             if (!placed)
             {
-                // Không đặt được, trả item lại
                 invManager.PutBackItem(invManager.draggingItem);
             }
 
@@ -257,14 +234,11 @@ namespace Project_Game.Entities
         {
             if (e.KeyCode == Keys.I)
             {
-                // Toggle inventory
                 showInventory = !showInventory;
-                form.Invalidate();
                 Console.WriteLine("Toggled Inventory: " + showInventory);
-
+                form.Invalidate();
             }
 
-            // Chọn slot trên bar (1-5)
             if (e.KeyCode == Keys.D1) selectedBarIndex = 0;
             if (e.KeyCode == Keys.D2) selectedBarIndex = 1;
             if (e.KeyCode == Keys.D3) selectedBarIndex = 2;
@@ -272,6 +246,25 @@ namespace Project_Game.Entities
             if (e.KeyCode == Keys.D5) selectedBarIndex = 4;
 
             form.Invalidate();
+        }
+
+        // Hàm kiểm tra click có nằm trên UI (Inventory/Bar) không
+        public bool IsClickOnUI(int mouseX, int mouseY)
+        {
+            // Vùng Item Bar
+            Rectangle barRect = new Rectangle(barStartX, barStartY, slotSize * 5, slotSize);
+            if (barRect.Contains(mouseX, mouseY))
+                return true;
+
+            // Vùng Inventory (nếu đang mở)
+            if (showInventory)
+            {
+                Rectangle invRect = new Rectangle(invStartX, invStartY, slotSize * 5, slotSize * 5);
+                if (invRect.Contains(mouseX, mouseY))
+                    return true;
+            }
+
+            return false;
         }
     }
 }

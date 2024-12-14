@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -19,11 +18,9 @@ namespace Project_Game
         private bool gameOverState = false;
         private bool needsRedraw = false;
 
-        // Thêm InventoryManager và UIManager
         private InventoryManager inventoryManager;
         private UIManager uiManager;
 
-        // Player Dimensions
         private const int PlayerWidth = 50;
         private const int PlayerHeight = 50;
 
@@ -32,13 +29,14 @@ namespace Project_Game
             InitializeComponent();
             this.FormClosing += Form1_FormClosing;
 
-            // Khởi tạo obstacles từ vị trí Control Test1 (giả sử Test1 là một obstacle)
+            // Gán sự kiện MouseClick trở lại
+            this.MouseClick += FormMouseClick;
+
             var obstacles = new List<GameObject>
             {
                 new GameObject(Test1.Location.X, Test1.Location.Y, Test1.Width, Test1.Height, "Obstacle1"),
             };
 
-            // Enemies và Chickens ban đầu
             var initialEnemies = new List<TestEnemy>();
             var initialChickens = new List<Chicken>
             {
@@ -46,7 +44,7 @@ namespace Project_Game
                 new Chicken("Chicken2", 400, 200, 350, 450)
             };
 
-            player = new Player(obstacles, initialChickens);
+            player = new Player(obstacles, initialEnemies, initialChickens);
             player.OnHealthChanged += UpdateHealBar;
 
             objectManager = new GameObjectManager(player);
@@ -60,7 +58,6 @@ namespace Project_Game
             mapManager = new MapManager(player, objectManager);
             renderer = new Renderer();
 
-            // Load Map1
             objectManager.LoadMap1();
 
             this.DoubleBuffered = true;
@@ -68,15 +65,11 @@ namespace Project_Game
 
             //this.KeyDown += KeyIsDown;
             //this.KeyUp += KeyIsUp;
-
-            // Thay vì sử dụng FormMouseClick, ta sẽ sử dụng OnMouseDown, OnMouseMove, OnMouseUp override
-            // để kết hợp với UIManager.
             this.Paint += FormPaintEvent;
 
             movementTimer.Tick += TimerEvent;
             movementTimer.Start();
 
-            // Khởi tạo Inventory và UI
             inventoryManager = new InventoryManager();
             uiManager = new UIManager(this, inventoryManager);
         }
@@ -90,15 +83,12 @@ namespace Project_Game
         {
             if (!gameOverState)
             {
-                // Xử lý phím di chuyển player
                 if (e.KeyCode == Keys.Left && !player.IsBlockedLeft) player.GoLeft = true;
                 if (e.KeyCode == Keys.Right && !player.IsBlockedRight) player.GoRight = true;
                 if (e.KeyCode == Keys.Up && !player.IsBlockedUp) player.GoUp = true;
                 if (e.KeyCode == Keys.Down && !player.IsBlockedDown) player.GoDown = true;
 
-                // Xử lý phím cho UI (I, 1-5)
                 uiManager.OnKeyDown(e);
-
             }
         }
 
@@ -157,7 +147,6 @@ namespace Project_Game
                 gameOverState
             );
 
-            // Vẽ UI (inventory, bar) sau cùng
             uiManager.Draw(e.Graphics);
         }
 
@@ -165,17 +154,21 @@ namespace Project_Game
         {
             if (!gameOverState)
             {
-                gameLogic.TimerEvent(sender, e, healBar);
+                if (player.IsAttacking)
+                {
+                    player.UpdateAttack();
+                }
+                else
+                {
+                    player.Move();
+                }
 
-                // Loại bỏ kẻ địch đã chết
+                gameLogic.TimerEvent(sender, e, healBar);
                 objectManager.Enemies.RemoveAll(en => en.ShouldRemove);
 
                 needsRedraw = true;
-
-                // Update logic của tất cả object
                 objectManager.UpdateAll(player);
 
-                // Kiểm tra map
                 mapManager.UpdateMap();
             }
 
@@ -201,7 +194,6 @@ namespace Project_Game
             this.KeyPreview = true;
             gameLogic.ResetGameState();
 
-            // Reset về Map1
             mapManager.ResetMap();
             objectManager.LoadMap1();
 
@@ -211,6 +203,7 @@ namespace Project_Game
 
             Invalidate();
         }
+
         public void EndGame(int currentHealth, ProgressBar healBar)
         {
             Console.WriteLine($"EndGame called with currentHealth = {currentHealth}");
@@ -233,9 +226,26 @@ namespace Project_Game
             ResetGameAction();
             Invalidate();
         }
+
+        private void Test1_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+        }
+
+        // Giữ lại hàm FormMouseClick
         private void FormMouseClick(object sender, MouseEventArgs e)
         {
             if (gameOverState || player.IsAttacking) return;
+
+            // Kiểm tra xem click có phải trên UI không
+            if (uiManager.IsClickOnUI(e.X, e.Y))
+            {
+                // Click vào UI thì không tấn công
+                return;
+            }
 
             string direction = player.CurrentDirection;
             if (string.IsNullOrEmpty(direction))
@@ -243,25 +253,24 @@ namespace Project_Game
                 direction = "Down";
             }
 
-            int attackRange = (int)player.AttackRange; // Sử dụng AttackRange từ Player
-
+            int attackRange = 50;
             Rectangle attackArea = new Rectangle();
             switch (direction)
             {
                 case "Left":
-                    attackArea = new Rectangle(player.playerX - attackRange, player.playerY, attackRange, player.playerHeight);
+                    attackArea = new Rectangle(player.playerX - attackRange, player.playerY, attackRange, PlayerHeight);
                     break;
                 case "Right":
-                    attackArea = new Rectangle(player.playerX + player.playerWidth, player.playerY, attackRange, player.playerHeight);
+                    attackArea = new Rectangle(player.playerX + PlayerWidth, player.playerY, attackRange, PlayerHeight);
                     break;
                 case "Up":
-                    attackArea = new Rectangle(player.playerX, player.playerY - attackRange, player.playerWidth, attackRange);
+                    attackArea = new Rectangle(player.playerX, player.playerY - attackRange, PlayerWidth, attackRange);
                     break;
                 case "Down":
-                    attackArea = new Rectangle(player.playerX, player.playerY + player.playerHeight, player.playerWidth, attackRange);
+                    attackArea = new Rectangle(player.playerX, player.playerY + PlayerHeight, PlayerWidth, attackRange);
                     break;
                 default:
-                    attackArea = new Rectangle(player.playerX, player.playerY + player.playerHeight, player.playerWidth, attackRange);
+                    attackArea = new Rectangle(player.playerX, player.playerY + PlayerHeight, PlayerWidth, attackRange);
                     break;
             }
 
@@ -293,29 +302,17 @@ namespace Project_Game
             Invalidate();
         }
 
-        private void Test1_Click(object sender, EventArgs e)
-        {
-            // Nếu cần xử lý gì khi click vào Test1 thì thêm vào đây
-        }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            // Form Load event
-        }
-
-        // Ghi đè các sự kiện chuột để kết hợp với UIManager (kéo thả item)
         protected override void OnMouseDown(MouseEventArgs e)
         {
             base.OnMouseDown(e);
             if (!gameOverState)
             {
-                // Gọi UIManager trước để kiểm tra xem có click vào ô item nào không
                 uiManager.OnMouseDown(e);
 
-                // Nếu không drag item, nghĩa là click vào vùng khác, có thể là tấn công
-                if (!uiManager.IsDraggingItem && !player.IsAttacking && !uiManager.showInventory)
+                // Chỉ tấn công nếu không drag item, không attacking, không click vào UI
+                if (!uiManager.IsDraggingItem && !player.IsAttacking && !uiManager.IsClickOnUI(e.X, e.Y))
                 {
-                    // Thực hiện logic tấn công như cũ
                     PerformAttack(e);
                 }
             }
@@ -335,7 +332,6 @@ namespace Project_Game
 
         private void PerformAttack(MouseEventArgs e)
         {
-            // Logic tấn công dựa trên hướng player
             string direction = player.CurrentDirection;
             if (string.IsNullOrEmpty(direction))
             {

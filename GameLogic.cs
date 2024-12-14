@@ -97,7 +97,7 @@ namespace Project_Game
             }
             else
             {
-                player.Move(enemies); // Truyền danh sách enemies
+                player.Move(); // Truyền danh sách enemies
             }
 
             // Di chuyển và xử lý va chạm của kẻ địch

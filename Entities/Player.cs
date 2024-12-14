@@ -1,5 +1,4 @@
-﻿using Project_Game.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -18,14 +17,11 @@ namespace Project_Game.Entities
 
         public int playerX { get; set; } = 100;
         public int playerY { get; set; } = 100;
-        // Đặt kích thước mong muốn
         public int playerWidth { get; set; } = 22;
         public int playerHeight { get; set; } = 35;
 
         public int playerSpeed { get; set; } = 2;
         public int AttackRange { get; set; } = 50; // phạm vi tấn công mặc định 50
-
-        public float AttackRange { get; set; } = 26f; // Đặt mặc định giống với Enemy
 
         public int Health { get; private set; } = 100;
         public int MaxHealth { get; private set; } = 100;
@@ -39,6 +35,7 @@ namespace Project_Game.Entities
         private string currentDirection = "Down";
 
         private List<GameObject> obstacles;
+        private List<TestEnemy> enemies;     // Thêm biến để lưu enemies
         private List<Chicken> chickens;
 
         public bool BlockedLeft { get; private set; } = false;
@@ -52,9 +49,11 @@ namespace Project_Game.Entities
         public bool IsBlockedDown => BlockedDown;
         public string CurrentDirection => currentDirection;
 
-        public Player(List<GameObject> obstacles, List<Chicken> chickens)
+        // Constructor nhận 3 tham số
+        public Player(List<GameObject> obstacles, List<TestEnemy> enemies, List<Chicken> chickens)
         {
             this.obstacles = obstacles;
+            this.enemies = enemies;   // Gán enemies vào biến thành viên
             this.chickens = chickens;
 
             movementAnimation = new AnimationManager(frameRate: 10);
@@ -97,7 +96,8 @@ namespace Project_Game.Entities
             Health = MaxHealth;
         }
 
-        public void Move(List<Enemy> enemies)
+        // Move không cần tham số, dùng enemies từ biến thành viên
+        public void Move()
         {
             if (IsAttacking) return;
 
@@ -108,7 +108,6 @@ namespace Project_Game.Entities
             PreviousX = playerX;
             PreviousY = playerY;
 
-            // Chỉ 4 hướng: Up, Down, Left, Right
             if (GoLeft)
             {
                 if (currentDirection != "Left")
@@ -150,7 +149,7 @@ namespace Project_Game.Entities
                 isMoving = true;
             }
 
-            // Giới hạn vùng di chuyển (ví dụ 800x630)
+            // Giới hạn vùng di chuyển
             if (newX < 0) newX = 0;
             if (newX + playerWidth > 800) newX = 800 - playerWidth;
             if (newY < 0) newY = 0;
@@ -177,7 +176,7 @@ namespace Project_Game.Entities
                 }
             }
 
-            // Nếu chưa va chạm với obstacles, kiểm tra va chạm với enemies
+            // Kiểm tra va chạm enemies nếu chưa va chạm obstacle
             if (!collisionDetected)
             {
                 foreach (var enemy in enemies)
