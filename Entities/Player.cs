@@ -24,6 +24,8 @@ namespace Project_Game.Entities
 
         public int playerSpeed { get; set; } = 4;
 
+        public float AttackRange { get; set; } = 26f; // Đặt mặc định giống với Enemy
+
         public int Health { get; private set; } = 100;
         public int MaxHealth { get; private set; } = 100;
         public event Action<int> OnHealthChanged;
@@ -56,7 +58,7 @@ namespace Project_Game.Entities
 
             movementAnimation = new AnimationManager(frameRate: 10);
             idleAnimation = new AnimationManager(frameRate: 10);
-            attackAnimation = new AnimationManager(frameRate: 10);
+            attackAnimation = new AnimationManager(frameRate: 8);
 
             // Load default animations
             movementAnimation.LoadFrames("Char_MoveMent/MoveDown");
