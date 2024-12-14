@@ -22,7 +22,7 @@ namespace Project_Game.Entities
         public int playerWidth { get; set; } = 22;
         public int playerHeight { get; set; } = 35;
 
-        public int playerSpeed { get; set; } = 2;
+        public int playerSpeed { get; set; } = 4;
 
         public int Health { get; private set; } = 100;
         public int MaxHealth { get; private set; } = 100;
@@ -36,7 +36,6 @@ namespace Project_Game.Entities
         private string currentDirection = "Down";
 
         private List<GameObject> obstacles;
-        private List<TestEnemy> enemies;
         private List<Chicken> chickens;
 
         public bool BlockedLeft { get; private set; } = false;
@@ -50,10 +49,9 @@ namespace Project_Game.Entities
         public bool IsBlockedDown => BlockedDown;
         public string CurrentDirection => currentDirection;
 
-        public Player(List<GameObject> obstacles, List<TestEnemy> enemies, List<Chicken> chickens)
+        public Player(List<GameObject> obstacles, List<Chicken> chickens)
         {
             this.obstacles = obstacles;
-            this.enemies = enemies;
             this.chickens = chickens;
 
             movementAnimation = new AnimationManager(frameRate: 10);
@@ -96,7 +94,7 @@ namespace Project_Game.Entities
             Health = MaxHealth;
         }
 
-        public void Move()
+        public void Move(List<Enemy> enemies)
         {
             if (IsAttacking) return;
 
@@ -173,6 +171,26 @@ namespace Project_Game.Entities
                     else if (GoDown) collisionDirection = "Down";
 
                     break;
+                }
+            }
+
+            // Nếu chưa va chạm với obstacles, kiểm tra va chạm với enemies
+            if (!collisionDetected)
+            {
+                foreach (var enemy in enemies)
+                {
+                    Rectangle enemyRect = new Rectangle(enemy.X, enemy.Y, enemy.Width, enemy.Height);
+                    if (newRect.IntersectsWith(enemyRect))
+                    {
+                        collisionDetected = true;
+
+                        if (GoLeft) collisionDirection = "Left";
+                        else if (GoRight) collisionDirection = "Right";
+                        else if (GoUp) collisionDirection = "Up";
+                        else if (GoDown) collisionDirection = "Down";
+
+                        break;
+                    }
                 }
             }
 
@@ -267,7 +285,7 @@ namespace Project_Game.Entities
                 {
                     foreach (var target in targets)
                     {
-                        target.TakeDamage(20);
+                        target.TakeDamage(50);
                     }
                 }
                 else
