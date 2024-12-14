@@ -1,5 +1,4 @@
-﻿// File: Form1.cs
-using Project_Game.Entities;
+﻿using Project_Game.Entities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -47,7 +46,7 @@ namespace Project_Game
                 new Chicken("Chicken2", 400, 200, 350, 450)
             };
 
-            player = new Player(obstacles, initialEnemies, initialChickens);
+            player = new Player(obstacles, initialChickens);
             player.OnHealthChanged += UpdateHealBar;
 
             objectManager = new GameObjectManager(player);
@@ -166,15 +165,6 @@ namespace Project_Game
         {
             if (!gameOverState)
             {
-                if (player.IsAttacking)
-                {
-                    player.UpdateAttack();
-                }
-                else
-                {
-                    player.Move();
-                }
-
                 gameLogic.TimerEvent(sender, e, healBar);
 
                 // Loại bỏ kẻ địch đã chết
