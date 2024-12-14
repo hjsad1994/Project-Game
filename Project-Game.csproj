@@ -54,11 +54,14 @@
     <Compile Include="Entities\GameObject.cs" />
     <Compile Include="Entities\GameObjectManager.cs" />
     <Compile Include="Entities\GameOver.cs" />
+    <Compile Include="Entities\InventoryManager.cs" />
+    <Compile Include="Entities\Item.cs" />
     <Compile Include="Entities\Kapybara.cs" />
     <Compile Include="Entities\MapManager.cs" />
     <Compile Include="Entities\Player.cs" />
     <Compile Include="Entities\Renderer.cs" />
     <Compile Include="Entities\TestEnemy.cs" />
+    <Compile Include="Entities\UIManager.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -23,6 +23,7 @@ namespace Project_Game.Entities
         public int playerHeight { get; set; } = 35;
 
         public int playerSpeed { get; set; } = 2;
+        public int AttackRange { get; set; } = 50; // phạm vi tấn công mặc định 50
 
         public int Health { get; private set; } = 100;
         public int MaxHealth { get; private set; } = 100;

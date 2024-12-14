@@ -20,7 +20,11 @@ namespace Project_Game
         private bool gameOverState = false;
         private bool needsRedraw = false;
 
-        // Player Dimensions (Có thể vẫn giữ nguyên)
+        // Thêm InventoryManager và UIManager
+        private InventoryManager inventoryManager;
+        private UIManager uiManager;
+
+        // Player Dimensions
         private const int PlayerWidth = 50;
         private const int PlayerHeight = 50;
 
@@ -29,14 +33,13 @@ namespace Project_Game
             InitializeComponent();
             this.FormClosing += Form1_FormClosing;
 
-            // Khởi tạo Player
-            // Giả sử bạn có obstacles, enemies, chickens ban đầu, nếu không bạn có thể truyền list trống
+            // Khởi tạo obstacles từ vị trí Control Test1 (giả sử Test1 là một obstacle)
             var obstacles = new List<GameObject>
             {
                 new GameObject(Test1.Location.X, Test1.Location.Y, Test1.Width, Test1.Height, "Obstacle1"),
             };
 
-            // Enemies và Chickens ban đầu, có thể để trống
+            // Enemies và Chickens ban đầu
             var initialEnemies = new List<TestEnemy>();
             var initialChickens = new List<Chicken>
             {
@@ -48,34 +51,35 @@ namespace Project_Game
             player.OnHealthChanged += UpdateHealBar;
 
             objectManager = new GameObjectManager(player);
-            // Thêm obstacles vào objectManager nếu muốn, hoặc giữ chúng ở Player
             objectManager.Obstacles.AddRange(obstacles);
             objectManager.Chickens.AddRange(initialChickens);
 
-            // Khởi tạo GameLogic
             var allEnemies = objectManager.Enemies.Cast<Enemy>().ToList();
             gameLogic = new GameLogic(player, allEnemies, objectManager.Obstacles);
             objectManager.SetGameLogic(gameLogic);
 
-            // Khởi tạo MapManager
             mapManager = new MapManager(player, objectManager);
-
-            // Khởi tạo Renderer
             renderer = new Renderer();
 
-            // Mặc định load Map1
+            // Load Map1
             objectManager.LoadMap1();
 
             this.DoubleBuffered = true;
             this.KeyPreview = true;
 
-            this.KeyDown += KeyIsDown;
-            this.KeyUp += KeyIsUp;
+            //this.KeyDown += KeyIsDown;
+            //this.KeyUp += KeyIsUp;
+
+            // Thay vì sử dụng FormMouseClick, ta sẽ sử dụng OnMouseDown, OnMouseMove, OnMouseUp override
+            // để kết hợp với UIManager.
             this.Paint += FormPaintEvent;
-            this.MouseClick += FormMouseClick;
 
             movementTimer.Tick += TimerEvent;
             movementTimer.Start();
+
+            // Khởi tạo Inventory và UI
+            inventoryManager = new InventoryManager();
+            uiManager = new UIManager(this, inventoryManager);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -87,10 +91,15 @@ namespace Project_Game
         {
             if (!gameOverState)
             {
+                // Xử lý phím di chuyển player
                 if (e.KeyCode == Keys.Left && !player.IsBlockedLeft) player.GoLeft = true;
                 if (e.KeyCode == Keys.Right && !player.IsBlockedRight) player.GoRight = true;
                 if (e.KeyCode == Keys.Up && !player.IsBlockedUp) player.GoUp = true;
                 if (e.KeyCode == Keys.Down && !player.IsBlockedDown) player.GoDown = true;
+
+                // Xử lý phím cho UI (I, 1-5)
+                uiManager.OnKeyDown(e);
+
             }
         }
 
@@ -145,11 +154,13 @@ namespace Project_Game
                 objectManager.Enemies,
                 objectManager.Chickens,
                 objectManager.AnimatedObjects,
-                objectManager.Kapybaras, // Truyền danh sách Kapybaras vào
+                objectManager.Kapybaras,
                 gameOverState
             );
-        }
 
+            // Vẽ UI (inventory, bar) sau cùng
+            uiManager.Draw(e.Graphics);
+        }
 
         private void TimerEvent(object sender, EventArgs e)
         {
@@ -210,11 +221,131 @@ namespace Project_Game
 
             Invalidate();
         }
+        public void EndGame(int currentHealth, ProgressBar healBar)
+        {
+            Console.WriteLine($"EndGame called with currentHealth = {currentHealth}");
+            gameOverState = true;
 
+            MessageBox.Show("Game Over! You have been defeated!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            if (gameOver == null)
+                gameOver = new GameOver(gameOverTimer, ResetGameAction, Invalidate);
+            gameOver.ResetGame();
+
+            healBar.Value = player.MaxHealth;
+            ResetGameAction();
+            mapManager.SwitchMap(1, new Point(393, 410));
+        }
+
+        private void GameOverTimer_Tick(object sender, EventArgs e)
+        {
+            gameOverTimer.Stop();
+            ResetGameAction();
+            Invalidate();
+        }
         private void FormMouseClick(object sender, MouseEventArgs e)
         {
             if (gameOverState || player.IsAttacking) return;
 
+            string direction = player.CurrentDirection;
+            if (string.IsNullOrEmpty(direction))
+            {
+                direction = "Down";
+            }
+
+            int attackRange = (int)player.AttackRange; // Sử dụng AttackRange từ Player
+
+            Rectangle attackArea = new Rectangle();
+            switch (direction)
+            {
+                case "Left":
+                    attackArea = new Rectangle(player.playerX - attackRange, player.playerY, attackRange, player.playerHeight);
+                    break;
+                case "Right":
+                    attackArea = new Rectangle(player.playerX + player.playerWidth, player.playerY, attackRange, player.playerHeight);
+                    break;
+                case "Up":
+                    attackArea = new Rectangle(player.playerX, player.playerY - attackRange, player.playerWidth, attackRange);
+                    break;
+                case "Down":
+                    attackArea = new Rectangle(player.playerX, player.playerY + player.playerHeight, player.playerWidth, attackRange);
+                    break;
+                default:
+                    attackArea = new Rectangle(player.playerX, player.playerY + player.playerHeight, player.playerWidth, attackRange);
+                    break;
+            }
+
+            List<TestEnemy> enemiesToAttack = new List<TestEnemy>();
+            foreach (var en in objectManager.Enemies)
+            {
+                if (!en.IsDead())
+                {
+                    Rectangle enemyRect = new Rectangle(en.X, en.Y, en.Width, en.Height);
+                    if (attackArea.IntersectsWith(enemyRect))
+                    {
+                        enemiesToAttack.Add(en);
+                    }
+                }
+            }
+
+            if (enemiesToAttack.Count > 0)
+            {
+                List<Enemy> enemiesToAttackList = enemiesToAttack.Cast<Enemy>().ToList();
+                player.PerformAttack(enemiesToAttackList);
+                Console.WriteLine($"Player attacked {enemiesToAttackList.Count} enemies.");
+            }
+            else
+            {
+                player.PerformAttack(new List<Enemy>());
+                Console.WriteLine("Player performed attack, but no enemies were hit.");
+            }
+
+            Invalidate();
+        }
+
+        private void Test1_Click(object sender, EventArgs e)
+        {
+            // Nếu cần xử lý gì khi click vào Test1 thì thêm vào đây
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // Form Load event
+        }
+
+        // Ghi đè các sự kiện chuột để kết hợp với UIManager (kéo thả item)
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+            if (!gameOverState)
+            {
+                // Gọi UIManager trước để kiểm tra xem có click vào ô item nào không
+                uiManager.OnMouseDown(e);
+
+                // Nếu không drag item, nghĩa là click vào vùng khác, có thể là tấn công
+                if (!uiManager.IsDraggingItem && !player.IsAttacking && !uiManager.showInventory)
+                {
+                    // Thực hiện logic tấn công như cũ
+                    PerformAttack(e);
+                }
+            }
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            uiManager.OnMouseMove(e);
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+            uiManager.OnMouseUp(e);
+        }
+
+        private void PerformAttack(MouseEventArgs e)
+        {
+            // Logic tấn công dựa trên hướng player
             string direction = player.CurrentDirection;
             if (string.IsNullOrEmpty(direction))
             {
@@ -269,38 +400,6 @@ namespace Project_Game
             }
 
             Invalidate();
-        }
-
-        public void EndGame(int currentHealth, ProgressBar healBar)
-        {
-            Console.WriteLine($"EndGame called with currentHealth = {currentHealth}");
-            gameOverState = true;
-
-            MessageBox.Show("Game Over! You have been defeated!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            if (gameOver == null)
-                gameOver = new GameOver(gameOverTimer, ResetGameAction, Invalidate);
-            gameOver.ResetGame();
-
-            healBar.Value = player.MaxHealth;
-            ResetGameAction();
-            mapManager.SwitchMap(1, new Point(393, 410));
-        }
-
-        private void GameOverTimer_Tick(object sender, EventArgs e)
-        {
-            gameOverTimer.Stop();
-            ResetGameAction();
-            Invalidate();
-        }
-
-        private void Test1_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }

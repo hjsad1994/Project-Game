@@ -59,7 +59,7 @@ namespace Project_Game.Entities
             if (isTransitioning) return;
 
             Rectangle playerRect = new Rectangle(player.playerX, player.playerY, player.playerWidth, player.playerHeight);
-            Console.WriteLine($"Player Rect: {playerRect}");
+        //    Console.WriteLine($"Player Rect: {playerRect}");
 
             if (currentMap == 1 && map1ToMap2Zone.IntersectsWith(playerRect))
             {
