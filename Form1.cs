@@ -23,7 +23,7 @@ namespace Project_Game
 
         private const int PlayerWidth = 50;
         private const int PlayerHeight = 50;
-
+       
         public Form1()
         {
             InitializeComponent();
@@ -65,10 +65,6 @@ namespace Project_Game
 
             //this.KeyDown += KeyIsDown;
             //this.KeyUp += KeyIsUp;
-            this.Paint += FormPaintEvent;
-
-            movementTimer.Tick += TimerEvent;
-            movementTimer.Start();
 
             inventoryManager = new InventoryManager();
             uiManager = new UIManager(this, inventoryManager);
@@ -87,6 +83,37 @@ namespace Project_Game
                 if (e.KeyCode == Keys.Right && !player.IsBlockedRight) player.GoRight = true;
                 if (e.KeyCode == Keys.Up && !player.IsBlockedUp) player.GoUp = true;
                 if (e.KeyCode == Keys.Down && !player.IsBlockedDown) player.GoDown = true;
+
+                if (e.KeyCode == Keys.D1)
+                {
+                    uiManager.SelectedBarIndex = 0;
+                    var item = inventoryManager.bar[0];
+                    if (item != null) player.SetCurrentWeapon(item.Name);
+                }
+                if (e.KeyCode == Keys.D2)
+                {
+                    uiManager.SelectedBarIndex = 1; // Axe is now in slot 1
+                    var item = inventoryManager.bar[1];
+                    if (item != null) player.SetCurrentWeapon(item.Name);
+                }
+                if (e.KeyCode == Keys.D3)
+                {
+                    uiManager.SelectedBarIndex = 2;
+                    var item = inventoryManager.bar[2];
+                    if (item != null) player.SetCurrentWeapon(item.Name);
+                }
+                if (e.KeyCode == Keys.D4)
+                {
+                    uiManager.SelectedBarIndex = 3;
+                    var item = inventoryManager.bar[3];
+                    if (item != null) player.SetCurrentWeapon(item.Name);
+                }
+                if (e.KeyCode == Keys.D5)
+                {
+                    uiManager.SelectedBarIndex = 4;
+                    var item = inventoryManager.bar[4];
+                    if (item != null) player.SetCurrentWeapon(item.Name);
+                }
 
                 uiManager.OnKeyDown(e);
             }

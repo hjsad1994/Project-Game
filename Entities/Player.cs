@@ -58,6 +58,7 @@ namespace Project_Game.Entities
         public bool IsBlockedUp => BlockedUp;
         public bool IsBlockedDown => BlockedDown;
         public string CurrentDirection => currentDirection;
+        private string currentWeapon = "Sword"; // Default weapon
 
         // Đồng bộ hóa X và Y với playerX và playerY
         public override int X
@@ -123,7 +124,11 @@ namespace Project_Game.Entities
                     break;
             }
         }
-
+        public void SetCurrentWeapon(string weaponName)
+        {
+            currentWeapon = weaponName;
+            Console.WriteLine($"Player equipped: {currentWeapon}");
+        }
         // Xử lý khi nhận sát thương
         public override void TakeDamage(int damage)
         {
@@ -351,29 +356,48 @@ namespace Project_Game.Entities
             if (!IsAttacking)
             {
                 IsAttacking = true;
-                string attackPath = Path.Combine("Assets", "Player_Attack", currentDirection);
+
+                string attackPath = string.Empty;
+                switch (currentWeapon)
+                {
+                    case "Sword":
+                        attackPath = Path.Combine("Assets", "Player_Attack", currentDirection);
+                        break;
+                    case "Axe":
+                        attackPath = Path.Combine("Assets", "Player", "Player_Axe", currentDirection);
+                        break;
+                    // Add cases for other weapons as needed
+                    default:
+                        attackPath = Path.Combine("Assets", "Player_Attack", currentDirection);
+                        break;
+                }
+
                 attackAnimation.LoadFrames(attackPath);
                 attackAnimation.ResetAnimation();
 
-                // Thêm kiểm tra để debug nếu không tải được khung hình
+                // Debug checks
                 if (attackAnimation.GetFrameCount() == 0)
                 {
-                    Console.WriteLine($"Không thể tải khung hình từ {attackPath}");
+                    Console.WriteLine($"Cannot load attack frames from {attackPath}");
                 }
 
                 if (targets.Any())
                 {
                     foreach (var target in targets)
                     {
-                        target.TakeDamage(50);
+                        target.TakeDamage(50); // Adjust damage as needed
                     }
+                    Console.WriteLine($"Player attacked {targets.Count} enemies with {currentWeapon}.");
                 }
                 else
                 {
-                    Console.WriteLine("Không có kẻ địch, chỉ tấn công không mục tiêu.");
+                    Console.WriteLine($"Player performed {currentWeapon} attack, but no enemies were hit.");
                 }
+
+                // Potentially set some attack cooldown or other logic
             }
         }
+
 
         // Cập nhật trạng thái tấn công
         public void UpdateAttack()

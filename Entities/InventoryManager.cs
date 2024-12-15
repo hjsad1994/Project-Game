@@ -144,5 +144,7 @@ namespace Project_Game.Entities
                 bar[dragSourceBarIndex] = item;
             }
         }
+
+
     }
 }

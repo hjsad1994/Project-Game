@@ -60,7 +60,7 @@
             // Test1
             // 
             this.Test1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
-            this.Test1.Location = new System.Drawing.Point(553, 111);
+            this.Test1.Location = new System.Drawing.Point(482, 108);
             this.Test1.Name = "Test1";
             this.Test1.Size = new System.Drawing.Size(63, 22);
             this.Test1.TabIndex = 2;

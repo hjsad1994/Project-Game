@@ -23,7 +23,7 @@ namespace Project_Game.Entities
         public int selectedBarIndex = 0;
 
         public bool IsDraggingItem { get { return invManager.isDragging; } }
-
+        public int SelectedBarIndex { get; set; } = 0;
         public UIManager(Form form, InventoryManager invManager)
         {
             this.form = form;
