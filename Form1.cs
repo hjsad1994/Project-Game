@@ -262,7 +262,7 @@ namespace Project_Game
         {
         }
 
-        // Giữ lại hàm FormMouseClick
+        // Giữ lại hàm FormMouseClickk
         private void FormMouseClick(object sender, MouseEventArgs e)
         {
             if (gameOverState || player.IsAttacking) return;
