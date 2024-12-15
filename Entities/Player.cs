@@ -160,7 +160,7 @@ namespace Project_Game.Entities
             PreviousY = playerY;
 
             // Debug: Trạng thái di chuyển hiện tại
-            Console.WriteLine($"Move Start: GoLeft={GoLeft}, GoRight={GoRight}, GoUp={GoUp}, GoDown={GoDown}, CurrentDirection={currentDirection}");
+          //  Console.WriteLine($"Move Start: GoLeft={GoLeft}, GoRight={GoRight}, GoUp={GoUp}, GoDown={GoDown}, CurrentDirection={currentDirection}");
 
             // Handle movement
             if (GoLeft)
@@ -341,6 +341,7 @@ namespace Project_Game.Entities
             }
 
             Console.WriteLine($"UpdateIdleAnimation: Loading Idle Animation from {idlePath}");
+            idleAnimation.ClearCache(); // Xóa cache trước khi tải mới
 
             idleAnimation.LoadFrames(idlePath);
             idleAnimation.ResetAnimation();
@@ -361,7 +362,7 @@ namespace Project_Game.Entities
         {
 
             idleAnimation.UpdateAnimation();
-            Console.WriteLine($"Animating Idle: Frame={idleAnimation.GetCurrentFrameName()}");
+    //        Console.WriteLine($"Animating Idle: Frame={idleAnimation.GetCurrentFrameName()}");
         }
 
         // Đặt lại trạng thái người chơi
@@ -472,19 +473,19 @@ namespace Project_Game.Entities
             if (IsAttacking)
             {
                 string attackFrameName = attackAnimation.GetCurrentFrameName();
-                Console.WriteLine($"GetCurrentFrame: IsAttacking=true, currentWeapon={currentWeapon}, currentDirection={currentDirection}, Frame={attackFrameName}");
+           //     Console.WriteLine($"GetCurrentFrame: IsAttacking=true, currentWeapon={currentWeapon}, currentDirection={currentDirection}, Frame={attackFrameName}");
                 return attackAnimation.GetCurrentFrame();
             }
 
             if (GoLeft || GoRight || GoUp || GoDown)
             {
                 string moveFrameName = movementAnimation.GetCurrentFrameName();
-                Console.WriteLine($"GetCurrentFrame: Moving, currentDirection={currentDirection}, Frame={moveFrameName}");
+             //   Console.WriteLine($"GetCurrentFrame: Moving, currentDirection={currentDirection}, Frame={moveFrameName}");
                 return movementAnimation.GetCurrentFrame();
             }
 
             string idleFrameName = idleAnimation.GetCurrentFrameName();
-            Console.WriteLine($"GetCurrentFrame: Idle, currentDirection={currentDirection}, Frame={idleFrameName}");
+          //  Console.WriteLine($"GetCurrentFrame: Idle, currentDirection={currentDirection}, Frame={idleFrameName}");
             return idleAnimation.GetCurrentFrame();
         }
     }

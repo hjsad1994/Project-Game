@@ -19,7 +19,7 @@ namespace Project_Game
         private bool needsRedraw = false;
 
         private InventoryManager inventoryManager;
-        private UIManager uiManager;
+        // private UIManager uiManager; // Không cần khai báo thêm nếu sử dụng Singleton
 
         private const int PlayerWidth = 50;
         private const int PlayerHeight = 50;
@@ -32,7 +32,6 @@ namespace Project_Game
             this.FormClosing += Form1_FormClosing;
 
             // Gán sự kiện MouseClick trở lại
-            this.MouseClick += FormMouseClick;
 
             var obstacles = new List<GameObject>
             {
@@ -62,11 +61,13 @@ namespace Project_Game
 
             objectManager.LoadMap1();
 
-            this.DoubleBuffered = true;
             this.KeyPreview = true;
-
+            this.KeyPress += Form1_KeyPress;
             inventoryManager = new InventoryManager();
-            uiManager = new UIManager(this, inventoryManager, player); // Truyền player vào
+
+            // Khởi tạo UIManager Singleton
+            UIManager.Initialize(this, inventoryManager, player);
+            // uiManager = UIManager.Instance; // Không cần gán lại
 
             // Khởi tạo và khởi động Timer
             gameTimer = new Timer();
@@ -79,7 +80,15 @@ namespace Project_Game
             this.Paint += FormPaintEvent;
             Console.WriteLine("Form Paint event handler registered.");
         }
-
+        private void Form1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 'i' || e.KeyChar == 'I')
+            {
+                UIManager.Instance.showInventory = !UIManager.Instance.showInventory;
+                Console.WriteLine($"Toggled Inventory via KeyPress: {UIManager.Instance.showInventory}");
+                this.Invalidate();
+            }
+        }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             gameTimer.Stop();
@@ -103,6 +112,9 @@ namespace Project_Game
         {
             if (!gameOverState)
             {
+                // Log phím được nhấn
+                Console.WriteLine($"Key pressed: {e.KeyCode}");
+
                 // Khi nhấn một hướng di chuyển, đặt các hướng khác thành false
                 if (e.KeyCode == Keys.Left && !player.IsBlockedLeft)
                 {
@@ -129,38 +141,45 @@ namespace Project_Game
                     Console.WriteLine("GoDown set to true, others set to false");
                 }
 
+                // Các xử lý phím D1-D5 khác...
                 if (e.KeyCode == Keys.D1)
                 {
-                    uiManager.SelectedBarIndex = 0;
+                    UIManager.Instance.SelectedBarIndex = 0;
                     var item = inventoryManager.bar[0];
                     if (item != null) player.SetCurrentWeapon(item.Name);
+                    Console.WriteLine($"SelectedBarIndex set to {UIManager.Instance.SelectedBarIndex} with item {item?.Name}");
                 }
                 if (e.KeyCode == Keys.D2)
                 {
-                    uiManager.SelectedBarIndex = 1; // Pickaxe is now in slot 2
+                    UIManager.Instance.SelectedBarIndex = 1; // Pickaxe is now in slot 2
                     var item = inventoryManager.bar[1];
                     if (item != null) player.SetCurrentWeapon(item.Name);
+                    Console.WriteLine($"SelectedBarIndex set to {UIManager.Instance.SelectedBarIndex} with item {item?.Name}");
                 }
                 if (e.KeyCode == Keys.D3)
                 {
-                    uiManager.SelectedBarIndex = 2; // Axe is now in slot 3
+                    UIManager.Instance.SelectedBarIndex = 2; // Axe is now in slot 3
                     var item = inventoryManager.bar[2];
                     if (item != null) player.SetCurrentWeapon(item.Name);
+                    Console.WriteLine($"SelectedBarIndex set to {UIManager.Instance.SelectedBarIndex} with item {item?.Name}");
                 }
                 if (e.KeyCode == Keys.D4)
                 {
-                    uiManager.SelectedBarIndex = 3;
+                    UIManager.Instance.SelectedBarIndex = 3;
                     var item = inventoryManager.bar[3];
                     if (item != null) player.SetCurrentWeapon(item.Name);
+                    Console.WriteLine($"SelectedBarIndex set to {UIManager.Instance.SelectedBarIndex} with item {item?.Name}");
                 }
                 if (e.KeyCode == Keys.D5)
                 {
-                    uiManager.SelectedBarIndex = 4;
+                    UIManager.Instance.SelectedBarIndex = 4;
                     var item = inventoryManager.bar[4];
                     if (item != null) player.SetCurrentWeapon(item.Name);
+                    Console.WriteLine($"SelectedBarIndex set to {UIManager.Instance.SelectedBarIndex} with item {item?.Name}");
                 }
 
-                uiManager.OnKeyDown(e);
+                // Chuyển tiếp sự kiện phím xuống UIManager
+                UIManager.Instance.OnKeyDown(e);
             }
         }
 
@@ -223,7 +242,7 @@ namespace Project_Game
                 gameOverState
             );
 
-            uiManager.Draw(e.Graphics);
+            UIManager.Instance.Draw(e.Graphics);
         }
 
         private void TimerEvent(object sender, EventArgs e)
@@ -317,7 +336,7 @@ namespace Project_Game
             if (gameOverState || player.IsAttacking) return;
 
             // Kiểm tra xem click có phải trên UI không
-            if (uiManager.IsClickOnUI(e.X, e.Y))
+            if (UIManager.Instance.IsClickOnUI(e.X, e.Y))
             {
                 // Click vào UI thì không tấn công
                 return;
@@ -383,10 +402,10 @@ namespace Project_Game
             base.OnMouseDown(e);
             if (!gameOverState)
             {
-                uiManager.OnMouseDown(e);
+                UIManager.Instance.OnMouseDown(e);
 
                 // Only perform attack if not dragging and not clicking on UI
-                if (!uiManager.IsDraggingItem && !uiManager.IsClickOnUI(e.X, e.Y))
+                if (!UIManager.Instance.IsDraggingItem && !UIManager.Instance.IsClickOnUI(e.X, e.Y))
                 {
                     PerformAttack(e);
                 }
@@ -396,13 +415,13 @@ namespace Project_Game
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            uiManager.OnMouseMove(e);
+            UIManager.Instance.OnMouseMove(e);
         }
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
-            uiManager.OnMouseUp(e);
+            UIManager.Instance.OnMouseUp(e);
         }
 
         private void PerformAttack(MouseEventArgs e)
