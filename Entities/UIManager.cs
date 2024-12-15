@@ -9,25 +9,28 @@ namespace Project_Game.Entities
     {
         private InventoryManager invManager;
         private Form form;
+        private Player player; // Thêm trường này
 
         private int slotSize = 32;
-        private int invStartX = 100;
-        private int invStartY = 100;
-        private int barStartX = 100;
-        private int barStartY = 300;
+        private int invStartX = 400;
+        private int invStartY = 400;
+        private int barStartX = 630 /2 ;
+        private int barStartY = 550 ;
 
         private Image inventoryUI;
         private Image itemBarUI;
 
         public bool showInventory = false;
-        public int selectedBarIndex = 0;
+        // public int selectedBarIndex = 0; // Xóa dòng này nếu không cần thiết
+        public int SelectedBarIndex { get; set; } = 0; // Sử dụng property này
 
         public bool IsDraggingItem { get { return invManager.isDragging; } }
-        public int SelectedBarIndex { get; set; } = 0;
-        public UIManager(Form form, InventoryManager invManager)
+
+        public UIManager(Form form, InventoryManager invManager, Player player) // Sửa constructor
         {
             this.form = form;
             this.invManager = invManager;
+            this.player = player; // Gán đối tượng Player
             LoadUIImages();
         }
 
@@ -60,13 +63,13 @@ namespace Project_Game.Entities
 
         public void Draw(Graphics g)
         {
-            // Vẽ ItemBarUI nền
+            // Vẽ ItemBarUI background
             if (itemBarUI != null)
             {
                 g.DrawImage(itemBarUI, barStartX, barStartY, slotSize * 5, slotSize);
             }
 
-            // Vẽ các item trong bar
+            // Vẽ items trong bar
             for (int i = 0; i < 5; i++)
             {
                 var rect = GetBarSlotRect(i);
@@ -74,9 +77,9 @@ namespace Project_Game.Entities
                 {
                     g.DrawImage(invManager.bar[i].Icon, rect);
                 }
-                if (i == selectedBarIndex)
+                if (i == SelectedBarIndex)
                 {
-                    g.DrawRectangle(Pens.Yellow, rect);
+                    g.DrawRectangle(Pens.Yellow, rect); // Highlight selected slot
                 }
             }
 
@@ -108,7 +111,7 @@ namespace Project_Game.Entities
 
         public void OnMouseDown(MouseEventArgs e)
         {
-            // Kiểm tra bar
+            // Check bar
             for (int i = 0; i < 5; i++)
             {
                 var rect = GetBarSlotRect(i);
@@ -128,7 +131,7 @@ namespace Project_Game.Entities
                 }
             }
 
-            // Kiểm tra Inventory nếu mở
+            // Check Inventory nếu mở
             if (showInventory)
             {
                 for (int r = 0; r < 5; r++)
@@ -243,11 +246,36 @@ namespace Project_Game.Entities
                 form.Invalidate();
             }
 
-            if (e.KeyCode == Keys.D1) selectedBarIndex = 0;
-            if (e.KeyCode == Keys.D2) selectedBarIndex = 1;
-            if (e.KeyCode == Keys.D3) selectedBarIndex = 2;
-            if (e.KeyCode == Keys.D4) selectedBarIndex = 3;
-            if (e.KeyCode == Keys.D5) selectedBarIndex = 4;
+            if (e.KeyCode == Keys.D1)
+            {
+                SelectedBarIndex = 0;
+                var item = invManager.bar[0];
+                if (item != null) player.SetCurrentWeapon(item.Name); // Sử dụng player đã được định nghĩa
+            }
+            if (e.KeyCode == Keys.D2)
+            {
+                SelectedBarIndex = 1; // Pickaxe is now in slot 2
+                var item = invManager.bar[1];
+                if (item != null) player.SetCurrentWeapon(item.Name);
+            }
+            if (e.KeyCode == Keys.D3)
+            {
+                SelectedBarIndex = 2; // Axe is now in slot 3
+                var item = invManager.bar[2];
+                if (item != null) player.SetCurrentWeapon(item.Name);
+            }
+            if (e.KeyCode == Keys.D4)
+            {
+                SelectedBarIndex = 3;
+                var item = invManager.bar[3];
+                if (item != null) player.SetCurrentWeapon(item.Name);
+            }
+            if (e.KeyCode == Keys.D5)
+            {
+                SelectedBarIndex = 4;
+                var item = invManager.bar[4];
+                if (item != null) player.SetCurrentWeapon(item.Name);
+            }
 
             form.Invalidate();
         }
