@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace Project_Game.Entities
 {
@@ -59,6 +58,19 @@ namespace Project_Game.Entities
         public bool IsBlockedUp => BlockedUp;
         public bool IsBlockedDown => BlockedDown;
         public string CurrentDirection => currentDirection;
+
+        // Đồng bộ hóa X và Y với playerX và playerY
+        public override int X
+        {
+            get { return playerX; }
+            set { playerX = value; }
+        }
+
+        public override int Y
+        {
+            get { return playerY; }
+            set { playerY = value; }
+        }
 
         // Constructor nhận 3 tham số
         public Player(List<GameObject> obstacles, List<TestEnemy> enemies, List<Chicken> chickens)
@@ -297,6 +309,12 @@ namespace Project_Game.Entities
 
             idleAnimation.LoadFrames(idlePath);
             idleAnimation.ResetAnimation();
+
+            // Thêm kiểm tra để debug nếu không tải được khung hình
+            if (idleAnimation.GetFrameCount() == 0)
+            {
+                Console.WriteLine($"Không thể tải khung hình từ {idlePath}");
+            }
         }
 
         // Cập nhật hoạt ảnh idle
@@ -314,6 +332,17 @@ namespace Project_Game.Entities
             GoLeft = GoRight = GoUp = GoDown = false;
             IsAttacking = false;
             BlockedLeft = BlockedRight = BlockedUp = BlockedDown = false;
+
+            // Reset hoạt ảnh
+            string idlePath = Path.Combine("Assets", "Player", "Char_Idle", "Down");
+            idleAnimation.LoadFrames(idlePath);
+            idleAnimation.ResetAnimation();
+
+            // Thêm kiểm tra để debug nếu không tải được khung hình
+            if (idleAnimation.GetFrameCount() == 0)
+            {
+                Console.WriteLine($"Không thể tải khung hình từ {idlePath}");
+            }
         }
 
         // Thực hiện tấn công
@@ -325,6 +354,12 @@ namespace Project_Game.Entities
                 string attackPath = Path.Combine("Assets", "Player_Attack", currentDirection);
                 attackAnimation.LoadFrames(attackPath);
                 attackAnimation.ResetAnimation();
+
+                // Thêm kiểm tra để debug nếu không tải được khung hình
+                if (attackAnimation.GetFrameCount() == 0)
+                {
+                    Console.WriteLine($"Không thể tải khung hình từ {attackPath}");
+                }
 
                 if (targets.Any())
                 {
@@ -354,7 +389,7 @@ namespace Project_Game.Entities
         }
 
         // Lấy khung hình hiện tại để vẽ
-        public Image GetCurrentFrame()
+        public virtual Image GetCurrentFrame()
         {
             if (IsAttacking)
             {

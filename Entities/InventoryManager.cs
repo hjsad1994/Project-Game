@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using System.Drawing;
 
 namespace Project_Game.Entities
 {
     public class InventoryManager
     {
         public Item[,] inventoryGrid = new Item[5, 5];
-        public Item[] bar = new Item[5];
+        public Item[] bar = new Item[5]; // 5 slot cho ItemBarUI
 
         public Item draggingItem = null;
         public bool isDragging = false;
@@ -19,8 +19,12 @@ namespace Project_Game.Entities
         public InventoryManager()
         {
             LoadOresItems();
+            LoadToolItems();
         }
 
+        /// <summary>
+        /// Tải các item ores từ thư mục Assets\Items\Ores vào inventoryGrid.
+        /// </summary>
         private void LoadOresItems()
         {
             List<Item> oreItems = new List<Item>();
@@ -31,9 +35,16 @@ namespace Project_Game.Entities
                 string fullPath = Path.Combine(oresPath, fileName);
                 if (File.Exists(fullPath))
                 {
-                    Image img = Image.FromFile(fullPath);
-                    Item oreItem = new Item($"Ores_{i}", img);
-                    oreItems.Add(oreItem);
+                    try
+                    {
+                        Image img = Image.FromFile(fullPath);
+                        Item oreItem = new Item($"Ores_{i}", img);
+                        oreItems.Add(oreItem);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Lỗi khi tải hình ảnh {fullPath}: {ex.Message}");
+                    }
                 }
                 else
                 {
@@ -41,12 +52,87 @@ namespace Project_Game.Entities
                 }
             }
 
+            // Gán các ore items vào inventoryGrid
             if (oreItems.Count > 0) inventoryGrid[0, 0] = oreItems[0];
             if (oreItems.Count > 1) inventoryGrid[0, 1] = oreItems[1];
-            if (oreItems.Count > 2) bar[0] = oreItems[2];
-            if (oreItems.Count > 3) bar[1] = oreItems[3];
+            if (oreItems.Count > 2) inventoryGrid[0, 2] = oreItems[2];
+            if (oreItems.Count > 3) inventoryGrid[0, 3] = oreItems[3];
+            if (oreItems.Count > 4) inventoryGrid[0, 4] = oreItems[4];
+            if (oreItems.Count > 5) inventoryGrid[1, 0] = oreItems[5];
+            if (oreItems.Count > 6) inventoryGrid[1, 1] = oreItems[6];
+            if (oreItems.Count > 7) inventoryGrid[1, 2] = oreItems[7];
+            // Bạn có thể tiếp tục gán các item khác nếu có
         }
 
+        /// <summary>
+        /// Tải các tool items từ thư mục Assets\Items\Tool_Icons_Outline_cuts vào các slot cụ thể trong bar.
+        /// </summary>
+        private void LoadToolItems()
+        {
+            string toolPath = Path.Combine(Application.StartupPath, "Assets", "Items", "Tool_Icons_Outline_cuts");
+
+            try
+            {
+                // Load Sword.png vào slot 0 (Slot 1)
+                string swordPath = Path.Combine(toolPath, "Sword.png");
+                if (File.Exists(swordPath))
+                {
+                    Image swordImg = Image.FromFile(swordPath);
+                    bar[0] = new Item("Sword", swordImg);
+                }
+                else
+                {
+                    Console.WriteLine($"Không tìm thấy file: {swordPath}");
+                }
+
+                // Load Pickaxe.png vào slot 1 (Slot 2)
+                string pickaxePath = Path.Combine(toolPath, "Pickaxe.png");
+                if (File.Exists(pickaxePath))
+                {
+                    Image pickaxeImg = Image.FromFile(pickaxePath);
+                    bar[1] = new Item("Pickaxe", pickaxeImg);
+                }
+                else
+                {
+                    Console.WriteLine($"Không tìm thấy file: {pickaxePath}");
+                }
+
+                // Load Watering-can.png vào slot 2 (Slot 3)
+                string wateringCanPath = Path.Combine(toolPath, "Watering-can.png");
+                if (File.Exists(wateringCanPath))
+                {
+                    Image wateringCanImg = Image.FromFile(wateringCanPath);
+                    bar[2] = new Item("Watering-can", wateringCanImg);
+                }
+                else
+                {
+                    Console.WriteLine($"Không tìm thấy file: {wateringCanPath}");
+                }
+
+                // Load Axe.png vào slot 3 (Slot 4) nếu cần
+                string axePath = Path.Combine(toolPath, "Axe.png");
+                if (File.Exists(axePath))
+                {
+                    Image axeImg = Image.FromFile(axePath);
+                    bar[3] = new Item("Axe", axeImg);
+                }
+                else
+                {
+                    Console.WriteLine($"Không tìm thấy file: {axePath}");
+                }
+
+                // Slot 4 (Slot 5) có thể để trống hoặc thêm item khác
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading tool items: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Đặt lại item vào vị trí ban đầu nếu việc kéo thả không thành công.
+        /// </summary>
+        /// <param name="item">Item cần đặt lại.</param>
         public void PutBackItem(Item item)
         {
             if (dragSourceRow != -1 && dragSourceCol != -1)

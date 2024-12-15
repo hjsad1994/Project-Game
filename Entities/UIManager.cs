@@ -60,11 +60,13 @@ namespace Project_Game.Entities
 
         public void Draw(Graphics g)
         {
+            // Vẽ ItemBarUI nền
             if (itemBarUI != null)
             {
                 g.DrawImage(itemBarUI, barStartX, barStartY, slotSize * 5, slotSize);
             }
 
+            // Vẽ các item trong bar
             for (int i = 0; i < 5; i++)
             {
                 var rect = GetBarSlotRect(i);
@@ -78,6 +80,7 @@ namespace Project_Game.Entities
                 }
             }
 
+            // Vẽ Inventory nếu mở
             if (showInventory && inventoryUI != null)
             {
                 g.DrawImage(inventoryUI, invStartX, invStartY, slotSize * 5, slotSize * 5);
@@ -94,6 +97,7 @@ namespace Project_Game.Entities
                 }
             }
 
+            // Vẽ item đang kéo thả
             if (invManager.isDragging && invManager.draggingItem != null)
             {
                 g.DrawImage(invManager.draggingItem.Icon, dragX - slotSize / 2, dragY - slotSize / 2, slotSize, slotSize);
