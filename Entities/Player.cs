@@ -159,9 +159,6 @@ namespace Project_Game.Entities
             PreviousX = playerX;
             PreviousY = playerY;
 
-            // Debug: Trạng thái di chuyển hiện tại
-          //  Console.WriteLine($"Move Start: GoLeft={GoLeft}, GoRight={GoRight}, GoUp={GoUp}, GoDown={GoDown}, CurrentDirection={currentDirection}");
-
             // Handle movement
             if (GoLeft)
             {
@@ -360,9 +357,8 @@ namespace Project_Game.Entities
         // Cập nhật hoạt ảnh idle
         private void AnimateIdle()
         {
-
             idleAnimation.UpdateAnimation();
-    //        Console.WriteLine($"Animating Idle: Frame={idleAnimation.GetCurrentFrameName()}");
+            // Console.WriteLine($"Animating Idle: Frame={idleAnimation.GetCurrentFrameName()}");
         }
 
         // Đặt lại trạng thái người chơi
@@ -410,7 +406,10 @@ namespace Project_Game.Entities
                         attackPath = Path.Combine("Assets", "Player", "Player_Axe", currentDirection);
                         break;
                     case "Pickaxe":
-                        attackPath = Path.Combine("Assets", "Player", "Player_Dig-up", currentDirection); // Load Dig-up animations
+                        attackPath = Path.Combine("Assets", "Player", "Player_Dig-up", currentDirection);
+                        break;
+                    case "Watering-can": // Thêm case cho Watering-can
+                        attackPath = Path.Combine("Assets", "Player", "Player_Watering", currentDirection);
                         break;
                     // Add cases for other weapons as needed
                     default:
@@ -437,7 +436,22 @@ namespace Project_Game.Entities
                 {
                     foreach (var target in targets)
                     {
-                        int damage = currentWeapon == "Axe" ? 50 : (currentWeapon == "Pickaxe" ? 30 : 50); // Adjust damage as needed
+                        int damage;
+                        switch (currentWeapon)
+                        {
+                            case "Axe":
+                                damage = 50;
+                                break;
+                            case "Pickaxe":
+                                damage = 30;
+                                break;
+                            case "Watering-can":
+                                damage = 20;
+                                break;
+                            default:
+                                damage = 50;
+                                break;
+                        }
                         target.TakeDamage(damage);
                     }
                     Console.WriteLine($"Player attacked {targets.Count} enemies with {currentWeapon}.");
@@ -473,19 +487,19 @@ namespace Project_Game.Entities
             if (IsAttacking)
             {
                 string attackFrameName = attackAnimation.GetCurrentFrameName();
-           //     Console.WriteLine($"GetCurrentFrame: IsAttacking=true, currentWeapon={currentWeapon}, currentDirection={currentDirection}, Frame={attackFrameName}");
+                // Console.WriteLine($"GetCurrentFrame: IsAttacking=true, currentWeapon={currentWeapon}, currentDirection={currentDirection}, Frame={attackFrameName}");
                 return attackAnimation.GetCurrentFrame();
             }
 
             if (GoLeft || GoRight || GoUp || GoDown)
             {
                 string moveFrameName = movementAnimation.GetCurrentFrameName();
-             //   Console.WriteLine($"GetCurrentFrame: Moving, currentDirection={currentDirection}, Frame={moveFrameName}");
+                // Console.WriteLine($"GetCurrentFrame: Moving, currentDirection={currentDirection}, Frame={moveFrameName}");
                 return movementAnimation.GetCurrentFrame();
             }
 
             string idleFrameName = idleAnimation.GetCurrentFrameName();
-          //  Console.WriteLine($"GetCurrentFrame: Idle, currentDirection={currentDirection}, Frame={idleFrameName}");
+            // Console.WriteLine($"GetCurrentFrame: Idle, currentDirection={currentDirection}, Frame={idleFrameName}");
             return idleAnimation.GetCurrentFrame();
         }
     }
