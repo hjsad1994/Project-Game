@@ -73,7 +73,7 @@ namespace Project_Game.Entities
 
             try
             {
-                // Load Sword.png vào slot 0 (Slot 1)
+                // Load Sword.png into slot 0 (Slot 1)
                 string swordPath = Path.Combine(toolPath, "Sword.png");
                 if (File.Exists(swordPath))
                 {
@@ -82,46 +82,46 @@ namespace Project_Game.Entities
                 }
                 else
                 {
-                    Console.WriteLine($"Không tìm thấy file: {swordPath}");
+                    Console.WriteLine($"File not found: {swordPath}");
                 }
 
-                // Load Pickaxe.png vào slot 1 (Slot 2)
+                // Load Pickaxe.png into slot 1 (Slot 2)
                 string pickaxePath = Path.Combine(toolPath, "Pickaxe.png");
                 if (File.Exists(pickaxePath))
                 {
                     Image pickaxeImg = Image.FromFile(pickaxePath);
-                    bar[1] = new Item("Pickaxe", pickaxeImg);
+                    bar[1] = new Item("Pickaxe", pickaxeImg); // Assign Pickaxe to slot 2
                 }
                 else
                 {
-                    Console.WriteLine($"Không tìm thấy file: {pickaxePath}");
+                    Console.WriteLine($"File not found: {pickaxePath}");
                 }
 
-                // Load Watering-can.png vào slot 2 (Slot 3)
-                string wateringCanPath = Path.Combine(toolPath, "Watering-can.png");
-                if (File.Exists(wateringCanPath))
-                {
-                    Image wateringCanImg = Image.FromFile(wateringCanPath);
-                    bar[2] = new Item("Watering-can", wateringCanImg);
-                }
-                else
-                {
-                    Console.WriteLine($"Không tìm thấy file: {wateringCanPath}");
-                }
-
-                // Load Axe.png vào slot 3 (Slot 4) nếu cần
+                // Load Axe.png into slot 2 (Slot 3)
                 string axePath = Path.Combine(toolPath, "Axe.png");
                 if (File.Exists(axePath))
                 {
                     Image axeImg = Image.FromFile(axePath);
-                    bar[3] = new Item("Axe", axeImg);
+                    bar[2] = new Item("Axe", axeImg); // Assign Axe to slot 3
                 }
                 else
                 {
-                    Console.WriteLine($"Không tìm thấy file: {axePath}");
+                    Console.WriteLine($"File not found: {axePath}");
                 }
 
-                // Slot 4 (Slot 5) có thể để trống hoặc thêm item khác
+                // Load Watering-can.png into slot 3 (Slot 4)
+                string wateringCanPath = Path.Combine(toolPath, "Watering-can.png");
+                if (File.Exists(wateringCanPath))
+                {
+                    Image wateringCanImg = Image.FromFile(wateringCanPath);
+                    bar[3] = new Item("Watering-can", wateringCanImg);
+                }
+                else
+                {
+                    Console.WriteLine($"File not found: {wateringCanPath}");
+                }
+
+                // Slot 4 (Slot 5) can remain empty or load another item as needed
             }
             catch (Exception ex)
             {
@@ -144,7 +144,6 @@ namespace Project_Game.Entities
                 bar[dragSourceBarIndex] = item;
             }
         }
-
 
     }
 }
