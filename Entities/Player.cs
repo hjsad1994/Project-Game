@@ -1,5 +1,4 @@
-﻿using Project_Game.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -36,8 +35,8 @@ namespace Project_Game.Entities
 
         // Quản lý hoạt ảnh
         public AnimationManager movementAnimation { get; private set; }
-        private AnimationManager idleAnimation;
-        private AnimationManager attackAnimation;
+        public AnimationManager idleAnimation { get; private set; }
+        public AnimationManager attackAnimation { get; private set; }
         private bool wasMovingPreviously = false;
         public bool IsAttacking { get; private set; } = false;
         private string currentDirection = "Down";
@@ -124,23 +123,28 @@ namespace Project_Game.Entities
                     break;
             }
         }
+
         public void SetCurrentWeapon(string weaponName)
         {
             currentWeapon = weaponName;
             Console.WriteLine($"Player equipped: {currentWeapon}");
         }
+
         // Xử lý khi nhận sát thương
         public override void TakeDamage(int damage)
         {
             Health -= damage;
             if (Health < 0) Health = 0;
             OnHealthChanged?.Invoke(Health);
+            Console.WriteLine($"Player took {damage} damage. Current Health: {Health}");
         }
 
         // Đặt lại sức khỏe
         public void ResetHealth()
         {
             Health = MaxHealth;
+            OnHealthChanged?.Invoke(Health);
+            Console.WriteLine("Player health reset to MaxHealth.");
         }
 
         // Phương thức di chuyển
@@ -155,14 +159,17 @@ namespace Project_Game.Entities
             PreviousX = playerX;
             PreviousY = playerY;
 
-            // Xử lý di chuyển theo hướng
+            // Handle movement
             if (GoLeft)
             {
                 if (currentDirection != "Left")
                 {
                     string moveLeftPath = Path.Combine("Assets", "Player", "Char_Movement", "MoveLeft");
+                    movementAnimation.ClearCache(); // Xóa cache trước khi tải mới
+
                     movementAnimation.LoadFrames(moveLeftPath);
                     currentDirection = "Left";
+                    Console.WriteLine("Loaded MoveLeft Animation");
                 }
                 newX -= playerSpeed;
                 isMoving = true;
@@ -172,8 +179,11 @@ namespace Project_Game.Entities
                 if (currentDirection != "Right")
                 {
                     string moveRightPath = Path.Combine("Assets", "Player", "Char_Movement", "MoveRight");
+                    movementAnimation.ClearCache(); // Xóa cache trước khi tải mới
+
                     movementAnimation.LoadFrames(moveRightPath);
                     currentDirection = "Right";
+                    Console.WriteLine("Loaded MoveRight Animation");
                 }
                 newX += playerSpeed;
                 isMoving = true;
@@ -183,8 +193,11 @@ namespace Project_Game.Entities
                 if (currentDirection != "Up")
                 {
                     string moveUpPath = Path.Combine("Assets", "Player", "Char_Movement", "MoveUp");
+                    movementAnimation.ClearCache(); // Xóa cache trước khi tải mới
+
                     movementAnimation.LoadFrames(moveUpPath);
                     currentDirection = "Up";
+                    Console.WriteLine("Loaded MoveUp Animation");
                 }
                 newY -= playerSpeed;
                 isMoving = true;
@@ -194,8 +207,12 @@ namespace Project_Game.Entities
                 if (currentDirection != "Down")
                 {
                     string moveDownPath = Path.Combine("Assets", "Player", "Char_Movement", "MoveDown");
+                    movementAnimation.ClearCache(); // Xóa cache trước khi tải mới
+
                     movementAnimation.LoadFrames(moveDownPath);
+
                     currentDirection = "Down";
+                    Console.WriteLine("Loaded MoveDown Animation");
                 }
                 newY += playerSpeed;
                 isMoving = true;
@@ -224,6 +241,7 @@ namespace Project_Game.Entities
                     else if (GoUp) collisionDirection = "Up";
                     else if (GoDown) collisionDirection = "Down";
 
+                    Console.WriteLine($"Collision detected: {collisionDirection}");
                     break;
                 }
             }
@@ -243,6 +261,7 @@ namespace Project_Game.Entities
                         else if (GoUp) collisionDirection = "Up";
                         else if (GoDown) collisionDirection = "Down";
 
+                        Console.WriteLine($"Collision with Enemy detected: {collisionDirection}");
                         break;
                     }
                 }
@@ -271,6 +290,7 @@ namespace Project_Game.Entities
                         break;
                 }
                 wasMovingPreviously = false;
+                Console.WriteLine($"Movement blocked: {collisionDirection}");
                 return;
             }
 
@@ -279,17 +299,22 @@ namespace Project_Game.Entities
                 playerX = newX;
                 playerY = newY;
                 movementAnimation.UpdateAnimation();
+                Console.WriteLine($"Player moved to ({playerX}, {playerY}) - Frame: {movementAnimation.GetCurrentFrameName()}");
             }
             else
             {
                 if (wasMovingPreviously)
                 {
                     UpdateIdleAnimation();
+                    Console.WriteLine("Switching to Idle Animation");
                 }
                 AnimateIdle();
             }
 
             wasMovingPreviously = isMoving;
+
+            // Debug: Trạng thái di chuyển kết thúc
+            Console.WriteLine($"Move End: CurrentDirection={currentDirection}");
         }
 
         // Cập nhật hoạt ảnh idle dựa trên hướng hiện tại
@@ -312,13 +337,20 @@ namespace Project_Game.Entities
                     break;
             }
 
+            Console.WriteLine($"UpdateIdleAnimation: Loading Idle Animation from {idlePath}");
+            idleAnimation.ClearCache(); // Xóa cache trước khi tải mới
+
             idleAnimation.LoadFrames(idlePath);
             idleAnimation.ResetAnimation();
 
             // Thêm kiểm tra để debug nếu không tải được khung hình
             if (idleAnimation.GetFrameCount() == 0)
             {
-                Console.WriteLine($"Không thể tải khung hình từ {idlePath}");
+                Console.WriteLine($"Cannot load idle frames from {idlePath}");
+            }
+            else
+            {
+                Console.WriteLine($"Loaded {idleAnimation.GetFrameCount()} idle frames from {idlePath}");
             }
         }
 
@@ -326,6 +358,7 @@ namespace Project_Game.Entities
         private void AnimateIdle()
         {
             idleAnimation.UpdateAnimation();
+            // Console.WriteLine($"Animating Idle: Frame={idleAnimation.GetCurrentFrameName()}");
         }
 
         // Đặt lại trạng thái người chơi
@@ -348,6 +381,12 @@ namespace Project_Game.Entities
             {
                 Console.WriteLine($"Không thể tải khung hình từ {idlePath}");
             }
+            else
+            {
+                Console.WriteLine($"Loaded {idleAnimation.GetFrameCount()} idle frames from {idlePath}");
+            }
+
+            Console.WriteLine("Player has been reset.");
         }
 
         // Thực hiện tấn công
@@ -366,11 +405,19 @@ namespace Project_Game.Entities
                     case "Axe":
                         attackPath = Path.Combine("Assets", "Player", "Player_Axe", currentDirection);
                         break;
+                    case "Pickaxe":
+                        attackPath = Path.Combine("Assets", "Player", "Player_Dig-up", currentDirection);
+                        break;
+                    case "Watering-can": // Thêm case cho Watering-can
+                        attackPath = Path.Combine("Assets", "Player", "Player_Watering", currentDirection);
+                        break;
                     // Add cases for other weapons as needed
                     default:
                         attackPath = Path.Combine("Assets", "Player_Attack", currentDirection);
                         break;
                 }
+
+                Console.WriteLine($"PerformAttack: currentWeapon={currentWeapon}, currentDirection={currentDirection}, attackPath={attackPath}");
 
                 attackAnimation.LoadFrames(attackPath);
                 attackAnimation.ResetAnimation();
@@ -380,12 +427,32 @@ namespace Project_Game.Entities
                 {
                     Console.WriteLine($"Cannot load attack frames from {attackPath}");
                 }
+                else
+                {
+                    Console.WriteLine($"Loaded {attackAnimation.GetFrameCount()} attack frames from {attackPath}");
+                }
 
                 if (targets.Any())
                 {
                     foreach (var target in targets)
                     {
-                        target.TakeDamage(50); // Adjust damage as needed
+                        int damage;
+                        switch (currentWeapon)
+                        {
+                            case "Axe":
+                                damage = 50;
+                                break;
+                            case "Pickaxe":
+                                damage = 30;
+                                break;
+                            case "Watering-can":
+                                damage = 20;
+                                break;
+                            default:
+                                damage = 50;
+                                break;
+                        }
+                        target.TakeDamage(damage);
                     }
                     Console.WriteLine($"Player attacked {targets.Count} enemies with {currentWeapon}.");
                 }
@@ -394,10 +461,9 @@ namespace Project_Game.Entities
                     Console.WriteLine($"Player performed {currentWeapon} attack, but no enemies were hit.");
                 }
 
-                // Potentially set some attack cooldown or other logic
+                // Optionally, implement attack cooldowns or other logic here
             }
         }
-
 
         // Cập nhật trạng thái tấn công
         public void UpdateAttack()
@@ -405,9 +471,12 @@ namespace Project_Game.Entities
             if (IsAttacking)
             {
                 attackAnimation.UpdateAnimation(loop: false);
+                Console.WriteLine($"Updating Attack Animation: Frame={attackAnimation.GetCurrentFrameName()}");
+
                 if (attackAnimation.IsComplete())
                 {
                     IsAttacking = false;
+                    Console.WriteLine("Attack Animation Complete");
                 }
             }
         }
@@ -417,9 +486,21 @@ namespace Project_Game.Entities
         {
             if (IsAttacking)
             {
+                string attackFrameName = attackAnimation.GetCurrentFrameName();
+                // Console.WriteLine($"GetCurrentFrame: IsAttacking=true, currentWeapon={currentWeapon}, currentDirection={currentDirection}, Frame={attackFrameName}");
                 return attackAnimation.GetCurrentFrame();
             }
-            return (GoLeft || GoRight || GoUp || GoDown) ? movementAnimation.GetCurrentFrame() : idleAnimation.GetCurrentFrame();
+
+            if (GoLeft || GoRight || GoUp || GoDown)
+            {
+                string moveFrameName = movementAnimation.GetCurrentFrameName();
+                // Console.WriteLine($"GetCurrentFrame: Moving, currentDirection={currentDirection}, Frame={moveFrameName}");
+                return movementAnimation.GetCurrentFrame();
+            }
+
+            string idleFrameName = idleAnimation.GetCurrentFrameName();
+            // Console.WriteLine($"GetCurrentFrame: Idle, currentDirection={currentDirection}, Frame={idleFrameName}");
+            return idleAnimation.GetCurrentFrame();
         }
     }
 }

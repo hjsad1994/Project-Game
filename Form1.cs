@@ -19,18 +19,19 @@ namespace Project_Game
         private bool needsRedraw = false;
 
         private InventoryManager inventoryManager;
-        private UIManager uiManager;
+        // private UIManager uiManager; // Không cần khai báo thêm nếu sử dụng Singleton
 
         private const int PlayerWidth = 50;
         private const int PlayerHeight = 50;
-       
+
+        private Timer gameTimer;
+
         public Form1()
         {
             InitializeComponent();
             this.FormClosing += Form1_FormClosing;
 
             // Gán sự kiện MouseClick trở lại
-            this.MouseClick += FormMouseClick;
 
             var obstacles = new List<GameObject>
             {
@@ -60,62 +61,125 @@ namespace Project_Game
 
             objectManager.LoadMap1();
 
-            this.DoubleBuffered = true;
             this.KeyPreview = true;
-
-            //this.KeyDown += KeyIsDown;
-            //this.KeyUp += KeyIsUp;
-
+            this.KeyPress += Form1_KeyPress;
             inventoryManager = new InventoryManager();
-            uiManager = new UIManager(this, inventoryManager);
-        }
 
+            // Khởi tạo UIManager Singleton
+            UIManager.Initialize(this, inventoryManager, player);
+            // uiManager = UIManager.Instance; // Không cần gán lại
+
+            // Khởi tạo và khởi động Timer
+            gameTimer = new Timer();
+            gameTimer.Interval = 16; // ~60 FPS
+            gameTimer.Tick += TimerEvent;
+            gameTimer.Start();
+            Console.WriteLine("Game Timer started with interval 16ms.");
+
+            // Đăng ký sự kiện Paint
+            this.Paint += FormPaintEvent;
+            Console.WriteLine("Form Paint event handler registered.");
+        }
+        private void Form1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 'i' || e.KeyChar == 'I')
+            {
+                UIManager.Instance.showInventory = !UIManager.Instance.showInventory;
+                Console.WriteLine($"Toggled Inventory via KeyPress: {UIManager.Instance.showInventory}");
+                this.Invalidate();
+            }
+        }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            gameTimer.Stop();
+            Console.WriteLine("Game Timer stopped.");
             Application.Exit();
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            KeyIsDown(this, e);
+        }
+
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+            KeyIsUp(this, e);
         }
 
         private void KeyIsDown(object sender, KeyEventArgs e)
         {
             if (!gameOverState)
             {
-                if (e.KeyCode == Keys.Left && !player.IsBlockedLeft) player.GoLeft = true;
-                if (e.KeyCode == Keys.Right && !player.IsBlockedRight) player.GoRight = true;
-                if (e.KeyCode == Keys.Up && !player.IsBlockedUp) player.GoUp = true;
-                if (e.KeyCode == Keys.Down && !player.IsBlockedDown) player.GoDown = true;
+                // Log phím được nhấn
+                Console.WriteLine($"Key pressed: {e.KeyCode}");
 
+                // Khi nhấn một hướng di chuyển, đặt các hướng khác thành false
+                if (e.KeyCode == Keys.Left && !player.IsBlockedLeft)
+                {
+                    player.GoLeft = true;
+                    player.GoRight = player.GoUp = player.GoDown = false;
+                    Console.WriteLine("GoLeft set to true, others set to false");
+                }
+                else if (e.KeyCode == Keys.Right && !player.IsBlockedRight)
+                {
+                    player.GoRight = true;
+                    player.GoLeft = player.GoUp = player.GoDown = false;
+                    Console.WriteLine("GoRight set to true, others set to false");
+                }
+                else if (e.KeyCode == Keys.Up && !player.IsBlockedUp)
+                {
+                    player.GoUp = true;
+                    player.GoLeft = player.GoRight = player.GoDown = false;
+                    Console.WriteLine("GoUp set to true, others set to false");
+                }
+                else if (e.KeyCode == Keys.Down && !player.IsBlockedDown)
+                {
+                    player.GoDown = true;
+                    player.GoLeft = player.GoRight = player.GoUp = false;
+                    Console.WriteLine("GoDown set to true, others set to false");
+                }
+
+                // Các xử lý phím D1-D5 khác...
                 if (e.KeyCode == Keys.D1)
                 {
-                    uiManager.SelectedBarIndex = 0;
+                    UIManager.Instance.SelectedBarIndex = 0;
                     var item = inventoryManager.bar[0];
                     if (item != null) player.SetCurrentWeapon(item.Name);
+                    Console.WriteLine($"SelectedBarIndex set to {UIManager.Instance.SelectedBarIndex} with item {item?.Name}");
                 }
                 if (e.KeyCode == Keys.D2)
                 {
-                    uiManager.SelectedBarIndex = 1; // Axe is now in slot 1
+                    UIManager.Instance.SelectedBarIndex = 1; // Pickaxe is now in slot 2
                     var item = inventoryManager.bar[1];
                     if (item != null) player.SetCurrentWeapon(item.Name);
+                    Console.WriteLine($"SelectedBarIndex set to {UIManager.Instance.SelectedBarIndex} with item {item?.Name}");
                 }
                 if (e.KeyCode == Keys.D3)
                 {
-                    uiManager.SelectedBarIndex = 2;
+                    UIManager.Instance.SelectedBarIndex = 2; // Axe is now in slot 3
                     var item = inventoryManager.bar[2];
                     if (item != null) player.SetCurrentWeapon(item.Name);
+                    Console.WriteLine($"SelectedBarIndex set to {UIManager.Instance.SelectedBarIndex} with item {item?.Name}");
                 }
                 if (e.KeyCode == Keys.D4)
                 {
-                    uiManager.SelectedBarIndex = 3;
+                    UIManager.Instance.SelectedBarIndex = 3;
                     var item = inventoryManager.bar[3];
                     if (item != null) player.SetCurrentWeapon(item.Name);
+                    Console.WriteLine($"SelectedBarIndex set to {UIManager.Instance.SelectedBarIndex} with item {item?.Name}");
                 }
                 if (e.KeyCode == Keys.D5)
                 {
-                    uiManager.SelectedBarIndex = 4;
+                    UIManager.Instance.SelectedBarIndex = 4;
                     var item = inventoryManager.bar[4];
                     if (item != null) player.SetCurrentWeapon(item.Name);
+                    Console.WriteLine($"SelectedBarIndex set to {UIManager.Instance.SelectedBarIndex} with item {item?.Name}");
                 }
 
-                uiManager.OnKeyDown(e);
+                // Chuyển tiếp sự kiện phím xuống UIManager
+                UIManager.Instance.OnKeyDown(e);
             }
         }
 
@@ -127,21 +191,25 @@ namespace Project_Game
                 {
                     player.GoLeft = false;
                     player.UnblockDirection("Left");
+                    Console.WriteLine("GoLeft set to false");
                 }
                 if (e.KeyCode == Keys.Right)
                 {
                     player.GoRight = false;
                     player.UnblockDirection("Right");
+                    Console.WriteLine("GoRight set to false");
                 }
                 if (e.KeyCode == Keys.Up)
                 {
                     player.GoUp = false;
                     player.UnblockDirection("Up");
+                    Console.WriteLine("GoUp set to false");
                 }
                 if (e.KeyCode == Keys.Down)
                 {
                     player.GoDown = false;
                     player.UnblockDirection("Down");
+                    Console.WriteLine("GoDown set to false");
                 }
             }
         }
@@ -174,7 +242,7 @@ namespace Project_Game
                 gameOverState
             );
 
-            uiManager.Draw(e.Graphics);
+            UIManager.Instance.Draw(e.Graphics);
         }
 
         private void TimerEvent(object sender, EventArgs e)
@@ -268,7 +336,7 @@ namespace Project_Game
             if (gameOverState || player.IsAttacking) return;
 
             // Kiểm tra xem click có phải trên UI không
-            if (uiManager.IsClickOnUI(e.X, e.Y))
+            if (UIManager.Instance.IsClickOnUI(e.X, e.Y))
             {
                 // Click vào UI thì không tấn công
                 return;
@@ -285,19 +353,19 @@ namespace Project_Game
             switch (direction)
             {
                 case "Left":
-                    attackArea = new Rectangle(player.playerX - attackRange, player.playerY, attackRange, PlayerHeight);
+                    attackArea = new Rectangle(player.playerX - attackRange, player.playerY, attackRange, player.playerHeight);
                     break;
                 case "Right":
-                    attackArea = new Rectangle(player.playerX + PlayerWidth, player.playerY, attackRange, PlayerHeight);
+                    attackArea = new Rectangle(player.playerX + player.playerWidth, player.playerY, attackRange, player.playerHeight);
                     break;
                 case "Up":
-                    attackArea = new Rectangle(player.playerX, player.playerY - attackRange, PlayerWidth, attackRange);
+                    attackArea = new Rectangle(player.playerX, player.playerY - attackRange, player.playerWidth, attackRange);
                     break;
                 case "Down":
-                    attackArea = new Rectangle(player.playerX, player.playerY + PlayerHeight, PlayerWidth, attackRange);
+                    attackArea = new Rectangle(player.playerX, player.playerY + player.playerHeight, player.playerWidth, attackRange);
                     break;
                 default:
-                    attackArea = new Rectangle(player.playerX, player.playerY + PlayerHeight, PlayerWidth, attackRange);
+                    attackArea = new Rectangle(player.playerX, player.playerY + player.playerHeight, player.playerWidth, attackRange);
                     break;
             }
 
@@ -329,16 +397,15 @@ namespace Project_Game
             Invalidate();
         }
 
-
         protected override void OnMouseDown(MouseEventArgs e)
         {
             base.OnMouseDown(e);
             if (!gameOverState)
             {
-                uiManager.OnMouseDown(e);
+                UIManager.Instance.OnMouseDown(e);
 
-                // Chỉ tấn công nếu không drag item, không attacking, không click vào UI
-                if (!uiManager.IsDraggingItem && !player.IsAttacking && !uiManager.IsClickOnUI(e.X, e.Y))
+                // Only perform attack if not dragging and not clicking on UI
+                if (!UIManager.Instance.IsDraggingItem && !UIManager.Instance.IsClickOnUI(e.X, e.Y))
                 {
                     PerformAttack(e);
                 }
@@ -348,13 +415,13 @@ namespace Project_Game
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            uiManager.OnMouseMove(e);
+            UIManager.Instance.OnMouseMove(e);
         }
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
-            uiManager.OnMouseUp(e);
+            UIManager.Instance.OnMouseUp(e);
         }
 
         private void PerformAttack(MouseEventArgs e)
@@ -365,25 +432,25 @@ namespace Project_Game
                 direction = "Down";
             }
 
-            int attackRange = 50;
+            int attackRange = player.AttackRange; // Use player's attack range
 
             Rectangle attackArea = new Rectangle();
             switch (direction)
             {
                 case "Left":
-                    attackArea = new Rectangle(player.playerX - attackRange, player.playerY, attackRange, PlayerHeight);
+                    attackArea = new Rectangle(player.playerX - attackRange, player.playerY, attackRange, player.playerHeight);
                     break;
                 case "Right":
-                    attackArea = new Rectangle(player.playerX + PlayerWidth, player.playerY, attackRange, PlayerHeight);
+                    attackArea = new Rectangle(player.playerX + player.playerWidth, player.playerY, attackRange, player.playerHeight);
                     break;
                 case "Up":
-                    attackArea = new Rectangle(player.playerX, player.playerY - attackRange, PlayerWidth, attackRange);
+                    attackArea = new Rectangle(player.playerX, player.playerY - attackRange, player.playerWidth, attackRange);
                     break;
                 case "Down":
-                    attackArea = new Rectangle(player.playerX, player.playerY + PlayerHeight, PlayerWidth, attackRange);
+                    attackArea = new Rectangle(player.playerX, player.playerY + player.playerHeight, player.playerWidth, attackRange);
                     break;
                 default:
-                    attackArea = new Rectangle(player.playerX, player.playerY + PlayerHeight, PlayerWidth, attackRange);
+                    attackArea = new Rectangle(player.playerX, player.playerY + player.playerHeight, player.playerWidth, attackRange);
                     break;
             }
 
