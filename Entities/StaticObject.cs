@@ -3,17 +3,13 @@ using System.Drawing;
 
 namespace Project_Game.Entities
 {
-    public class StaticObject
+    public class StaticObject : GameObject
     {
-        protected Image sprite;
-        protected int x, y, width, height;
+        private Image sprite;
 
         public StaticObject(string imagePath, int x, int y, int width, int height)
+            : base(x, y, width, height, "StaticObject", 9999) // 9999 máu giả, hoặc 100, tuỳ ý
         {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
             LoadSprite(imagePath);
         }
 
@@ -31,11 +27,16 @@ namespace Project_Game.Entities
             }
         }
 
-        public virtual void Draw(Graphics g)
+        public override void TakeDamage(int damage)
+        {
+            // Đối tượng tĩnh không bị phá huỷ, nên có thể bỏ trống hoặc không giảm máu.
+        }
+
+        public void Draw(Graphics g)
         {
             if (sprite != null)
             {
-                g.DrawImage(sprite, x, y, width, height);
+                g.DrawImage(sprite, X, Y, Width, Height);
             }
         }
     }

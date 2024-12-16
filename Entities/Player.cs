@@ -502,5 +502,9 @@ namespace Project_Game.Entities
             // Console.WriteLine($"GetCurrentFrame: Idle, currentDirection={currentDirection}, Frame={idleFrameName}");
             return idleAnimation.GetCurrentFrame();
         }
+        public void SetObstacles(List<GameObject> newObstacles)
+        {
+            this.obstacles = newObstacles;
+        }
     }
 }

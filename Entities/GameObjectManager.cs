@@ -35,32 +35,25 @@ namespace Project_Game
 
         public void LoadMap1()
         {
-            // Xóa dữ liệu cũ
             AnimatedObjects.Clear();
             Enemies.Clear();
             Chickens.Clear();
             Kapybaras.Clear();
             StaticObjects.Clear();
 
-            // Thêm gà thủ công để test
-            Chickens.Add(new Chicken("Chicken1", 150, 200, 100, 200));
+            List<Chicken> loadedChickens;
+            var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map1_objects.xml", out loadedChickens);
 
-            // Thêm nhà thủ công
-        //    StaticObjects.Add(new House("House_3_1.png", 300, 200, 100, 100));
-
-            // Load objects từ XML
-            var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map1_objects.xml");
             StaticObjects.AddRange(loadedObjects);
+            Chickens.AddRange(loadedChickens);
 
-            // Spawn quái kiểu cũ
-         //   Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 700, 150));
+            Obstacles.AddRange(StaticObjects); // Nếu muốn house cản đường
 
-            // Debug số lượng static object
-            Console.WriteLine($"After loading map1: StaticObjects={StaticObjects.Count}, Enemies={Enemies.Count}, Chickens={Chickens.Count}");
-
-            // Cập nhật danh sách enemies trong gameLogic
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
+
+
+
 
         public void LoadMap2()
         {
@@ -70,8 +63,8 @@ namespace Project_Game
             Kapybaras.Clear();
             StaticObjects.Clear();
 
-            var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map2_objects.xml");
-            StaticObjects.AddRange(loadedObjects);
+         //   var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map2_objects.xml");
+       //     StaticObjects.AddRange(loadedObjects);
 
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }

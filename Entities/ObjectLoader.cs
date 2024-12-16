@@ -7,9 +7,10 @@ namespace Project_Game.Entities
 {
     public class ObjectLoader
     {
-        public static List<StaticObject> LoadObjectsFromXml(string xmlFilePath)
+        public static List<StaticObject> LoadObjectsFromXml(string xmlFilePath, out List<Chicken> chickens)
         {
             List<StaticObject> objects = new List<StaticObject>();
+            chickens = new List<Chicken>();
 
             if (!File.Exists(xmlFilePath))
             {
@@ -22,6 +23,7 @@ namespace Project_Game.Entities
 
             XmlNodeList nodeList = doc.SelectNodes("/Objects/Object");
             Console.WriteLine($"Found {nodeList.Count} Object node(s) in {xmlFilePath}.");
+
             foreach (XmlNode node in nodeList)
             {
                 string type = node.Attributes["type"]?.Value;
@@ -31,21 +33,23 @@ namespace Project_Game.Entities
                 int width = int.Parse(node.Attributes["width"]?.Value ?? "50");
                 int height = int.Parse(node.Attributes["height"]?.Value ?? "50");
 
-                Console.WriteLine($"Loading Object: type={type}, imageName={imageName}, x={x}, y={y}, width={width}, height={height}");
-
-                StaticObject obj = null;
+                Console.WriteLine($"Object node: type={type}, imageName={imageName}, x={x}, y={y}, width={width}, height={height}");
 
                 if (type == "House")
                 {
-                    // Chỉ truyền tên file. House constructor sẽ tự ghép "Assets/House/"
-                    obj = new House(imageName, x, y, width, height);
+                    objects.Add(new House(imageName, x, y, width, height));
                 }
-                else if (type == "Fence")
+                else if (type == "Chicken")
                 {
-                    obj = new Fence(imageName, x, y, width, height);
+                    // Giả sử Chicken có constructor: Chicken(string name, int startX, int startY, int minX, int maxX)
+                    // Bạn phải quyết định minX, maxX như thế nào. Ví dụ đặt cứng:
+                    int minX = x - 50;
+                    int maxX = x + 50;
+                    chickens.Add(new Chicken("ChickenFromXML", x, y, minX, maxX));
                 }
                 else
                 {
+                    // Các loại object khác (Fence, v.v.)
                     string category = node.Attributes["category"]?.Value;
                     if (string.IsNullOrEmpty(category))
                     {
@@ -53,16 +57,11 @@ namespace Project_Game.Entities
                     }
 
                     string fullPath = Path.Combine("Assets", category, imageName);
-                    obj = new StaticObject(fullPath, x, y, width, height);
+                    objects.Add(new StaticObject(fullPath, x, y, width, height));
                 }
-
-                if (obj != null)
-                    objects.Add(obj);
-                else
-                    Console.WriteLine("Failed to create object from XML node.");
             }
 
-            Console.WriteLine($"Total objects loaded from XML: {objects.Count}");
+            Console.WriteLine($"Total objects loaded from XML: {objects.Count}, Chickens loaded: {chickens.Count}");
             return objects;
         }
     }

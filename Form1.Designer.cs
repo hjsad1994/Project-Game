@@ -32,8 +32,6 @@
             this.movementTimer = new System.Windows.Forms.Timer(this.components);
             this.healBar = new System.Windows.Forms.ProgressBar();
             this.gameOverTimer = new System.Windows.Forms.Timer(this.components);
-            this.Test1 = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.Test1)).BeginInit();
             this.SuspendLayout();
             // 
             // movementTimer
@@ -57,22 +55,12 @@
             this.gameOverTimer.Interval = 4000;
             this.gameOverTimer.Tick += new System.EventHandler(this.GameOverTimer_Tick);
             // 
-            // Test1
-            // 
-            this.Test1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
-            this.Test1.Location = new System.Drawing.Point(482, 108);
-            this.Test1.Name = "Test1";
-            this.Test1.Size = new System.Drawing.Size(63, 22);
-            this.Test1.TabIndex = 2;
-            this.Test1.TabStop = false;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(784, 591);
-            this.Controls.Add(this.Test1);
             this.Controls.Add(this.healBar);
             this.DoubleBuffered = true;
             this.MaximizeBox = false;
@@ -89,7 +77,6 @@
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.KeyIsDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.KeyIsUp);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.FormMouseClick);
-            ((System.ComponentModel.ISupportInitialize)(this.Test1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -98,7 +85,6 @@
         private System.Windows.Forms.Timer movementTimer;
         private System.Windows.Forms.Timer gameOverTimer;
         private System.Windows.Forms.ProgressBar healBar;
-        private System.Windows.Forms.PictureBox Test1;
     }
 }
 
