@@ -235,10 +235,7 @@ namespace Project_Game
                 e.Graphics,
                 mapManager.CurrentBg,
                 player,
-                objectManager.Enemies,
-                objectManager.Chickens,
-                objectManager.AnimatedObjects,
-                objectManager.Kapybaras,
+                objectManager, // truyền thẳng objectManager
                 gameOverState
             );
 

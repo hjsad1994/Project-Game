@@ -1,19 +1,18 @@
-﻿using Project_Game;
-using Project_Game.Entities;
-using System;
+﻿using Project_Game.Entities;
 using System.Collections.Generic;
 using System.Linq;
-using System.Drawing;
+using System;
 
 namespace Project_Game
 {
     public class GameObjectManager
     {
+        public List<StaticObject> StaticObjects { get; private set; }
+        public List<AnimatedObject> AnimatedObjects { get; private set; }
         public List<TestEnemy> Enemies { get; private set; }
         public List<Chicken> Chickens { get; private set; }
         public List<Kapybara> Kapybaras { get; private set; }
         public List<GameObject> Obstacles { get; private set; }
-        public List<AnimatedObject> AnimatedObjects { get; private set; }
 
         private Player player;
         private GameLogic gameLogic;
@@ -26,6 +25,7 @@ namespace Project_Game
             Enemies = new List<TestEnemy>();
             Chickens = new List<Chicken>();
             Kapybaras = new List<Kapybara>();
+            StaticObjects = new List<StaticObject>();
         }
 
         public void SetGameLogic(GameLogic logic)
@@ -35,18 +35,30 @@ namespace Project_Game
 
         public void LoadMap1()
         {
+            // Xóa dữ liệu cũ
             AnimatedObjects.Clear();
             Enemies.Clear();
             Chickens.Clear();
             Kapybaras.Clear();
+            StaticObjects.Clear();
 
-            // Thêm 1 Kapybara
-            Kapybaras.Add(new Kapybara("Kapybara1", 640, 450, 100, 200));
+            // Thêm gà thủ công để test
+            Chickens.Add(new Chicken("Chicken1", 150, 200, 100, 200));
 
-            // Thêm chickens
-            Chickens.Add(new Chicken("Chicken1", 600, 300, 100, 200));
-            Chickens.Add(new Chicken("Chicken2", 400, 200, 350, 450));
+            // Thêm nhà thủ công
+        //    StaticObjects.Add(new House("House_3_1.png", 300, 200, 100, 100));
 
+            // Load objects từ XML
+            var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map1_objects.xml");
+            StaticObjects.AddRange(loadedObjects);
+
+            // Spawn quái kiểu cũ
+         //   Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 700, 150));
+
+            // Debug số lượng static object
+            Console.WriteLine($"After loading map1: StaticObjects={StaticObjects.Count}, Enemies={Enemies.Count}, Chickens={Chickens.Count}");
+
+            // Cập nhật danh sách enemies trong gameLogic
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
 
@@ -56,8 +68,10 @@ namespace Project_Game
             Enemies.Clear();
             Chickens.Clear();
             Kapybaras.Clear();
+            StaticObjects.Clear();
 
-            // Thêm logic cho Map2 nếu cần
+            var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map2_objects.xml");
+            StaticObjects.AddRange(loadedObjects);
 
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
@@ -68,10 +82,10 @@ namespace Project_Game
             Enemies.Clear();
             Chickens.Clear();
             Kapybaras.Clear();
+            StaticObjects.Clear();
 
-            AnimatedObjects.Add(new AnimatedObject("Flower_Grass_12_Anim_cuts", 200, 200, 40, 40, 12));
-            AnimatedObjects.Add(new AnimatedObject("Flower_Grass_3_Anim_cuts", 600, 350, 40, 40, 12));
-            Enemies = TestEnemy.CreateEnemies("Enemy/Skeleton_Swordman", 3, 700, 150);
+            // var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map3_objects.xml");
+            // StaticObjects.AddRange(loadedObjects);
 
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
@@ -82,9 +96,10 @@ namespace Project_Game
             Enemies.Clear();
             Chickens.Clear();
             Kapybaras.Clear();
+            StaticObjects.Clear();
 
-            AnimatedObjects.Add(new AnimatedObject("Flower_Grass_12_Anim_cuts", 250, 250, 35, 35, 9));
-            AnimatedObjects.Add(new AnimatedObject("Flower_Grass_3_Anim_cuts", 650, 400, 35, 35, 9));
+            // var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map4_objects.xml");
+            // StaticObjects.AddRange(loadedObjects);
 
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
@@ -101,7 +116,6 @@ namespace Project_Game
                 chicken.Update(player);
             }
 
-            // Update Kapybaras
             foreach (var kapy in Kapybaras)
             {
                 kapy.Update();

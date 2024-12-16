@@ -6,14 +6,19 @@ namespace Project_Game.Entities
 {
     public class Renderer
     {
-        public void Render(Graphics canvas, Image bg, Player player, List<TestEnemy> enemies, List<Chicken> chickens, List<AnimatedObject> animatedObjects, List<Kapybara> kapybaras, bool gameOverState)
+        public void Render(
+            Graphics canvas,
+            Image bg,
+            Player player,
+            GameObjectManager objectManager, // Thêm parameter này
+            bool gameOverState)
         {
             if (bg != null)
             {
                 canvas.DrawImage(bg, 0, 0, 800, 600);
             }
 
-            foreach (var animatedObject in animatedObjects)
+            foreach (var animatedObject in objectManager.AnimatedObjects)
             {
                 animatedObject.Update();
                 animatedObject.Draw(canvas);
@@ -22,37 +27,48 @@ namespace Project_Game.Entities
             var playerFrame = player.GetCurrentFrame();
             if (playerFrame != null)
             {
-                // Vẽ player theo kích thước playerWidth, playerHeight
                 canvas.DrawImage(playerFrame, player.playerX, player.playerY, player.playerWidth, player.playerHeight);
             }
 
-            foreach (var en in enemies)
+            foreach (var en in objectManager.Enemies)
             {
                 var enemyFrame = en.GetCurrentFrame();
                 if (enemyFrame != null)
                 {
-                    // Vẽ enemy theo Width, Height
                     canvas.DrawImage(enemyFrame, en.X, en.Y, en.Width, en.Height);
                 }
             }
 
-            foreach (var chicken in chickens)
+            foreach (var chicken in objectManager.Chickens)
             {
                 var chickenFrame = chicken.GetCurrentFrame();
                 if (chickenFrame != null)
                 {
-                    // Gà vẫn 20x20, bạn có thể thay đổi kích thước gà tương tự
                     canvas.DrawImage(chickenFrame, chicken.X, chicken.Y, chicken.Width, chicken.Height);
                 }
             }
 
-            foreach (var kapy in kapybaras)
+            foreach (var kapy in objectManager.Kapybaras)
             {
                 var kapyFrame = kapy.GetCurrentFrame();
                 if (kapyFrame != null)
                 {
-                    // Kapybara có thể thay đổi Width, Height tương tự
                     canvas.DrawImage(kapyFrame, kapy.X, kapy.Y, kapy.Width, kapy.Height);
+                }
+            }
+
+            // Vẽ các StaticObject
+            foreach (var staticObj in objectManager.StaticObjects)
+            {
+                staticObj.Draw(canvas);
+            }
+
+            foreach (var en in objectManager.Enemies)
+            {
+                var enemyFrame = en.GetCurrentFrame();
+                if (enemyFrame != null)
+                {
+                    canvas.DrawImage(enemyFrame, en.X, en.Y, en.Width, en.Height);
                 }
             }
 

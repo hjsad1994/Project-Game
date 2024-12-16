@@ -93,6 +93,38 @@ namespace Project_Game.Entities
             }
         }
 
+        //public void SwitchMap(int newMap, Point targetPosition)
+        //{
+        //    currentMap = newMap;
+        //    Console.WriteLine($"Switching to Map {newMap}.");
+
+        //    if (currentMap == 1)
+        //    {
+        //        currentBg = bgMap1;
+        //        objectManager.LoadMap1();
+        //    }
+        //    else if (currentMap == 2)
+        //    {
+        //        currentBg = bgMap2;
+        //        objectManager.LoadMap2();
+        //    }
+        //    else if (currentMap == 3)
+        //    {
+        //        currentBg = bgMap3;
+        //        objectManager.LoadMap3();
+        //    }
+        //    else if (currentMap == 4)
+        //    {
+        //        currentBg = bgMap4;
+        //        objectManager.LoadMap4();
+        //    }
+
+        //    player.playerX = targetPosition.X;
+        //    player.playerY = targetPosition.Y;
+        //    Console.WriteLine($"Player positioned at Map {currentMap} entrance: ({player.playerX}, {player.playerY})");
+
+        //    isTransitioning = false;
+        //}
         public void SwitchMap(int newMap, Point targetPosition)
         {
             currentMap = newMap;
