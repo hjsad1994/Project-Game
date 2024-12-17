@@ -24,7 +24,7 @@ namespace Project_Game.Entities
         public virtual int AttackRange { get; } = 25; // Giá trị mặc định, có thể override trong lớp kế thừaa
         public virtual int DetectionRange { get; } = 300;
         public Enemy(string name, int maxHealth = 100)
-            : base(0, 0, 22, 35, name, maxHealth) { }
+            : base(0, 0, 22, 32, name, maxHealth) { }
 
         public virtual void SetPosition(int x, int y)
         {

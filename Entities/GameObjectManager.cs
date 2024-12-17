@@ -43,6 +43,7 @@ namespace Project_Game
 
             List<Chicken> loadedChickens;
             var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map1_objects.xml", out loadedChickens);
+            Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 700, 150));
 
             StaticObjects.AddRange(loadedObjects);
             Chickens.AddRange(loadedChickens);
@@ -62,12 +63,23 @@ namespace Project_Game
             Chickens.Clear();
             Kapybaras.Clear();
             StaticObjects.Clear();
+            Obstacles.Clear();
 
-         //   var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map2_objects.xml");
-       //     StaticObjects.AddRange(loadedObjects);
+            // Nếu map2 có objects từ XML:
+            // var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map2_objects.xml", out List<Chicken> loadedChickens);
+            // StaticObjects.AddRange(loadedObjects);
+            // Chickens.AddRange(loadedChickens);
 
+            // Thêm StaticObjects vào Obstacles nếu cần
+            Obstacles.AddRange(StaticObjects);
+
+            // Spawn quái cho map2 (nếu bạn muốn có quái ở map2)
+            //Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 600, 200));
+
+            // Cập nhật danh sách enemies trong gameLogic
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
+
 
         public void LoadMap3()
         {
@@ -79,6 +91,7 @@ namespace Project_Game
 
             // var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map3_objects.xml");
             // StaticObjects.AddRange(loadedObjects);
+            Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 600, 200));
 
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
