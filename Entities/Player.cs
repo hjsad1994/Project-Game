@@ -58,6 +58,7 @@ namespace Project_Game.Entities
         public bool IsBlockedDown => BlockedDown;
         public string CurrentDirection => currentDirection;
         private string currentWeapon = "Sword"; // Default weapon
+        public InventoryManager InventoryManager { get; set; }
 
         // Đồng bộ hóa X và Y với playerX và playerY
         public override int X

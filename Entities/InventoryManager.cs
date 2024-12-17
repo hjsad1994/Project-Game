@@ -144,35 +144,36 @@ namespace Project_Game.Entities
                 bar[dragSourceBarIndex] = item;
             }
         }
-        public bool AddItem(Item item)
+public bool AddItem(Item item)
+{
+    // Thêm vào inventoryGrid
+    for (int r = 0; r < inventoryGrid.GetLength(0); r++)
+    {
+        for (int c = 0; c < inventoryGrid.GetLength(1); c++)
         {
-            // Thêm vào inventoryGrid
-            for (int r = 0; r < inventoryGrid.GetLength(0); r++)
+            if (inventoryGrid[r, c] == null)
             {
-                for (int c = 0; c < inventoryGrid.GetLength(1); c++)
-                {
-                    if (inventoryGrid[r, c] == null)
-                    {
-                        inventoryGrid[r, c] = item;
-                        Console.WriteLine($"Item {item.Name} thêm vào inventory tại ({r}, {c})");
-                        return true;
-                    }
-                }
+                inventoryGrid[r, c] = item;
+                Console.WriteLine($"Item {item.Name} thêm vào inventory tại ({r}, {c})");
+                return true;
             }
-
-            // Nếu inventoryGrid đầy, có thể thêm vào bar nếu cần
-            for (int i = 0; i < bar.Length; i++)
-            {
-                if (bar[i] == null)
-                {
-                    bar[i] = item;
-                    Console.WriteLine($"Item {item.Name} thêm vào bar tại slot {i}");
-                    return true;
-                }
-            }
-
-            // Nếu không có chỗ trống, trả về false
-            return false;
         }
+    }
+
+    // Nếu inventoryGrid đầy, có thể thêm vào bar nếu cần
+    for (int i = 0; i < bar.Length; i++)
+    {
+        if (bar[i] == null)
+        {
+            bar[i] = item;
+            Console.WriteLine($"Item {item.Name} thêm vào bar tại slot {i}");
+            return true;
+        }
+    }
+
+    // Nếu không có chỗ trống, trả về false
+    Console.WriteLine($"Inventory đầy. Không thể thêm item: {item.Name}");
+    return false;
+}
     }
 }

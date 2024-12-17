@@ -68,7 +68,7 @@ namespace Project_Game
             UIManager.Initialize(this, inventoryManager, player);
 
             gameTimer = new Timer();
-            gameTimer.Interval = 16; // ~60 FPS
+            gameTimer.Interval = 33; // ~60 FPS
             gameTimer.Tick += TimerEvent;
             gameTimer.Start();
             Console.WriteLine("Game Timer started with interval 16ms.");
@@ -244,6 +244,9 @@ namespace Project_Game
                 // Người chơi nhặt item
                 player.PickupItems(objectManager.DroppedItems, inventoryManager);
 
+                // Kiểm tra khoảng cách và bắt đầu hiệu ứng bay vào người chơi
+                CheckProximityForItems();
+
                 mapManager.UpdateMap();
             }
 
@@ -253,6 +256,28 @@ namespace Project_Game
                 needsRedraw = false;
             }
         }
+
+
+        private void CheckProximityForItems()
+        {
+            float proximityThreshold = 50f; // Khoảng cách để bắt đầu bay vào người chơi
+
+            foreach (var item in objectManager.DroppedItems.ToList()) // Sử dụng ToList() để tránh lỗi khi xoá trong vòng lặp
+            {
+                if (!item.IsFlying)
+                {
+                    float deltaX = player.X - item.X;
+                    float deltaY = player.Y - item.Y;
+                    float distance = (float)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                    if (distance <= proximityThreshold)
+                    {
+                        item.StartFlyingTowardsPlayer(player);
+                    }
+                }
+            }
+        }
+
 
 
         private void ResetGameAction()

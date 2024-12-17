@@ -198,9 +198,10 @@ namespace Project_Game
 
             foreach (var droppedItem in DroppedItems)
             {
-                droppedItem.Update();
+                droppedItem.Update(player);
             }
         }
+
 
         public void RenderAll(Graphics g)
         {

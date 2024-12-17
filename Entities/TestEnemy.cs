@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace Project_Game.Entities
 {
@@ -38,6 +39,7 @@ namespace Project_Game.Entities
 
         // Lưu vị trí dưới dạng float để di chuyển mượt mà
         private float posX, posY;
+        private static Random rand = new Random();
 
         public TestEnemy(string baseFolder, int maxHealth = 50, int startX = 500, int startY = 100)
             : base("TestEnemy", maxHealth)
@@ -392,12 +394,20 @@ namespace Project_Game.Entities
                 {
                     Image itemIcon = Image.FromFile(itemImagePath);
                     Item droppedItem = new Item(itemName, itemIcon);
-                    DroppedItem newDroppedItem = new DroppedItem(droppedItem, X, Y);
+
+                    // Tính toán khoảng cách và hướng ngẫu nhiên
+                    double angle = rand.NextDouble() * 2 * Math.PI; // Góc ngẫu nhiên từ 0 đến 2π radians
+                    float distance = rand.Next(10, 40); // Khoảng cách ngẫu nhiên từ 10 đến 30 pixels
+                    int offsetX = (int)(Math.Cos(angle) * distance);
+                    int offsetY = (int)(Math.Sin(angle) * distance);
+
+                    // Tạo DroppedItem tại vị trí offset
+                    DroppedItem newDroppedItem = new DroppedItem(droppedItem, X + offsetX, Y + offsetY);
 
                     // Thêm DroppedItem vào GameObjectManager
                     GameObjectManager.Instance.AddDroppedItem(newDroppedItem);
 
-                    Console.WriteLine($"{Name} đã rớt ra item: {itemName}");
+                    Console.WriteLine($"{Name} đã rớt ra item: {itemName} tại ({newDroppedItem.X}, {newDroppedItem.Y})");
                 }
                 catch (Exception ex)
                 {
