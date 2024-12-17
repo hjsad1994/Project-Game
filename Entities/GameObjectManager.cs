@@ -40,6 +40,9 @@ namespace Project_Game
             Chickens.Clear();
             Kapybaras.Clear();
             StaticObjects.Clear();
+            Obstacles.Clear(); // Đảm bảo danh sách Obstacles được xóa
+
+            Console.WriteLine("Loading Map 1...");
 
             List<Chicken> loadedChickens;
             var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map1_objects.xml", out loadedChickens);
@@ -48,13 +51,14 @@ namespace Project_Game
             StaticObjects.AddRange(loadedObjects);
             Chickens.AddRange(loadedChickens);
 
-            Obstacles.AddRange(StaticObjects); // Nếu muốn house cản đường
+            Obstacles.AddRange(StaticObjects); // Thêm StaticObjects vào Obstacles
+
+            Console.WriteLine($"Map1 Loaded - StaticObjects Count: {StaticObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}");
+
+            player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
 
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
-
-
-
 
         public void LoadMap2()
         {
@@ -63,15 +67,21 @@ namespace Project_Game
             Chickens.Clear();
             Kapybaras.Clear();
             StaticObjects.Clear();
-            Obstacles.Clear();
+            Obstacles.Clear(); // Đảm bảo danh sách Obstacles được xóa
+
+            Console.WriteLine("Loading Map 2...");
 
             // Nếu map2 có objects từ XML:
             // var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map2_objects.xml", out List<Chicken> loadedChickens);
             // StaticObjects.AddRange(loadedObjects);
             // Chickens.AddRange(loadedChickens);
 
-            // Thêm StaticObjects vào Obstacles nếu cần
+            // Thêm StaticObjects vào Obstacles nếu cần (hiện tại StaticObjects đã được xóa nên Obstacles sẽ rỗng)
             Obstacles.AddRange(StaticObjects);
+
+            Console.WriteLine($"Map2 Loaded - StaticObjects Count: {StaticObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}");
+
+            player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
 
             // Spawn quái cho map2 (nếu bạn muốn có quái ở map2)
             //Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 600, 200));
@@ -80,7 +90,6 @@ namespace Project_Game
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
 
-
         public void LoadMap3()
         {
             AnimatedObjects.Clear();
@@ -88,10 +97,21 @@ namespace Project_Game
             Chickens.Clear();
             Kapybaras.Clear();
             StaticObjects.Clear();
+            Obstacles.Clear(); // Đảm bảo danh sách Obstacles được xóa
+
+            Console.WriteLine("Loading Map 3...");
 
             // var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map3_objects.xml");
             // StaticObjects.AddRange(loadedObjects);
+
             Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 600, 200));
+
+            // Thêm StaticObjects vào Obstacles nếu cần
+            Obstacles.AddRange(StaticObjects);
+
+            Console.WriteLine($"Map3 Loaded - StaticObjects Count: {StaticObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}");
+
+            player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
 
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
@@ -103,9 +123,22 @@ namespace Project_Game
             Chickens.Clear();
             Kapybaras.Clear();
             StaticObjects.Clear();
+            Obstacles.Clear(); // Đảm bảo danh sách Obstacles được xóa
+
+            Console.WriteLine("Loading Map 4...");
 
             // var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map4_objects.xml");
             // StaticObjects.AddRange(loadedObjects);
+
+            // Thêm StaticObjects vào Obstacles nếu cần
+            Obstacles.AddRange(StaticObjects);
+
+            Console.WriteLine($"Map4 Loaded - StaticObjects Count: {StaticObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}");
+
+            player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
+
+            // Thêm quái cho map4 nếu cần
+            //Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 600, 200));
 
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
