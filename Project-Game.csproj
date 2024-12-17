@@ -51,6 +51,7 @@
     <Compile Include="Entities\AnimationManager.cs" />
     <Compile Include="Entities\Attack.cs" />
     <Compile Include="Entities\Chicken.cs" />
+    <Compile Include="Entities\DroppedItem.cs" />
     <Compile Include="Entities\Enemy.cs" />
     <Compile Include="Entities\Fence.cs" />
     <Compile Include="Entities\GameObject.cs" />

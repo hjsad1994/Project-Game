@@ -506,5 +506,32 @@ namespace Project_Game.Entities
         {
             this.obstacles = newObstacles;
         }
+        public void PickupItems(List<DroppedItem> droppedItems, InventoryManager inventory)
+        {
+            for (int i = droppedItems.Count - 1; i >= 0; i--)
+            {
+                var item = droppedItems[i];
+                Rectangle playerRect = new Rectangle(X, Y, Width, Height);
+                Rectangle itemRect = new Rectangle(item.X, item.Y, item.Width, item.Height);
+
+                // Debug: Kiểm tra các Rectangle
+                Console.WriteLine($"Player Rect: {playerRect}, Item Rect: {itemRect}");
+
+                if (playerRect.IntersectsWith(itemRect))
+                {
+                    bool added = inventory.AddItem(item.Item);
+                    if (added)
+                    {
+                        droppedItems.RemoveAt(i);
+                        Console.WriteLine($"{Name} đã nhặt được item: {item.Item.Name}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Inventory đã đầy. Không thể nhặt thêm item.");
+                    }
+                }
+            }
+        }
+
     }
 }

@@ -30,16 +30,19 @@ namespace Project_Game
             InitializeComponent();
             this.FormClosing += Form1_FormClosing;
 
+            // Bật double buffering để giảm hiện tượng nhấp nháy
+            this.DoubleBuffered = true;
+
             // Trước đây bạn dùng Test1 để tạo obstacle.
             // Giờ bỏ qua, hoặc tự tạo một obstacle khác, hoặc để trống.
             var obstacles = new List<GameObject>();
 
             var initialEnemies = new List<TestEnemy>();
             var initialChickens = new List<Chicken>
-            {
-                new Chicken("Chicken1", 150, 200, 100, 200),
-                new Chicken("Chicken2", 400, 200, 350, 450)
-            };
+        {
+        new Chicken("Chicken1", 150, 200, 100, 200),
+        new Chicken("Chicken2", 400, 200, 350, 450)
+        };
 
             player = new Player(obstacles, initialEnemies, initialChickens);
             player.OnHealthChanged += UpdateHealBar;
@@ -238,6 +241,9 @@ namespace Project_Game
                 needsRedraw = true;
                 objectManager.UpdateAll(player);
 
+                // Người chơi nhặt item
+                player.PickupItems(objectManager.DroppedItems, inventoryManager);
+
                 mapManager.UpdateMap();
             }
 
@@ -247,6 +253,7 @@ namespace Project_Game
                 needsRedraw = false;
             }
         }
+
 
         private void ResetGameAction()
         {

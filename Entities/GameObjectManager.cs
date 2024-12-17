@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Drawing;
 
 namespace Project_Game
 {
@@ -13,9 +14,22 @@ namespace Project_Game
         public List<Chicken> Chickens { get; private set; }
         public List<Kapybara> Kapybaras { get; private set; }
         public List<GameObject> Obstacles { get; private set; }
+        public List<DroppedItem> DroppedItems { get; private set; } // Thêm danh sách DroppedItem
 
         private Player player;
         private GameLogic gameLogic;
+
+        // Singleton pattern (nếu bạn đã triển khai)
+        private static GameObjectManager _instance;
+        public static GameObjectManager Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    throw new Exception("GameObjectManager chưa được khởi tạo. Vui lòng khởi tạo nó trước khi sử dụng.");
+                return _instance;
+            }
+        }
 
         public GameObjectManager(Player player)
         {
@@ -26,12 +40,23 @@ namespace Project_Game
             Chickens = new List<Chicken>();
             Kapybaras = new List<Kapybara>();
             StaticObjects = new List<StaticObject>();
+            DroppedItems = new List<DroppedItem>();
+            _instance = this; // Thiết lập instance cho Singleton
         }
 
         public void SetGameLogic(GameLogic logic)
         {
             this.gameLogic = logic;
         }
+
+        // Phương thức để thêm DroppedItem vào danh sách
+        public void AddDroppedItem(DroppedItem item)
+        {
+            DroppedItems.Add(item);
+           // Obstacles.Add(item); // Nếu muốn DroppedItem cũng là chướng ngại vật
+        }
+
+        // ... Các phương thức LoadMapX hiện tại ...
 
         public void LoadMap1()
         {
@@ -48,8 +73,7 @@ namespace Project_Game
             AnimatedObjects.AddRange(loadedAnimatedObjects);
             Chickens.AddRange(loadedChickens);
 
-            Obstacles.AddRange(StaticObjects); // Nếu muốn house cản đường
-          
+            Obstacles.AddRange(StaticObjects); // Thêm StaticObjects vào Obstacles
 
             Console.WriteLine($"Map1 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}");
 
@@ -147,6 +171,7 @@ namespace Project_Game
             Kapybaras.Clear();
             StaticObjects.Clear();
             Obstacles.Clear();
+            DroppedItems.Clear(); // Xoá DroppedItems khi tải bản đồ mới
         }
 
         public void UpdateAll(Player player)
@@ -170,6 +195,35 @@ namespace Project_Game
             {
                 animatedObj.Update();
             }
+
+            foreach (var droppedItem in DroppedItems)
+            {
+                droppedItem.Update();
+            }
+        }
+
+        public void RenderAll(Graphics g)
+        {
+            // Vẽ StaticObjects
+            foreach (var staticObj in StaticObjects)
+            {
+                staticObj.Draw(g);
+            }
+
+            // Vẽ AnimatedObjects
+            foreach (var animatedObj in AnimatedObjects)
+            {
+                animatedObj.Draw(g);
+            }
+
+            // Vẽ DroppedItems
+            foreach (var droppedItem in DroppedItems)
+            {
+                droppedItem.Draw(g);
+            }
+
+            // Vẽ Enemies, Chickens, Kapybaras, Player, etc.
+            // (Assuming bạn đã có một Renderer để vẽ các đối tượng khác)
         }
     }
 }

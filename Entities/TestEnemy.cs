@@ -313,6 +313,7 @@ namespace Project_Game.Entities
                 isDead = true;
                 deadAnimation.ResetAnimation();
                 Console.WriteLine($"{Name} đã chết.");
+                DropItem(); // Gọi phương thức DropItem khi quái bị giết
             }
         }
 
@@ -377,6 +378,35 @@ namespace Project_Game.Entities
             if (IsAttacking)
             {
                 UpdateAttack();
+            }
+        }
+        private void DropItem()
+        {
+            // Tạo một item mới (cập nhật đường dẫn hình ảnh sau)
+            string itemName = "Ores_1"; // Ví dụ: đặt tên item
+            string itemImagePath = Path.Combine("Assets", "Items", "Ores", "ores_1.png"); // Đường dẫn hình ảnh item
+
+            if (File.Exists(itemImagePath))
+            {
+                try
+                {
+                    Image itemIcon = Image.FromFile(itemImagePath);
+                    Item droppedItem = new Item(itemName, itemIcon);
+                    DroppedItem newDroppedItem = new DroppedItem(droppedItem, X, Y);
+
+                    // Thêm DroppedItem vào GameObjectManager
+                    GameObjectManager.Instance.AddDroppedItem(newDroppedItem);
+
+                    Console.WriteLine($"{Name} đã rớt ra item: {itemName}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Lỗi khi tạo DroppedItem: {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Không tìm thấy hình ảnh cho item: {itemImagePath}");
             }
         }
     }

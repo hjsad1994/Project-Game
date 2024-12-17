@@ -1,6 +1,8 @@
 ﻿using Project_Game.Entities;
-using System.Drawing;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace Project_Game.Entities
 {
@@ -10,26 +12,36 @@ namespace Project_Game.Entities
             Graphics canvas,
             Image bg,
             Player player,
-            GameObjectManager objectManager, // Thêm parameter này
+            GameObjectManager objectManager,
             bool gameOverState)
         {
+            // Vẽ nền
             if (bg != null)
             {
                 canvas.DrawImage(bg, 0, 0, 800, 600);
             }
 
+            // Vẽ các AnimatedObject
             foreach (var animatedObject in objectManager.AnimatedObjects)
             {
                 animatedObject.Update();
                 animatedObject.Draw(canvas);
             }
 
+            // Vẽ DroppedItems
+            foreach (var droppedItem in objectManager.DroppedItems)
+            {
+                droppedItem.Draw(canvas);
+            }
+
+            // Vẽ người chơi
             var playerFrame = player.GetCurrentFrame();
             if (playerFrame != null)
             {
-                canvas.DrawImage(playerFrame, player.playerX, player.playerY, player.playerWidth, player.playerHeight);
+                canvas.DrawImage(playerFrame, player.X, player.Y, player.Width, player.Height);
             }
 
+            // Vẽ kẻ thù
             foreach (var en in objectManager.Enemies)
             {
                 var enemyFrame = en.GetCurrentFrame();
@@ -39,6 +51,7 @@ namespace Project_Game.Entities
                 }
             }
 
+            // Vẽ gà
             foreach (var chicken in objectManager.Chickens)
             {
                 var chickenFrame = chicken.GetCurrentFrame();
@@ -48,6 +61,7 @@ namespace Project_Game.Entities
                 }
             }
 
+            // Vẽ Kapybara
             foreach (var kapy in objectManager.Kapybaras)
             {
                 var kapyFrame = kapy.GetCurrentFrame();
@@ -58,20 +72,26 @@ namespace Project_Game.Entities
             }
 
             // Vẽ các StaticObject
+            Console.WriteLine($"Rendering {objectManager.StaticObjects.Count} StaticObjects.");
             foreach (var staticObj in objectManager.StaticObjects)
             {
                 staticObj.Draw(canvas);
             }
 
-            foreach (var en in objectManager.Enemies)
+            // Vẽ các DroppedItem
+            Console.WriteLine($"Rendering {objectManager.DroppedItems.Count} DroppedItems.");
+            foreach (var droppedItem in objectManager.DroppedItems)
             {
-                var enemyFrame = en.GetCurrentFrame();
-                if (enemyFrame != null)
-                {
-                    canvas.DrawImage(enemyFrame, en.X, en.Y, en.Width, en.Height);
-                }
+                droppedItem.Draw(canvas);
             }
 
+            // Vẽ UI nếu game không kết thúc
+            if (!gameOverState)
+            {
+                // Bạn có thể thêm các phần vẽ UI khác ở đây nếu cần
+            }
+
+            // Vẽ trạng thái Game Over
             if (gameOverState)
             {
                 using (Font font = new Font("Arial", 24, FontStyle.Bold))
