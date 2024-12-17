@@ -221,6 +221,8 @@ namespace Project_Game
             StaticObjects.Clear();
             Obstacles.Clear();
             DroppedItems.Clear(); // Xoá DroppedItems khi tải bản đồ mới
+            Trees.Clear(); // Thêm dòng này để xoá danh sách Trees
+            Console.WriteLine("[Info] Cleared all game objects.");
         }
 
         public void UpdateAll(Player player)
