@@ -17,7 +17,6 @@ namespace Project_Game
         private GameOver gameOver;
         private bool gameOverState = false;
         private bool needsRedraw = false;
-
         private InventoryManager inventoryManager;
 
         private const int PlayerWidth = 50;
@@ -99,91 +98,95 @@ namespace Project_Game
             base.OnKeyDown(e);
             KeyIsDown(this, e);
 
-            if (!gameOverState)
-            {
-                if (e.KeyCode == Keys.C)
-                {
-                    AttemptHarvest();
-                }
-                else if (e.KeyCode == Keys.X)
-                {
-                    AttemptChop();
-                }
-            }
+            //if (!gameOverState)
+            //{
+            //    //if (e.KeyCode == Keys.C)
+            //    //{
+            //    //    AttemptHarvest();
+            //    //}
+            //    //else if (e.KeyCode == Keys.X)
+            //    //{
+            //    //    AttemptChop();
+            //    //}
+            //}
         }
-        private void AttemptHarvest()
+        private void AttemptHarvestWithClick(int mouseX, int mouseY)
         {
-            bool harvestedAny = false;
-
-            // Kiểm tra xem người chơi có đứng gần bất kỳ cây nào không
+            // Tìm cây được click
+            Tree clickedTree = null;
             foreach (var tree in objectManager.Trees)
             {
-                // Tính trung tâm của người chơi
+                Rectangle treeRect = new Rectangle(tree.X, tree.Y, tree.TreeWidth, tree.TreeHeight);
+                if (treeRect.Contains(mouseX, mouseY))
+                {
+                    clickedTree = tree;
+                    break;
+                }
+            }
+
+            if (clickedTree != null)
+            {
+                // Kiểm tra khoảng cách giữa người chơi và cây
                 float playerCenterX = player.X + player.Width / 2f;
                 float playerCenterY = player.Y + player.Height / 2f;
 
-                // Tính trung tâm của cây
-                float treeCenterX = tree.X + tree.TreeWidth / 2f;
-                float treeCenterY = tree.Y + tree.TreeHeight / 2f;
+                float treeCenterX = clickedTree.X + clickedTree.TreeWidth / 2f;
+                float treeCenterY = clickedTree.Y + clickedTree.TreeHeight / 2f;
 
-                // Tính khoảng cách giữa trung tâm người chơi và trung tâm cây
                 float deltaX = playerCenterX - treeCenterX;
                 float deltaY = playerCenterY - treeCenterY;
                 float distance = (float)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
 
-                float harvestDistance = 50f; // Khoảng cách tối đa để thu hoạch
+                float harvestDistance = 100f; // Khoảng cách tối đa để thu hoạch (tùy chỉnh nếu cần)
 
-                Console.WriteLine($"[Debug] Distance to tree at ({tree.X}, {tree.Y}): {distance}");
+                Console.WriteLine($"[Debug] Distance to clicked tree: {distance}");
 
                 if (distance <= harvestDistance)
                 {
+                    // Xác định hướng dựa trên vị trí cây so với người chơi
+                    string direction = DetermineDirection(deltaX, deltaY);
+                    player.CurrentDirection = direction; // Cập nhật hướng của người chơi
+
                     // Thực hiện thu hoạch
-                    Item harvestedItem = tree.Harvest(inventoryManager);
+                    Item harvestedItem = clickedTree.Harvest(inventoryManager);
                     if (harvestedItem != null)
                     {
-                        Console.WriteLine($"Player đã thu hoạch {harvestedItem.Name} từ cây tại ({tree.X}, {tree.Y}).");
-                        harvestedAny = true;
+                        Console.WriteLine($"Player đã thu hoạch {harvestedItem.Name} từ cây tại ({clickedTree.X}, {clickedTree.Y}).");
+
+                        // Hiển thị hoạt ảnh cắt cây
+                        player.PerformAttack(new List<Enemy>()); // Không tấn công kẻ thù, chỉ thực hiện hoạt ảnh
+
+                        // Vẽ lại UI
+                        Invalidate();
                     }
                     else
                     {
-                        Console.WriteLine($"Không thể thu hoạch cây tại ({tree.X}, {tree.Y}). Có thể cây chưa trưởng thành hoặc inventory đã đầy.");
+                        Console.WriteLine($"Không thể thu hoạch cây tại ({clickedTree.X}, {clickedTree.Y}).");
                     }
                 }
-            }
-
-            if (!harvestedAny)
-            {
-                Console.WriteLine("[Info] Không có cây nào gần bạn để thu hoạch.");
-            }
-
-            Invalidate(); // Yêu cầu vẽ lại form
-        }
-
-
-        private void AttemptChop()
-        {
-            // Kiểm tra xem người chơi có đứng gần bất kỳ cây nào không
-            foreach (var tree in objectManager.Trees)
-            {
-                // Xác định khoảng cách giữa người chơi và cây
-                float deltaX = player.X - tree.X;
-                float deltaY = player.Y - tree.Y;
-                float distance = (float)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
-
-                float chopDistance = 50f; // Khoảng cách tối đa để chặt
-
-                if (distance <= chopDistance)
+                else
                 {
-                    // Thực hiện chặt cây
-                    tree.Chop();
-                    Console.WriteLine($"Player đã chặt cây tại ({tree.X}, {tree.Y}).");
-
-                    // Có thể thêm logic thêm experience, resource, v.v.
+                    Console.WriteLine("[Info] Cây được click không trong khoảng cách thu hoạch.");
                 }
             }
-
-            Invalidate(); // Yêu cầu vẽ lại form
+            else
+            {
+                Console.WriteLine("[Info] Không tìm thấy cây nào được click.");
+            }
         }
+
+        private string DetermineDirection(float deltaX, float deltaY)
+        {
+            if (Math.Abs(deltaX) > Math.Abs(deltaY))
+            {
+                return deltaX > 0 ? "Left" : "Right";
+            }
+            else
+            {
+                return deltaY > 0 ? "Up" : "Down";
+            }
+        }
+
         protected override void OnKeyUp(KeyEventArgs e)
         {
             base.OnKeyUp(e);
@@ -489,10 +492,20 @@ namespace Project_Game
                 UIManager.Instance.OnMouseDown(e);
                 if (!UIManager.Instance.IsDraggingItem && !UIManager.Instance.IsClickOnUI(e.X, e.Y))
                 {
-                    PerformAttack(e);
+                    // Kiểm tra xem công cụ hiện tại có phải là Axe không
+                    if (player.CurrentWeapon == "Axe")
+                    {
+                        AttemptHarvestWithClick(e.X, e.Y);
+                    }
+                    else
+                    {
+                        // Các hành động khác nếu cần (ví dụ: tấn công bằng vũ khí khác)
+                        PerformAttack(e);
+                    }
                 }
             }
         }
+
 
         protected override void OnMouseMove(MouseEventArgs e)
         {

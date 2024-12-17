@@ -56,8 +56,10 @@ namespace Project_Game.Entities
         public bool IsBlockedRight => BlockedRight;
         public bool IsBlockedUp => BlockedUp;
         public bool IsBlockedDown => BlockedDown;
-        public string CurrentDirection => currentDirection;
-        private string currentWeapon = "Sword"; // Default weapon
+        //public string CurrentDirection => currentDirection;
+        public string CurrentDirection { get; set; }  // Add the setter
+
+        public string currentWeapon = "Sword"; // Default weapon 
         public InventoryManager InventoryManager { get; set; }
 
         // Đồng bộ hóa X và Y với playerX và playerY
@@ -404,7 +406,7 @@ namespace Project_Game.Entities
                         attackPath = Path.Combine("Assets", "Player_Attack", currentDirection);
                         break;
                     case "Axe":
-                        attackPath = Path.Combine("Assets", "Player", "Player_Axe", currentDirection);
+                        attackPath = Path.Combine("Assets", "Player", "Player_Cut", currentDirection);
                         break;
                     case "Pickaxe":
                         attackPath = Path.Combine("Assets", "Player", "Player_Dig-up", currentDirection);
@@ -465,6 +467,7 @@ namespace Project_Game.Entities
                 // Optionally, implement attack cooldowns or other logic here
             }
         }
+
 
         // Cập nhật trạng thái tấn công
         public void UpdateAttack()
@@ -533,6 +536,9 @@ namespace Project_Game.Entities
                 }
             }
         }
-
+        public string CurrentWeapon
+        {
+            get { return currentWeapon; }
+        }
     }
 }
