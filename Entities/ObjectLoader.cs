@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Project_Game.Entities;
+using System;
 using System.IO;
 using System.Xml;
 using System.Collections.Generic;
@@ -7,10 +8,11 @@ namespace Project_Game.Entities
 {
     public class ObjectLoader
     {
-        public static List<StaticObject> LoadObjectsFromXml(string xmlFilePath, out List<Chicken> chickens)
+        public static List<StaticObject> LoadObjectsFromXml(string xmlFilePath, out List<Chicken> chickens, out List<AnimatedObject> animatedObjects)
         {
             List<StaticObject> objects = new List<StaticObject>();
             chickens = new List<Chicken>();
+            animatedObjects = new List<AnimatedObject>();
 
             if (!File.Exists(xmlFilePath))
             {
@@ -22,8 +24,11 @@ namespace Project_Game.Entities
             doc.Load(xmlFilePath);
 
             XmlNodeList nodeList = doc.SelectNodes("/Objects/Object");
-            Console.WriteLine($"Found {nodeList.Count} Object node(s) in {xmlFilePath}.");
+            XmlNodeList animatedNodeList = doc.SelectNodes("/Objects/AnimatedObject");
 
+            Console.WriteLine($"Found {nodeList.Count} Object node(s) and {animatedNodeList.Count} AnimatedObject node(s) in {xmlFilePath}.");
+
+            // Xử lý các đối tượng tĩnh và động như trước
             foreach (XmlNode node in nodeList)
             {
                 string type = node.Attributes["type"]?.Value;
@@ -61,7 +66,31 @@ namespace Project_Game.Entities
                 }
             }
 
-            Console.WriteLine($"Total objects loaded from XML: {objects.Count}, Chickens loaded: {chickens.Count}");
+            // Xử lý các AnimatedObject
+            foreach (XmlNode animNode in animatedNodeList)
+            {
+                string type = animNode.Attributes["type"]?.Value;
+                string spriteSheetFolderPath = animNode.Attributes["spriteSheetFolderPath"]?.Value;
+                int x = int.Parse(animNode.Attributes["x"]?.Value ?? "0");
+                int y = int.Parse(animNode.Attributes["y"]?.Value ?? "0");
+                int width = int.Parse(animNode.Attributes["width"]?.Value ?? "50");
+                int height = int.Parse(animNode.Attributes["height"]?.Value ?? "50");
+                int frameRate = int.Parse(animNode.Attributes["frameRate"]?.Value ?? "5");
+
+                Console.WriteLine($"AnimatedObject node: type={type}, spriteSheetFolderPath={spriteSheetFolderPath}, x={x}, y={y}, width={width}, height={height}, frameRate={frameRate}");
+
+                try
+                {
+                    AnimatedObject animatedObj = new AnimatedObject(spriteSheetFolderPath, x, y, width, height, frameRate);
+                    animatedObjects.Add(animatedObj);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error creating AnimatedObject of type {type}: {ex.Message}");
+                }
+            }
+
+            Console.WriteLine($"Total objects loaded from XML: {objects.Count}, Chickens loaded: {chickens.Count}, AnimatedObjects loaded: {animatedObjects.Count}");
             return objects;
         }
     }
