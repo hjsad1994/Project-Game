@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using System.Drawing;
+using System.IO;
 
 namespace Project_Game
 {
@@ -15,6 +16,7 @@ namespace Project_Game
         public List<Kapybara> Kapybaras { get; private set; }
         public List<GameObject> Obstacles { get; private set; }
         public List<DroppedItem> DroppedItems { get; private set; } // Thêm danh sách DroppedItem
+        public List<Tree> Trees { get; private set; }
 
         private Player player;
         private GameLogic gameLogic;
@@ -41,6 +43,7 @@ namespace Project_Game
             Kapybaras = new List<Kapybara>();
             StaticObjects = new List<StaticObject>();
             DroppedItems = new List<DroppedItem>();
+            Trees = new List<Tree>(); // Khởi tạo danh sách Trees
             _instance = this; // Thiết lập instance cho Singleton
         }
 
@@ -63,24 +66,70 @@ namespace Project_Game
             ClearAll();
 
             Console.WriteLine("Loading Map 1...");
-
+            List<Tree> loadedTrees;
             List<Chicken> loadedChickens;
             List<AnimatedObject> loadedAnimatedObjects;
-            var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map1_objects.xml", out loadedChickens, out loadedAnimatedObjects);
+            var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map1_objects.xml", out loadedChickens, out loadedAnimatedObjects, out loadedTrees);
             Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 700, 150));
 
             StaticObjects.AddRange(loadedObjects);
             AnimatedObjects.AddRange(loadedAnimatedObjects);
             Chickens.AddRange(loadedChickens);
 
+            // Thêm cây vào danh sách Trees với vị trí cố định
+            List<Image> treeStages = new List<Image>();
+            for (int i = 1; i <= 3; i++)
+            {
+                string treeImagePath = Path.Combine("Assets", "Tree", "Spruce_tree", $"Spruce_tree_{i:00}.png");
+                if (File.Exists(treeImagePath))
+                {
+                    try
+                    {
+                        Image treeImage = Image.FromFile(treeImagePath);
+                        treeStages.Add(treeImage);
+                        Console.WriteLine($"Loaded tree stage {i} from {treeImagePath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error loading tree image {treeImagePath}: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Tree image not found: {treeImagePath}");
+                }
+            }
+
+            // Kiểm tra xem đã tải đủ 3 giai đoạn chưa
+            if (treeStages.Count != 3)
+            {
+                Console.WriteLine($"Error: Expected 3 tree stages, but loaded {treeStages.Count}.");
+                // Bạn có thể xử lý lỗi ở đây, chẳng hạn như bỏ qua việc thêm cây hoặc sử dụng hình ảnh mặc định
+            }
+            else
+            {
+                // Tạo cây tại vị trí cố định, ví dụ: (200, 300) với width=50 và height=100
+                int treeWidth = 25; // Bạn có thể thay đổi giá trị này theo ý muốn
+                int treeHeight = 50; // Bạn có thể thay đổi giá trị này theo ý muốn
+
+                Tree tree1 = new Tree(300, 350, treeStages, treeWidth, treeHeight, growthIntervalMilliseconds: 5000); // 5 giây để phát triển
+                Trees.Add(tree1);
+                Obstacles.Add(tree1); // Nếu bạn muốn cây cũng là chướng ngại vật
+
+                Console.WriteLine($"Added Tree at (200, 300) with size ({treeWidth}x{treeHeight})");
+
+            }
+
             Obstacles.AddRange(StaticObjects); // Thêm StaticObjects vào Obstacles
 
-            Console.WriteLine($"Map1 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}");
+            Console.WriteLine($"Map1 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}");
 
             player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
 
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
+
+
 
         public void LoadMap2()
         {
@@ -200,7 +249,13 @@ namespace Project_Game
             {
                 droppedItem.Update(player);
             }
+
+            foreach (var tree in Trees)
+            {
+                tree.UpdateTree();
+            }
         }
+
 
 
         public void RenderAll(Graphics g)

@@ -67,6 +67,7 @@
     <Compile Include="Entities\Renderer.cs" />
     <Compile Include="Entities\StaticObject.cs" />
     <Compile Include="Entities\TestEnemy.cs" />
+    <Compile Include="Entities\Tree.cs" />
     <Compile Include="Entities\UIManager.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
