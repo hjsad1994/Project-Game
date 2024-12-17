@@ -58,10 +58,30 @@ namespace Project_Game.Entities
             LoadDeadAnimation(Path.Combine(baseFolderPath, "Dead"));
         }
 
-        // Ghi đè X, Y để lấy từ posX, posY
-        public override int X { get { return (int)posX; } set { posX = value; } }
-        public override int Y { get { return (int)posY; } set { posY = value; } }
+        // Ghi đè X, Y để lấy từ posX, posY với giới hạn
+        public override int X
+        {
+            get { return (int)posX; }
+            set
+            {
+                posX = value;
+                // Giới hạn posX trong khoảng từ 0 đến 800
+                if (posX < 0) posX = 0;
+                if (posX > 800) posX = 800;
+            }
+        }
 
+        public override int Y
+        {
+            get { return (int)posY; }
+            set
+            {
+                posY = value;
+                // Giới hạn posY trong khoảng từ 0 đến 630
+                if (posY < 0) posY = 0;
+                if (posY > 630) posY = 630;
+            }
+        }
 
         public override void LoadEnemyImages(string baseFolderPath)
         {
@@ -214,6 +234,28 @@ namespace Project_Game.Entities
             {
                 posY += moveY;
                 moved = true;
+            }
+
+            // Giới hạn posX và posY sau khi di chuyển
+            if (posX < 0)
+            {
+                posX = 0;
+                ChangeDirection("Right"); // Đổi hướng về phải
+            }
+            if (posX > 800)
+            {
+                posX = 800;
+                ChangeDirection("Left"); // Đổi hướng về trái
+            }
+            if (posY < 0)
+            {
+                posY = 0;
+                ChangeDirection("Down"); // Đổi hướng xuống dưới
+            }
+            if (posY > 630)
+            {
+                posY = 630;
+                ChangeDirection("Up"); // Đổi hướng lên trên
             }
 
             isMoving = moved;
@@ -382,6 +424,7 @@ namespace Project_Game.Entities
                 UpdateAttack();
             }
         }
+
         private void DropItem()
         {
             // Tạo một item mới (cập nhật đường dẫn hình ảnh sau)
@@ -397,7 +440,7 @@ namespace Project_Game.Entities
 
                     // Tính toán khoảng cách và hướng ngẫu nhiên
                     double angle = rand.NextDouble() * 2 * Math.PI; // Góc ngẫu nhiên từ 0 đến 2π radians
-                    float distance = rand.Next(10, 40); // Khoảng cách ngẫu nhiên từ 10 đến 30 pixels
+                    float distance = rand.Next(10, 40); // Khoảng cách ngẫu nhiên từ 10 đến 40 pixels
                     int offsetX = (int)(Math.Cos(angle) * distance);
                     int offsetY = (int)(Math.Sin(angle) * distance);
 
