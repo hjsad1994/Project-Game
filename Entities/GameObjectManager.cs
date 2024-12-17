@@ -70,7 +70,7 @@ namespace Project_Game
             List<Chicken> loadedChickens;
             List<AnimatedObject> loadedAnimatedObjects;
             var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map1_objects.xml", out loadedChickens, out loadedAnimatedObjects, out loadedTrees);
-            Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 700, 150));
+            Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 1, 700, 150));
 
             StaticObjects.AddRange(loadedObjects);
             AnimatedObjects.AddRange(loadedAnimatedObjects);
@@ -115,7 +115,6 @@ namespace Project_Game
                 Tree tree1 = new Tree(300, 350, treeStages, treeWidth, treeHeight, growthIntervalMilliseconds: 5000); // 5 giây để phát triển
                 Trees.Add(tree1);
                 Obstacles.Add(tree1); // Nếu bạn muốn cây cũng là chướng ngại vật
-
                 Console.WriteLine($"Added Tree at (200, 300) with size ({treeWidth}x{treeHeight})");
 
             }

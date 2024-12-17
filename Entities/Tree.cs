@@ -125,18 +125,47 @@ namespace Project_Game.Entities
             }
         }
 
-        public void Chop()
+        public List<Item> Chop()
         {
             if (currentStage == maxStage && !isHarvested)
             {
                 // Giảm giai đoạn để biểu thị việc chặt cây
-                currentStage = maxStage - 1;
+                currentStage = maxStage - 2;
                 isHarvested = true;
-                Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã bị chặt, bắt đầu tái sinh.");
+                Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã bị chặt.");
+
+                // Tạo các vật phẩm rơi xuống
+                List<Item> droppedItems = new List<Item>();
+
+                // Ví dụ: Rơi xuống một cây gỗ
+                string itemName = "Wood";
+                string itemImagePath = Path.Combine("Assets", "Items", "Wood", "wood.png");
+
+                if (File.Exists(itemImagePath))
+                {
+                    try
+                    {
+                        Image itemIcon = Image.FromFile(itemImagePath);
+                        Item wood = new Item(itemName, itemIcon);
+                        droppedItems.Add(wood);
+                        Console.WriteLine($"[Info] Đã tạo vật phẩm: {itemName}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Error] Lỗi khi tải hình ảnh vật phẩm: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"[Error] Không tìm thấy hình ảnh cho vật phẩm: {itemImagePath}");
+                }
+
+                return droppedItems;
             }
             else
             {
                 Console.WriteLine($"[Warning] Cây tại ({X}, {Y}) không thể chặt.");
+                return new List<Item>();
             }
         }
 

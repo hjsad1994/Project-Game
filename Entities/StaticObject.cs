@@ -37,6 +37,11 @@ namespace Project_Game.Entities
             if (sprite != null)
             {
                 g.DrawImage(sprite, X, Y, Width, Height);
+                Console.WriteLine($"[Debug] Vẽ StaticObject tại ({X}, {Y}) với kích thước ({Width}x{Height}).");
+            }
+            else
+            {
+                Console.WriteLine($"[Error] StaticObject tại ({X}, {Y}) không có hình ảnh để vẽ.");
             }
         }
     }
