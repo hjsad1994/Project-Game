@@ -7,10 +7,11 @@ namespace Project_Game.Entities
 {
     public class Tree : GameObject
     {
-        // Danh sách các hình ảnh cho từng giai đoạn phát triển của cây
-        private List<Image> growthStages;
+        // Danh sách các giai đoạn phát triển của cây
+        private List<TreeStage> growthStages;
         private int currentStage;
         private int maxStage;
+        public Image Image { get; set; } // Thêm thuộc tính Image
 
         // Thời gian giữa các giai đoạn (milliseconds)
         private int growthInterval;
@@ -24,20 +25,16 @@ namespace Project_Game.Entities
         // Trạng thái của cây
         private bool isHarvested;
 
-        // Chiều dài và chiều cao của cây
-        public int TreeWidth { get; private set; }
-        public int TreeHeight { get; private set; }
-
         // Tọa độ cố định
         public override int X { get; set; }
         public override int Y { get; set; }
 
-        public Tree(int x, int y, List<Image> stages, int width, int height, int growthIntervalMilliseconds = 5000)
-            : base(x, y, width, height, "Tree", 1) // Sử dụng width và height từ XML
+        public Tree(int x, int y, List<TreeStage> stages, int growthIntervalMilliseconds = 5000)
+            : base(x, y, stages[0].Width, stages[0].Height, "Tree", 1) // Sử dụng width và height từ giai đoạn đầu tiên
         {
-            if (stages == null || stages.Count != 3)
+            if (stages == null || stages.Count == 0)
             {
-                throw new ArgumentException("Cây cần có đúng 3 giai đoạn phát triển.");
+                throw new ArgumentException("Cây cần có ít nhất 1 giai đoạn phát triển.");
             }
 
             X = x;
@@ -48,8 +45,6 @@ namespace Project_Game.Entities
             growthInterval = growthIntervalMilliseconds;
             lastGrowthTime = DateTime.Now;
             isHarvested = false;
-            TreeWidth = width;
-            TreeHeight = height;
         }
 
         public void UpdateTree()
@@ -81,6 +76,7 @@ namespace Project_Game.Entities
                     {
                         currentStage++;
                         lastGrowthTime = now;
+                        UpdateStage();
                         Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã phát triển đến giai đoạn {currentStage + 1}.");
                     }
                     else
@@ -88,6 +84,22 @@ namespace Project_Game.Entities
                         Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã đạt giai đoạn tối đa.");
                     }
                 }
+            }
+        }
+
+        private void UpdateStage()
+        {
+            if (currentStage >= 0 && currentStage < growthStages.Count)
+            {
+                TreeStage current = growthStages[currentStage];
+                this.Width = current.Width;
+                this.Height = current.Height;
+                this.Image = current.Image;
+                Console.WriteLine($"[Info] Cập nhật cây tại ({X}, {Y}) sang giai đoạn {currentStage + 1} với kích thước ({Width}x{Height}).");
+            }
+            else
+            {
+                Console.WriteLine($"[Error] Giai đoạn {currentStage} không hợp lệ cho cây tại ({X}, {Y}).");
             }
         }
 
@@ -150,10 +162,11 @@ namespace Project_Game.Entities
             if (currentStage == maxStage && !isHarvested && !isChopped)
             {
                 // Giảm giai đoạn để biểu thị việc chặt cây
-                currentStage = maxStage - 2;
+                currentStage = maxStage - 2 >= 0 ? maxStage - 2 : 0;
                 isHarvested = true;
                 isChopped = true;
                 chopTime = DateTime.Now;
+                UpdateStage();
                 Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã bị chặt.");
 
                 // Tạo các vật phẩm rơi xuống
@@ -168,8 +181,8 @@ namespace Project_Game.Entities
                     try
                     {
                         Image itemIcon = Image.FromFile(itemImagePath);
-                        Item wood = new Item(itemName, itemIcon);
-                        droppedItems.Add(wood);
+                        Item fruit = new Item(itemName, itemIcon);
+                        droppedItems.Add(fruit);
                         Console.WriteLine($"[Info] Đã tạo vật phẩm: {itemName}");
                     }
                     catch (Exception ex)
@@ -198,6 +211,7 @@ namespace Project_Game.Entities
             isChopped = false;
             lastGrowthTime = DateTime.Now;
             chopTime = DateTime.MinValue;
+            UpdateStage();
             Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã được tái sinh và bắt đầu phát triển lại.");
         }
 
@@ -209,11 +223,11 @@ namespace Project_Game.Entities
                 return; // Hoặc vẽ một hình ảnh mặc định
             }
 
-            Image currentImage = growthStages[currentStage];
+            Image currentImage = growthStages[currentStage].Image;
             if (currentImage != null)
             {
-                g.DrawImage(currentImage, X, Y, TreeWidth, TreeHeight); // Sử dụng TreeWidth và TreeHeight
-                Console.WriteLine($"[Debug] Vẽ cây tại ({X}, {Y}) ở giai đoạn {currentStage + 1} với kích thước ({TreeWidth}x{TreeHeight}).");
+                g.DrawImage(currentImage, X, Y, Width, Height); // Sử dụng Width và Height được cập nhật theo giai đoạn
+                Console.WriteLine($"[Debug] Vẽ cây tại ({X}, {Y}) ở giai đoạn {currentStage + 1} với kích thước ({Width}x{Height}).");
             }
             else
             {

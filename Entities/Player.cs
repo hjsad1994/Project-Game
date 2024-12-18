@@ -28,7 +28,7 @@ namespace Project_Game.Entities
 
         // Tốc độ di chuyển và phạm vi tấn công
         public int playerSpeed { get; set; } = 2;
-        public int AttackRange { get; set; } = 50; // Phạm vi tấn công mặc định 50
+        public int AttackRange { get; set; } = 30; // Phạm vi tấn công mặc định 50
 
         // Sức khỏe của người chơi
         public int Health { get; private set; } = 100;
@@ -39,6 +39,8 @@ namespace Project_Game.Entities
         public AnimationManager movementAnimation { get; private set; }
         public AnimationManager idleAnimation { get; private set; }
         public AnimationManager attackAnimation { get; private set; }
+        public AnimationManager chopAnimation { get; private set; }
+
         private bool wasMovingPreviously = false;
         public bool IsAttacking { get; private set; } = false;
         private string currentDirection = "Down";
@@ -86,9 +88,10 @@ namespace Project_Game.Entities
             this.chickens = chickens;
 
             // Khởi tạo các AnimationManager
-            movementAnimation = new AnimationManager(frameRate: 10);
-            idleAnimation = new AnimationManager(frameRate: 10);
-            attackAnimation = new AnimationManager(frameRate: 8);
+            movementAnimation = new AnimationManager(frameRate: 15);
+            idleAnimation = new AnimationManager(frameRate: 15);
+            attackAnimation = new AnimationManager(frameRate: 15);
+            chopAnimation = new AnimationManager(frameRate: 15);   // Tốc độ chậm hơn cho chop
 
             // Load default animations với đường dẫn mới
             string movementPath = Path.Combine("Assets", "Player", "Char_Movement", "MoveDown");
@@ -411,15 +414,14 @@ namespace Project_Game.Entities
                         attackPath = Path.Combine("Assets", "Player_Attack", currentDirection);
                         break;
                     case "Axe":
-                        attackPath = Path.Combine("Assets", "Player", "Player_Cut", currentDirection); // Chỉnh sửa để sử dụng Player_Cut
+                        attackPath = Path.Combine("Assets", "Player", "Player_Cut", currentDirection);
                         break;
                     case "Pickaxe":
                         attackPath = Path.Combine("Assets", "Player", "Player_Dig-up", currentDirection);
                         break;
-                    case "Watering-can": // Thêm case cho Watering-can
+                    case "Watering-can":
                         attackPath = Path.Combine("Assets", "Player", "Player_Watering", currentDirection);
                         break;
-                    // Add cases for other weapons as needed
                     default:
                         attackPath = Path.Combine("Assets", "Player_Attack", currentDirection);
                         break;
@@ -447,20 +449,24 @@ namespace Project_Game.Entities
                         int damage;
                         switch (CurrentWeapon)
                         {
+                            case "Sword":
+                                damage = 15; // Sát thương cho Sword
+                                break;
                             case "Axe":
-                                damage = 50;
+                                damage = 25;
                                 break;
                             case "Pickaxe":
-                                damage = 30;
+                                damage = 25;
                                 break;
                             case "Watering-can":
-                                damage = 20;
+                                damage = 5;
                                 break;
                             default:
-                                damage = 50;
+                                damage = 10;
                                 break;
                         }
                         target.TakeDamage(damage);
+                        Console.WriteLine($"Player đã gây {damage} sát thương cho {target.Name}.");
                     }
                     Console.WriteLine($"Player đã tấn công {targets.Count} kẻ địch với {CurrentWeapon}.");
                 }

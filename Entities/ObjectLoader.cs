@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing; // Đảm bảo đã thêm using này
+using System.Drawing;
 using System.IO;
 using System.Xml;
 
@@ -80,31 +80,54 @@ namespace Project_Game.Entities
             }
 
             // Xử lý các Tree
-            // Phần xử lý Tree trong LoadObjectsFromXml
             foreach (XmlNode treeNode in treeNodeList)
             {
-                string category = treeNode.Attributes["category"]?.Value;
-                string imageName = treeNode.Attributes["imageName"]?.Value;
+                string category = treeNode.Attributes["category"]?.Value; // e.g., "Tree/Spruce_tree"
+                if (string.IsNullOrEmpty(category))
+                {
+                    Console.WriteLine($"[Error] Tree category is missing.");
+                    continue;
+                }
+
                 int x = int.Parse(treeNode.Attributes["x"]?.Value ?? "0");
                 int y = int.Parse(treeNode.Attributes["y"]?.Value ?? "0");
-                int width = int.Parse(treeNode.Attributes["width"]?.Value ?? "50");   // Đọc width
-                int height = int.Parse(treeNode.Attributes["height"]?.Value ?? "100"); // Đọc height
 
-                Console.WriteLine($"[Debug] Tree node: category={category}, imageName={imageName}, x={x}, y={y}, width={width}, height={height}");
+                Console.WriteLine($"[Debug] Tree node: category={category}, x={x}, y={y}");
 
                 // Giả sử các giai đoạn phát triển được đặt trong thư mục cụ thể
-                List<Image> treeStages = new List<Image>();
+                List<TreeStage> treeStages = new List<TreeStage>();
                 bool missingStage = false;
-                for (int i = 1; i <= 3; i++)
+
+                foreach (XmlNode stageNode in treeNode.SelectNodes("Stage"))
                 {
-                    string treeImagePath = Path.Combine("Assets", category, $"Spruce_tree_{i:00}.png");
+                    string imageName = stageNode.Attributes["imageName"]?.Value;
+                    int stageWidth = int.Parse(stageNode.Attributes["width"]?.Value ?? "10");
+                    int stageHeight = int.Parse(stageNode.Attributes["height"]?.Value ?? "10");
+
+                    if (string.IsNullOrEmpty(imageName))
+                    {
+                        Console.WriteLine($"[Error] Stage imageName is missing for Tree at ({x}, {y}).");
+                        missingStage = true;
+                        break;
+                    }
+
+                    string[] categoryParts = category.Split('/');
+                    if (categoryParts.Length < 2)
+                    {
+                        Console.WriteLine($"[Error] Invalid category format for Tree: {category}");
+                        missingStage = true;
+                        break;
+                    }
+                    string treeType = categoryParts[1]; // e.g., "Spruce_tree"
+                    string treeImagePath = Path.Combine("Assets", category, imageName);
+
                     if (File.Exists(treeImagePath))
                     {
                         try
                         {
                             Image treeImage = Image.FromFile(treeImagePath);
-                            treeStages.Add(treeImage);
-                            Console.WriteLine($"[Info] Loaded tree stage {i} from {treeImagePath}");
+                            treeStages.Add(new TreeStage(treeImage, stageWidth, stageHeight));
+                            Console.WriteLine($"[Info] Loaded tree stage with image {treeImagePath} and size ({stageWidth}x{stageHeight}).");
                         }
                         catch (Exception ex)
                         {
@@ -121,19 +144,17 @@ namespace Project_Game.Entities
                     }
                 }
 
-                if (!missingStage && treeStages.Count == 3)
+                if (!missingStage && treeStages.Count > 0)
                 {
-                    // Tạo Tree với width và height
-                    Tree tree = new Tree(x, y, treeStages, width, height, growthIntervalMilliseconds: 5000); // Thêm width và height
+                    Tree tree = new Tree(x, y, treeStages, growthIntervalMilliseconds: 5000); // 5 giây để phát triển
                     trees.Add(tree);
-                    Console.WriteLine($"[Info] Added Tree at ({x}, {y}) with 3 stages and size ({width}x{height}).");
+                    Console.WriteLine($"[Info] Added Tree at ({x}, {y}) with {treeStages.Count} stages.");
                 }
                 else
                 {
                     Console.WriteLine($"[Warning] Tree at ({x}, {y}) not added due to missing stages.");
                 }
             }
-
 
             // Xử lý các AnimatedObject
             foreach (XmlNode animNode in animatedNodeList)

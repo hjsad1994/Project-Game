@@ -20,9 +20,6 @@ namespace Project_Game
 
         private InventoryManager inventoryManager;
 
-        private const int PlayerWidth = 50;
-        private const int PlayerHeight = 50;
-
         private Timer gameTimer;
 
         public Form1()
@@ -123,8 +120,8 @@ namespace Project_Game
                 float playerCenterY = player.Y + player.Height / 2f;
 
                 // Tính trung tâm của cây
-                float treeCenterX = tree.X + tree.TreeWidth / 2f;
-                float treeCenterY = tree.Y + tree.TreeHeight / 2f;
+                float treeCenterX = tree.X + tree.Width / 2f;
+                float treeCenterY = tree.Y + tree.Height / 2f;
 
                 // Tính khoảng cách giữa trung tâm người chơi và trung tâm cây
                 float deltaX = playerCenterX - treeCenterX;
@@ -179,8 +176,8 @@ namespace Project_Game
                 float playerCenterY = player.Y + player.Height / 2f;
 
                 // Tính trung tâm của cây
-                float treeCenterX = tree.X + tree.TreeWidth / 2f;
-                float treeCenterY = tree.Y + tree.TreeHeight / 2f;
+                float treeCenterX = tree.X + tree.Width / 2f;
+                float treeCenterY = tree.Y + tree.Height / 2f;
 
                 // Tính khoảng cách giữa trung tâm người chơi và trung tâm cây
                 float deltaX = playerCenterX - treeCenterX;

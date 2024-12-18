@@ -61,6 +61,73 @@ namespace Project_Game
 
         // ... Các phương thức LoadMapX hiện tại ...
 
+        //public void LoadMap1()
+        //{
+        //    ClearAll();
+
+        //    Console.WriteLine("Loading Map 1...");
+        //    List<Tree> loadedTrees;
+        //    List<Chicken> loadedChickens;
+        //    List<AnimatedObject> loadedAnimatedObjects;
+        //    var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map1_objects.xml", out loadedChickens, out loadedAnimatedObjects, out loadedTrees);
+        //    Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 1, 700, 150));
+
+        //    StaticObjects.AddRange(loadedObjects);
+        //    AnimatedObjects.AddRange(loadedAnimatedObjects);
+        //    Chickens.AddRange(loadedChickens);
+
+        //    // Thêm cây vào danh sách Trees với vị trí cố định
+        //    List<Image> treeStages = new List<Image>();
+        //    for (int i = 1; i <= 3; i++)
+        //    {
+        //        string treeImagePath = Path.Combine("Assets", "Tree", "Spruce_tree", $"Spruce_tree_{i:00}.png");
+        //        if (File.Exists(treeImagePath))
+        //        {
+        //            try
+        //            {
+        //                Image treeImage = Image.FromFile(treeImagePath);
+        //                treeStages.Add(treeImage);
+        //                Console.WriteLine($"Loaded tree stage {i} from {treeImagePath}");
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Console.WriteLine($"Error loading tree image {treeImagePath}: {ex.Message}");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            Console.WriteLine($"Tree image not found: {treeImagePath}");
+        //        }
+        //    }
+
+        //    // Kiểm tra xem đã tải đủ 3 giai đoạn chưa
+        //    if (treeStages.Count != 3)
+        //    {
+        //        Console.WriteLine($"Error: Expected 3 tree stages, but loaded {treeStages.Count}.");
+        //        // Bạn có thể xử lý lỗi ở đây, chẳng hạn như bỏ qua việc thêm cây hoặc sử dụng hình ảnh mặc định
+        //    }
+        //    else
+        //    {
+        //        // Tạo cây tại vị trí cố định, ví dụ: (200, 300) với width=50 và height=100
+        //        int treeWidth = 25; // Bạn có thể thay đổi giá trị này theo ý muốn
+        //        int treeHeight = 50; // Bạn có thể thay đổi giá trị này theo ý muốn
+
+        //        Tree tree1 = new Tree(300, 350, treeStages, treeWidth, treeHeight, growthIntervalMilliseconds: 3000); // 5 giây để phát triển
+        //        Trees.Add(tree1);
+        //        Obstacles.Add(tree1); // Nếu bạn muốn cây cũng là chướng ngại vật
+        //        Console.WriteLine($"Added Tree at (200, 300) with size ({treeWidth}x{treeHeight})");
+
+        //    }
+
+        //    Obstacles.AddRange(StaticObjects); // Thêm StaticObjects vào Obstacles
+
+        //    Console.WriteLine($"Map1 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}");
+
+        //    player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
+
+        //    gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
+        //}
+
         public void LoadMap1()
         {
             ClearAll();
@@ -70,64 +137,32 @@ namespace Project_Game
             List<Chicken> loadedChickens;
             List<AnimatedObject> loadedAnimatedObjects;
             var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map1_objects.xml", out loadedChickens, out loadedAnimatedObjects, out loadedTrees);
+
+            // Thêm kẻ thù
             Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 1, 700, 150));
 
+            // Thêm các đối tượng vào danh sách tương ứng
             StaticObjects.AddRange(loadedObjects);
             AnimatedObjects.AddRange(loadedAnimatedObjects);
             Chickens.AddRange(loadedChickens);
+            Trees.AddRange(loadedTrees);
 
-            // Thêm cây vào danh sách Trees với vị trí cố định
-            List<Image> treeStages = new List<Image>();
-            for (int i = 1; i <= 3; i++)
-            {
-                string treeImagePath = Path.Combine("Assets", "Tree", "Spruce_tree", $"Spruce_tree_{i:00}.png");
-                if (File.Exists(treeImagePath))
-                {
-                    try
-                    {
-                        Image treeImage = Image.FromFile(treeImagePath);
-                        treeStages.Add(treeImage);
-                        Console.WriteLine($"Loaded tree stage {i} from {treeImagePath}");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error loading tree image {treeImagePath}: {ex.Message}");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"Tree image not found: {treeImagePath}");
-                }
-            }
-
-            // Kiểm tra xem đã tải đủ 3 giai đoạn chưa
-            if (treeStages.Count != 3)
-            {
-                Console.WriteLine($"Error: Expected 3 tree stages, but loaded {treeStages.Count}.");
-                // Bạn có thể xử lý lỗi ở đây, chẳng hạn như bỏ qua việc thêm cây hoặc sử dụng hình ảnh mặc định
-            }
-            else
-            {
-                // Tạo cây tại vị trí cố định, ví dụ: (200, 300) với width=50 và height=100
-                int treeWidth = 25; // Bạn có thể thay đổi giá trị này theo ý muốn
-                int treeHeight = 50; // Bạn có thể thay đổi giá trị này theo ý muốn
-
-                Tree tree1 = new Tree(300, 350, treeStages, treeWidth, treeHeight, growthIntervalMilliseconds: 3000); // 5 giây để phát triển
-                Trees.Add(tree1);
-                Obstacles.Add(tree1); // Nếu bạn muốn cây cũng là chướng ngại vật
-                Console.WriteLine($"Added Tree at (200, 300) with size ({treeWidth}x{treeHeight})");
-
-            }
-
-            Obstacles.AddRange(StaticObjects); // Thêm StaticObjects vào Obstacles
+            // Thêm cây vào danh sách Obstacles nếu chúng là chướng ngại vật
+            Obstacles.AddRange(loadedObjects);
+            Obstacles.AddRange(loadedTrees); // Thêm tất cả các cây vào Obstacles
 
             Console.WriteLine($"Map1 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}");
+
+            // Thêm thông tin chi tiết về từng House
+            foreach (var house in StaticObjects.OfType<House>())
+            {
+                Console.WriteLine($"[Info] House at ({house.X}, {house.Y}) size ({house.Width}x{house.Height})");
+            }
 
             player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
 
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
-
 
 
         public void LoadMap2()
