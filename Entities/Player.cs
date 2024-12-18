@@ -542,5 +542,39 @@ namespace Project_Game.Entities
                 }
             }
         }
+        public void Chop()
+        {
+            if (CurrentWeapon != "Axe")
+            {
+                Console.WriteLine("Only Axe can chop trees.");
+                return;
+            }
+
+            if (!IsAttacking)
+            {
+                IsAttacking = true;
+
+                // Đường dẫn tới hoạt ảnh Player_Cut dựa trên hướng hiện tại
+                string chopPath = Path.Combine("Assets", "Player", "Player_Cut", currentDirection);
+                attackAnimation.LoadFrames(chopPath);
+                attackAnimation.ResetAnimation();
+
+                Console.WriteLine($"Chop Animation Loaded from {chopPath}");
+
+                // Kiểm tra nếu không tải được khung hình
+                if (attackAnimation.GetFrameCount() == 0)
+                {
+                    Console.WriteLine($"Cannot load chop frames from {chopPath}");
+                }
+                else
+                {
+                    Console.WriteLine($"Loaded {attackAnimation.GetFrameCount()} chop frames từ {chopPath}");
+                }
+
+                // Thực hiện các tác động sau khi chặt cây (nếu cần)
+                // Ví dụ: Giảm số lượng cây, cập nhật trạng thái cây, v.v.
+            }
+        }
+
     }
 }

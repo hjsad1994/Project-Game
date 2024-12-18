@@ -15,7 +15,7 @@ namespace Project_Game.Entities
         private bool isComplete = false;
 
         public Image CurrentFrame { get; private set; }
-        private Dictionary<string, List<Image>> cachedFrames = new Dictionary<string, List<Image>>();
+        private Dictionary<string, CachedAnimation> cachedFrames = new Dictionary<string, CachedAnimation>();
 
         public AnimationManager(int frameRate = 5)
         {
@@ -26,10 +26,12 @@ namespace Project_Game.Entities
         {
             if (cachedFrames.ContainsKey(folderPath))
             {
-                frames = cachedFrames[folderPath];
-                CurrentFrame = frames[0];
+                frames = new List<Image>(cachedFrames[folderPath].Frames);
+                frameNames = new List<string>(cachedFrames[folderPath].FrameNames);
+                CurrentFrame = frames.Count > 0 ? frames[0] : null;
                 currentFrameIndex = 0; // Reset frame index
                 frameRateCounter = 0;   // Reset frame rate counter
+                isComplete = false;
                 Console.WriteLine($"Loaded cached frames from: {folderPath}");
                 return;
             }
@@ -69,7 +71,7 @@ namespace Project_Game.Entities
                 CurrentFrame = frames[0];
                 currentFrameIndex = 0;      // Reset frame index
                 frameRateCounter = 0;       // Reset frame rate counter
-                cachedFrames[folderPath] = new List<Image>(frames); // Cache the loaded frames
+                cachedFrames[folderPath] = new CachedAnimation(new List<Image>(frames), new List<string>(frameNames)); // Cache the loaded frames and names
                 Console.WriteLine($"Total frames loaded from {folderPath}: {frames.Count}");
             }
             else
@@ -101,8 +103,23 @@ namespace Project_Game.Entities
                     }
                 }
 
-                CurrentFrame = frames[currentFrameIndex];
-                Console.WriteLine($"Animation Update: Frame {currentFrameIndex + 1}/{frames.Count} - {frameNames[currentFrameIndex]}");
+                // Kiểm tra xem currentFrameIndex có hợp lệ không trước khi truy cập frameNames
+                if (currentFrameIndex >= 0 && currentFrameIndex < frames.Count)
+                {
+                    CurrentFrame = frames[currentFrameIndex];
+                    if (currentFrameIndex < frameNames.Count)
+                    {
+                        Console.WriteLine($"Animation Update: Frame {currentFrameIndex + 1}/{frames.Count} - {frameNames[currentFrameIndex]}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[Warning] frameNames does not contain index {currentFrameIndex}. Skipping frame name logging.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"[Error] currentFrameIndex {currentFrameIndex} is out of range for frames list.");
+                }
             }
         }
 
@@ -154,6 +171,7 @@ namespace Project_Game.Entities
             isComplete = false;
             Console.WriteLine("Animation frames set.");
         }
+
         public void ClearCache()
         {
             cachedFrames.Clear();

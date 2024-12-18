@@ -16,6 +16,11 @@ namespace Project_Game.Entities
         private int growthInterval;
         private DateTime lastGrowthTime;
 
+        // Thời gian hồi phục sau khi chặt (milliseconds)
+        private int recoveryInterval = 10000; // 10 giây
+        private bool isChopped = false;
+        private DateTime chopTime;
+
         // Trạng thái của cây
         private bool isHarvested;
 
@@ -51,22 +56,37 @@ namespace Project_Game.Entities
         {
             if (isHarvested)
             {
-                // Nếu cây đã được thu hoạch, không cần cập nhật thêm
-                return;
-            }
-
-            var now = DateTime.Now;
-            if ((now - lastGrowthTime).TotalMilliseconds >= growthInterval)
-            {
-                if (currentStage < maxStage)
+                // Nếu cây đã bị chặt, kiểm tra thời gian hồi phục
+                if (isChopped)
                 {
-                    currentStage++;
-                    lastGrowthTime = now;
-                    Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã phát triển đến giai đoạn {currentStage + 1}.");
+                    var now = DateTime.Now;
+                    if ((now - chopTime).TotalMilliseconds >= recoveryInterval)
+                    {
+                        ResetTree();
+                        Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã hồi phục lại.");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã đạt giai đoạn tối đa.");
+                    // Nếu cây chỉ được thu hoạch nhưng chưa bị chặt, không cần hồi phục
+                    return;
+                }
+            }
+            else
+            {
+                var now = DateTime.Now;
+                if ((now - lastGrowthTime).TotalMilliseconds >= growthInterval)
+                {
+                    if (currentStage < maxStage)
+                    {
+                        currentStage++;
+                        lastGrowthTime = now;
+                        Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã phát triển đến giai đoạn {currentStage + 1}.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã đạt giai đoạn tối đa.");
+                    }
                 }
             }
         }
@@ -127,19 +147,21 @@ namespace Project_Game.Entities
 
         public List<Item> Chop()
         {
-            if (currentStage == maxStage && !isHarvested)
+            if (currentStage == maxStage && !isHarvested && !isChopped)
             {
                 // Giảm giai đoạn để biểu thị việc chặt cây
                 currentStage = maxStage - 2;
                 isHarvested = true;
+                isChopped = true;
+                chopTime = DateTime.Now;
                 Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã bị chặt.");
 
                 // Tạo các vật phẩm rơi xuống
                 List<Item> droppedItems = new List<Item>();
 
                 // Ví dụ: Rơi xuống một cây gỗ
-                string itemName = "Wood";
-                string itemImagePath = Path.Combine("Assets", "Items", "Wood", "wood.png");
+                string itemName = "Fruit";
+                string itemImagePath = Path.Combine("Assets", "Items", "Fruit", "fruit.png");
 
                 if (File.Exists(itemImagePath))
                 {
@@ -173,16 +195,17 @@ namespace Project_Game.Entities
         {
             currentStage = 0;
             isHarvested = false;
+            isChopped = false;
             lastGrowthTime = DateTime.Now;
+            chopTime = DateTime.MinValue;
             Console.WriteLine($"[Info] Cây tại ({X}, {Y}) đã được tái sinh và bắt đầu phát triển lại.");
         }
-
 
         public void Draw(Graphics g)
         {
             if (currentStage < 0 || currentStage >= growthStages.Count)
             {
-                Console.WriteLine($"[Error] currentStage {currentStage} is out of range for Tree tại ({X}, {Y}).");
+                Console.WriteLine($"[Error] currentStage {currentStage} is out of range cho Tree tại ({X}, {Y}).");
                 return; // Hoặc vẽ một hình ảnh mặc định
             }
 

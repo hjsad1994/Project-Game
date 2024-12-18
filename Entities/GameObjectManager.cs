@@ -112,7 +112,7 @@ namespace Project_Game
                 int treeWidth = 25; // Bạn có thể thay đổi giá trị này theo ý muốn
                 int treeHeight = 50; // Bạn có thể thay đổi giá trị này theo ý muốn
 
-                Tree tree1 = new Tree(300, 350, treeStages, treeWidth, treeHeight, growthIntervalMilliseconds: 5000); // 5 giây để phát triển
+                Tree tree1 = new Tree(300, 350, treeStages, treeWidth, treeHeight, growthIntervalMilliseconds: 3000); // 5 giây để phát triển
                 Trees.Add(tree1);
                 Obstacles.Add(tree1); // Nếu bạn muốn cây cũng là chướng ngại vật
                 Console.WriteLine($"Added Tree at (200, 300) with size ({treeWidth}x{treeHeight})");
@@ -135,14 +135,14 @@ namespace Project_Game
             ClearAll();
 
             Console.WriteLine("Loading Map 2...");
-
+            List<Tree> loadedTrees;
             // Nếu map2 có objects từ XML:
-            // List<Chicken> loadedChickens;
-            // List<AnimatedObject> loadedAnimatedObjects;
-            // var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map2_objects.xml", out loadedChickens, out loadedAnimatedObjects);
-            // StaticObjects.AddRange(loadedObjects);
-            // AnimatedObjects.AddRange(loadedAnimatedObjects);
-            // Chickens.AddRange(loadedChickens);
+            List<Chicken> loadedChickens;
+             List<AnimatedObject> loadedAnimatedObjects;
+            var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map2_objects.xml", out loadedChickens, out loadedAnimatedObjects, out loadedTrees);
+            StaticObjects.AddRange(loadedObjects);
+             AnimatedObjects.AddRange(loadedAnimatedObjects);
+             Chickens.AddRange(loadedChickens);
 
             // Nếu không có AnimatedObject trong map2, bạn có thể bỏ qua
             // Thêm StaticObjects vào Obstacles nếu cần (hiện tại StaticObjects đã được xóa nên Obstacles sẽ rỗng)
@@ -165,11 +165,15 @@ namespace Project_Game
             ClearAll();
 
             Console.WriteLine("Loading Map 3...");
+            List<Tree> loadedTrees;
+            // Nếu map2 có objects từ XML:
+            List<Chicken> loadedChickens;
+            List<AnimatedObject> loadedAnimatedObjects;
+            var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map3_objects.xml", out loadedChickens, out loadedAnimatedObjects, out loadedTrees);
+            StaticObjects.AddRange(loadedObjects);
+            AnimatedObjects.AddRange(loadedAnimatedObjects);
+            Chickens.AddRange(loadedChickens);
 
-            // var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map3_objects.xml", out List<Chicken> loadedChickens, out List<AnimatedObject> loadedAnimatedObjects);
-            // StaticObjects.AddRange(loadedObjects);
-            // AnimatedObjects.AddRange(loadedAnimatedObjects);
-            // Chickens.AddRange(loadedChickens);
 
             Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 600, 200));
 

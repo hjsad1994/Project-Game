@@ -68,7 +68,7 @@ namespace Project_Game
             UIManager.Initialize(this, inventoryManager, player);
 
             gameTimer = new Timer();
-            gameTimer.Interval = 33; // ~60 FPS
+            gameTimer.Interval = 16; //
             gameTimer.Tick += TimerEvent;
             gameTimer.Start();
             Console.WriteLine("Game Timer started with interval 16ms.");
@@ -166,8 +166,6 @@ namespace Project_Game
             if (player.CurrentWeapon != "Axe")
             {
                 Console.WriteLine("Only Axe can chop trees.");
-                // Optionally, show a message box or feedback to the player
-                // MessageBox.Show("Only Axe can chop trees!", "Invalid Action", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -196,19 +194,46 @@ namespace Project_Game
                 if (distance <= chopDistance)
                 {
                     // Thực hiện chặt cây
-                    tree.Chop();
-                    Console.WriteLine($"Player đã chặt cây tại ({tree.X}, {tree.Y}).");
-                    choppedAny = true;
+                    List<Item> choppedItems = tree.Chop();
+                    if (choppedItems != null && choppedItems.Count > 0)
+                    {
+                        foreach (var item in choppedItems)
+                        {
+                            bool added = inventoryManager.AddItem(item);
+                            if (added)
+                            {
+                                Console.WriteLine($"Player đã nhận được {item.Name} từ việc chặt cây tại ({tree.X}, {tree.Y}).");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Inventory đã đầy. Không thể thêm {item.Name} từ việc chặt cây tại ({tree.X}, {tree.Y}).");
+                            }
+                        }
+                        choppedAny = true;
+
+                        // Kích hoạt hoạt ảnh chặt cây
+                        player.Chop();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[Info] Không có item nào được rớt từ việc chặt cây tại ({tree.X}, {tree.Y}).");
+                    }
                 }
             }
 
-            if (!choppedAny)
+            if (choppedAny)
             {
-                Console.WriteLine("[Info] Không có cây nào gần bạn để chặt.");
+                Console.WriteLine("[Info] Đã chặt ít nhất một cây và nhận được item.");
+            }
+            else
+            {
+                Console.WriteLine("[Info] Không có cây nào gần bạn để chặt hoặc không có item nào được rớt.");
             }
 
             Invalidate(); // Yêu cầu vẽ lại form
         }
+
+
         protected override void OnKeyUp(KeyEventArgs e)
         {
             base.OnKeyUp(e);

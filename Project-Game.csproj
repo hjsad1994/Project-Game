@@ -50,6 +50,7 @@
     <Compile Include="Entities\AnimatedObject.cs" />
     <Compile Include="Entities\AnimationManager.cs" />
     <Compile Include="Entities\Attack.cs" />
+    <Compile Include="Entities\CachedAnimation.cs" />
     <Compile Include="Entities\Chicken.cs" />
     <Compile Include="Entities\DroppedItem.cs" />
     <Compile Include="Entities\Enemy.cs" />
