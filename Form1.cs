@@ -65,7 +65,7 @@ namespace Project_Game
             UIManager.Initialize(this, inventoryManager, player);
 
             gameTimer = new Timer();
-            gameTimer.Interval = 16; //
+            gameTimer.Interval = 20; //
             gameTimer.Tick += TimerEvent;
             gameTimer.Start();
             Console.WriteLine("Game Timer started with interval 16ms.");
@@ -348,8 +348,9 @@ namespace Project_Game
                 player,
                 objectManager,
                 gameOverState
-            );
 
+            );
+            objectManager.RenderAll(e.Graphics);
             UIManager.Instance.Draw(e.Graphics);
         }
 

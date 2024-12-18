@@ -23,8 +23,8 @@ namespace Project_Game.Entities
         // Vị trí hiện tại của người chơi
         public int playerX { get; set; } = 100;
         public int playerY { get; set; } = 100;
-        public int playerWidth { get; set; } = 22;
-        public int playerHeight { get; set; } = 35;
+        public int playerWidth { get; set; } = 16;
+        public int playerHeight { get; set; } = 19;
 
         // Tốc độ di chuyển và phạm vi tấn công
         public int playerSpeed { get; set; } = 2;
@@ -81,17 +81,17 @@ namespace Project_Game.Entities
 
         // Constructor nhận 3 tham số
         public Player(List<GameObject> obstacles, List<TestEnemy> enemies, List<Chicken> chickens)
-            : base(0, 0, 22, 35, "Player", 100) // Gọi constructor của GameObject
+            : base(0, 0, 20, 33, "Player", 100) // Gọi constructor của GameObject
         {
             this.obstacles = obstacles;
             this.enemies = enemies;
             this.chickens = chickens;
 
             // Khởi tạo các AnimationManager
-            movementAnimation = new AnimationManager(frameRate: 15);
-            idleAnimation = new AnimationManager(frameRate: 15);
-            attackAnimation = new AnimationManager(frameRate: 15);
-            chopAnimation = new AnimationManager(frameRate: 15);   // Tốc độ chậm hơn cho chop
+            movementAnimation = new AnimationManager(frameRate: 12);
+            idleAnimation = new AnimationManager(frameRate: 12);
+            attackAnimation = new AnimationManager(frameRate: 13);
+            chopAnimation = new AnimationManager(frameRate: 13);   // Tốc độ chậm hơn cho chop
 
             // Load default animations với đường dẫn mới
             string movementPath = Path.Combine("Assets", "Player", "Char_Movement", "MoveDown");
