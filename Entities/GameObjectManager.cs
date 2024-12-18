@@ -484,6 +484,15 @@ namespace Project_Game
         public void LoadMap4()
         {
             ClearAll();
+            Console.WriteLine("Loading Map 2...");
+            List<Tree> loadedTrees;
+            // Nếu map2 có objects từ XML:
+            List<Chicken> loadedChickens;
+            List<AnimatedObject> loadedAnimatedObjects;
+            var loadedObjects = ObjectLoader.LoadObjectsFromXml("Assets/MapData/map4_objects.xml", out loadedChickens, out loadedAnimatedObjects, out loadedTrees);
+            StaticObjects.AddRange(loadedObjects);
+            AnimatedObjects.AddRange(loadedAnimatedObjects);
+            Chickens.AddRange(loadedChickens);
 
             Console.WriteLine("Loading Map 4...");
 

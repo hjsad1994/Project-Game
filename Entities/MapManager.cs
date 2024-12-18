@@ -33,7 +33,7 @@ namespace Project_Game.Entities
             this.player = player;
             this.objectManager = objectManager;
             LoadMaps();
-            currentBg = bgMap1; // default start map
+            currentBg = bgMap4; // default start map
         }
 
         private void LoadMaps()

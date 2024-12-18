@@ -55,7 +55,7 @@ namespace Project_Game
             mapManager = new MapManager(player, objectManager);
             renderer = new Renderer();
 
-            objectManager.LoadMap1();
+            objectManager.LoadMap4();
             player.SetObstacles(objectManager.Obstacles);
 
             this.KeyPreview = true;
@@ -429,7 +429,7 @@ namespace Project_Game
             gameLogic.ResetGameState();
 
             mapManager.ResetMap();
-            objectManager.LoadMap1();
+            objectManager.LoadMap4();
             player.SetObstacles(objectManager.Obstacles);
 
             player.playerX = 393;
