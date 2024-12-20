@@ -17,7 +17,11 @@ public class Renderer
         {
             canvas.DrawImage(bg, 0, 0, 800, 600);
         }
-
+        var playerFrame = player.GetCurrentFrame();
+        if (playerFrame != null)
+        {
+            canvas.DrawImage(playerFrame, player.X, player.Y, player.Width, player.Height);
+        }
         // 2. Vẽ StaticObjects
         foreach (var staticObj in objectManager.StaticObjects)
         {
@@ -68,10 +72,9 @@ public class Renderer
         {
             droppedItem.Draw(canvas);
         }
-        var playerFrame = player.GetCurrentFrame();
-        if (playerFrame != null)
+        foreach (var ore in objectManager.Ores)
         {
-            canvas.DrawImage(playerFrame, player.X, player.Y, player.Width, player.Height);
+            ore.Draw(canvas);
         }
         // 10. Vẽ UI nếu game không kết thúc
         if (!gameOverState)

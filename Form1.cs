@@ -30,8 +30,7 @@ namespace Project_Game
             // Bật double buffering để giảm hiện tượng nhấp nháy
             this.DoubleBuffered = true;
 
-            // Trước đây bạn dùng Test1 để tạo obstacle.
-            // Giờ bỏ qua, hoặc tự tạo một obstacle khác, hoặc để trống.
+            // Tạo danh sách các đối tượng
             var obstacles = new List<GameObject>();
 
             var initialEnemies = new List<TestEnemy>();
@@ -41,12 +40,16 @@ namespace Project_Game
         new Chicken("Chicken2", 400, 200, 350, 450)
         };
 
-            player = new Player(obstacles, initialEnemies, initialChickens);
+            var initialOres = new List<Ore>(); // Thêm danh sách Ores
+
+            // Khởi tạo Player với danh sách Ores
+            player = new Player(obstacles, initialEnemies, initialChickens, initialOres);
             player.OnHealthChanged += UpdateHealBar;
 
             objectManager = new GameObjectManager(player);
             objectManager.Obstacles.AddRange(obstacles);
             objectManager.Chickens.AddRange(initialChickens);
+            objectManager.Ores.AddRange(initialOres); // Thêm Ores vào GameObjectManager
 
             var allEnemies = objectManager.Enemies.Cast<Enemy>().ToList();
             gameLogic = new GameLogic(player, allEnemies, objectManager.Obstacles);
@@ -65,10 +68,10 @@ namespace Project_Game
             UIManager.Initialize(this, inventoryManager, player);
 
             gameTimer = new Timer();
-            gameTimer.Interval = 20; //
+            gameTimer.Interval = 20; // khoảng 50 FPS
             gameTimer.Tick += TimerEvent;
             gameTimer.Start();
-            Console.WriteLine("Game Timer started with interval 16ms.");
+            Console.WriteLine("Game Timer started with interval 20ms.");
 
             this.Paint += FormPaintEvent;
             Console.WriteLine("Form Paint event handler registered.");
@@ -105,6 +108,10 @@ namespace Project_Game
                 else if (e.KeyCode == Keys.X)
                 {
                     AttemptChop();
+                }
+                else if (e.KeyCode == Keys.V)
+                {
+                    AttemptMineOres();
                 }
             }
         }
@@ -229,6 +236,21 @@ namespace Project_Game
 
             Invalidate(); // Yêu cầu vẽ lại form
         }
+        private void AttemptMineOres()
+        {
+            // Kiểm tra xem vũ khí hiện tại có phải là Pickaxe hay không
+            if (player.CurrentWeapon != "Pickaxe")
+            {
+                Console.WriteLine("Only Pickaxe can mine ores.");
+                return;
+            }
+
+            // Thực hiện đào quặng bằng Player
+            player.MineOres(objectManager.Ores);
+
+            Invalidate(); // Yêu cầu vẽ lại form
+        }
+
 
 
         protected override void OnKeyUp(KeyEventArgs e)
@@ -388,6 +410,7 @@ namespace Project_Game
                 needsRedraw = false;
             }
         }
+
 
 
 

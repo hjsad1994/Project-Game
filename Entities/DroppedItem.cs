@@ -20,7 +20,7 @@ namespace Project_Game.Entities
 
         public bool IsFlying => isFlying;
 
-        public DroppedItem(Item item, int x, int y, int width = 32, int height = 32)
+        public DroppedItem(Item item, int x, int y, int width = 16, int height = 16)
             : base(x, y, width, height, "DroppedItem", 1) // Health không quan trọng cho DroppedItem
         {
             Item = item;

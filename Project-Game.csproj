@@ -60,10 +60,12 @@
     <Compile Include="Entities\GameOver.cs" />
     <Compile Include="Entities\House.cs" />
     <Compile Include="Entities\InventoryManager.cs" />
+    <Compile Include="Entities\IRemovable.cs" />
     <Compile Include="Entities\Item.cs" />
     <Compile Include="Entities\Kapybara.cs" />
     <Compile Include="Entities\MapManager.cs" />
     <Compile Include="Entities\ObjectLoader.cs" />
+    <Compile Include="Entities\Ore.cs" />
     <Compile Include="Entities\Player.cs" />
     <Compile Include="Entities\Renderer.cs" />
     <Compile Include="Entities\StaticObject.cs" />

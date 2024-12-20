@@ -52,6 +52,7 @@ namespace Project_Game.Entities
         public string Name { get; set; }
         public int Health { get; private set; }
         public int MaxHealth { get; private set; } // Thêm thuộc tính MaxHealth
+        public bool ShouldRemove { get; set; } = false;
 
         public GameObject(int x, int y, int width, int height, string name, int health = 100)
         {
@@ -78,5 +79,8 @@ namespace Project_Game.Entities
         }
 
         public bool IsDead() => Health <= 0;
+        public virtual void Draw(Graphics g)
+        {
+        }
     }
 }

@@ -28,7 +28,7 @@ namespace Project_Game.Entities
 
         // Tốc độ di chuyển và phạm vi tấn công
         public int playerSpeed { get; set; } = 2;
-        public int AttackRange { get; set; } = 30; // Phạm vi tấn công mặc định 50
+        public int AttackRange { get; set; } = 30; // Phạm vi tấn công mặc định 30
 
         // Sức khỏe của người chơi
         public int Health { get; private set; } = 100;
@@ -49,17 +49,18 @@ namespace Project_Game.Entities
         private List<GameObject> obstacles;
         private List<TestEnemy> enemies;
         private List<Chicken> chickens;
+        private List<Ore> ores; // Thêm danh sách Ores
 
         // Trạng thái bị chặn
         public bool BlockedLeft { get; private set; } = false;
         public bool BlockedRight { get; private set; } = false;
         public bool BlockedUp { get; private set; } = false;
         public bool BlockedDown { get; private set; } = false;
-
         public bool IsBlockedLeft => BlockedLeft;
         public bool IsBlockedRight => BlockedRight;
         public bool IsBlockedUp => BlockedUp;
         public bool IsBlockedDown => BlockedDown;
+
         public string CurrentDirection => currentDirection;
 
         public string CurrentWeapon { get; private set; } = "Sword"; // Vũ khí mặc định
@@ -79,13 +80,14 @@ namespace Project_Game.Entities
             set { playerY = value; }
         }
 
-        // Constructor nhận 3 tham số
-        public Player(List<GameObject> obstacles, List<TestEnemy> enemies, List<Chicken> chickens)
+        // Constructor nhận 4 tham số (thêm danh sách Ores)
+        public Player(List<GameObject> obstacles, List<TestEnemy> enemies, List<Chicken> chickens, List<Ore> ores)
             : base(0, 0, 20, 33, "Player", 100) // Gọi constructor của GameObject
         {
             this.obstacles = obstacles;
             this.enemies = enemies;
             this.chickens = chickens;
+            this.ores = ores;
 
             // Khởi tạo các AnimationManager
             movementAnimation = new AnimationManager(frameRate: 12);
@@ -273,6 +275,27 @@ namespace Project_Game.Entities
                         else if (GoDown) collisionDirection = "Down";
 
                         Console.WriteLine($"Collision with Enemy detected: {collisionDirection}");
+                        break;
+                    }
+                }
+            }
+
+            // Kiểm tra va chạm với quặng nếu chưa va chạm obstacle và enemy
+            if (!collisionDetected)
+            {
+                foreach (var ore in ores)
+                {
+                    Rectangle oreRect = new Rectangle(ore.X, ore.Y, ore.Width, ore.Height);
+                    if (newRect.IntersectsWith(oreRect))
+                    {
+                        collisionDetected = true;
+
+                        if (GoLeft) collisionDirection = "Left";
+                        else if (GoRight) collisionDirection = "Right";
+                        else if (GoUp) collisionDirection = "Up";
+                        else if (GoDown) collisionDirection = "Down";
+
+                        Console.WriteLine($"Collision with Ore detected: {collisionDirection}");
                         break;
                     }
                 }
@@ -520,6 +543,8 @@ namespace Project_Game.Entities
         public void SetObstacles(List<GameObject> newObstacles)
         {
             this.obstacles = newObstacles;
+            // Cập nhật danh sách Ores từ Obstacles nếu cần
+            this.ores = newObstacles.OfType<Ore>().ToList();
         }
 
         public void PickupItems(List<DroppedItem> droppedItems, InventoryManager inventory)
@@ -548,6 +573,8 @@ namespace Project_Game.Entities
                 }
             }
         }
+
+        // Thực hiện chặt cây
         public void Chop()
         {
             if (CurrentWeapon != "Axe")
@@ -582,5 +609,58 @@ namespace Project_Game.Entities
             }
         }
 
+        // Phương thức để đào quặng khi nhấn phím V
+        public void MineOres(List<Ore> ores)
+        {
+            if (!IsAttacking && CurrentWeapon == "Pickaxe")
+            {
+                // Tìm quặng gần nhất trong khoảng đào
+                int miningRange = 50; // Khoảng cách tối đa để đào quặng
+                Ore nearestOre = null;
+                double minDistance = double.MaxValue;
+
+                foreach (var ore in ores)
+                {
+                    double distance = Math.Sqrt(Math.Pow(playerX - ore.X, 2) + Math.Pow(playerY - ore.Y, 2));
+                    if (distance <= miningRange && distance < minDistance)
+                    {
+                        nearestOre = ore;
+                        minDistance = distance;
+                    }
+                }
+
+                if (nearestOre != null)
+                {
+                    Console.WriteLine($"[Info] Đang đào quặng tại ({nearestOre.X}, {nearestOre.Y}).");
+                    nearestOre.Mine(InventoryManager);
+
+                    // Kích hoạt hoạt ảnh đào quặng
+                    IsAttacking = true;
+                    string miningPath = Path.Combine("Assets", "Player", "Player_Dig-up", currentDirection);
+                    attackAnimation.LoadFrames(miningPath);
+                    attackAnimation.ResetAnimation();
+
+                    // Kiểm tra tải khung hình thành công
+                    if (attackAnimation.GetFrameCount() == 0)
+                    {
+                        Console.WriteLine($"Cannot load mining frames from {miningPath}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Loaded {attackAnimation.GetFrameCount()} mining frames từ {miningPath}");
+                    }
+                    GameObjectManager.Instance.RemoveOre(nearestOre);
+
+                }
+                else
+                {
+                    Console.WriteLine("[Info] Không tìm thấy quặng nào trong phạm vi đào.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("[Info] Bạn cần có Pickaxe để đào quặng hoặc đang trong trạng thái tấn công.");
+            }
+        }
     }
 }

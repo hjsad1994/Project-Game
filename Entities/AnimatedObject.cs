@@ -4,7 +4,7 @@ using System;
 
 namespace Project_Game.Entities // Đảm bảo AnimatedObject thuộc về cùng namespace
 {
-    public class AnimatedObject
+    public class AnimatedObject 
     {
         private static readonly Random rand = new Random(); // Nguồn Random chung
         private AnimationManager animationManager;
