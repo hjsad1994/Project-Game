@@ -8,12 +8,13 @@ namespace Project_Game.Entities
 {
     public static class ObjectLoader
     {
-        public static List<StaticObject> LoadObjectsFromXml(string xmlFilePath, out List<Chicken> chickens, out List<AnimatedObject> animatedObjects, out List<Tree> trees)
+        public static List<StaticObject> LoadObjectsFromXml(string xmlFilePath, out List<Chicken> chickens, out List<AnimatedObject> animatedObjects, out List<Tree> trees, out List<Kapybara> kapybaras)
         {
             List<StaticObject> objects = new List<StaticObject>();
             chickens = new List<Chicken>();
             animatedObjects = new List<AnimatedObject>();
             trees = new List<Tree>();
+            kapybaras = new List<Kapybara>();
 
             if (!File.Exists(xmlFilePath))
             {
@@ -27,8 +28,9 @@ namespace Project_Game.Entities
             XmlNodeList nodeList = doc.SelectNodes("/Objects/Object");
             XmlNodeList treeNodeList = doc.SelectNodes("/Objects/Tree");
             XmlNodeList animatedNodeList = doc.SelectNodes("/Objects/AnimatedObject");
+            XmlNodeList kapybaraNodeList = doc.SelectNodes("/Objects/Kapybara");
 
-            Console.WriteLine($"[Info] Found {nodeList.Count} Object node(s), {treeNodeList.Count} Tree node(s), and {animatedNodeList.Count} AnimatedObject node(s) in {xmlFilePath}.");
+            Console.WriteLine($"[Info] Found {nodeList.Count} Object node(s), {treeNodeList.Count} Tree node(s), {animatedNodeList.Count} AnimatedObject node(s), và {kapybaraNodeList.Count} Kapybara node(s) trong {xmlFilePath}.");
 
             // Xử lý các StaticObject và Chicken
             foreach (XmlNode node in nodeList)
@@ -49,7 +51,7 @@ namespace Project_Game.Entities
                     if (File.Exists(fullPath))
                     {
                         objects.Add(new House(fullPath, x, y, width, height));
-                        Console.WriteLine($"[Info] Added House at ({x}, {y}) with image {fullPath}");
+                        Console.WriteLine($"[Info] Added House tại ({x}, {y}) với image {fullPath}");
                     }
                     else
                     {
@@ -58,10 +60,9 @@ namespace Project_Game.Entities
                 }
                 else if (type == "Chicken")
                 {
-                    int minX = x - 50;
-                    int maxX = x + 50;
-                    chickens.Add(new Chicken("ChickenFromXML", x, y, minX, maxX));
-                    Console.WriteLine($"[Info] Added Chicken at ({x}, {y}) with patrol range [{minX}, {maxX}]");
+                    // Bạn có thể thêm các thuộc tính khác nếu cần, như tên
+                    chickens.Add(new Chicken("ChickenFromXML", x, y, x - 50, x + 50));
+                    Console.WriteLine($"[Info] Added Chicken tại ({x}, {y}) với patrol range [{x - 50}, {x + 50}]");
                 }
                 else
                 {
@@ -70,7 +71,7 @@ namespace Project_Game.Entities
                     if (File.Exists(fullPath))
                     {
                         objects.Add(new StaticObject(fullPath, x, y, width, height));
-                        Console.WriteLine($"[Info] Added StaticObject at ({x}, {y}) with image {fullPath}");
+                        Console.WriteLine($"[Info] Added StaticObject tại ({x}, {y}) với image {fullPath}");
                     }
                     else
                     {
@@ -82,7 +83,7 @@ namespace Project_Game.Entities
             // Xử lý các Tree
             foreach (XmlNode treeNode in treeNodeList)
             {
-                string category = treeNode.Attributes["category"]?.Value; // e.g., "Tree/Spruce_tree"
+                string category = treeNode.Attributes["category"]?.Value; // e.g., "Trees/Spruce_tree"
                 if (string.IsNullOrEmpty(category))
                 {
                     Console.WriteLine($"[Error] Tree category is missing.");
@@ -106,7 +107,7 @@ namespace Project_Game.Entities
 
                     if (string.IsNullOrEmpty(imageName))
                     {
-                        Console.WriteLine($"[Error] Stage imageName is missing for Tree at ({x}, {y}).");
+                        Console.WriteLine($"[Error] Stage imageName is missing for Tree tại ({x}, {y}).");
                         missingStage = true;
                         break;
                     }
@@ -127,7 +128,7 @@ namespace Project_Game.Entities
                         {
                             Image treeImage = Image.FromFile(treeImagePath);
                             treeStages.Add(new TreeStage(treeImage, stageWidth, stageHeight));
-                            Console.WriteLine($"[Info] Loaded tree stage with image {treeImagePath} and size ({stageWidth}x{stageHeight}).");
+                            Console.WriteLine($"[Info] Loaded tree stage với image {treeImagePath} và size ({stageWidth}x{stageHeight}).");
                         }
                         catch (Exception ex)
                         {
@@ -148,11 +149,11 @@ namespace Project_Game.Entities
                 {
                     Tree tree = new Tree(x, y, treeStages, growthIntervalMilliseconds: 5000); // 5 giây để phát triển
                     trees.Add(tree);
-                    Console.WriteLine($"[Info] Added Tree at ({x}, {y}) with {treeStages.Count} stages.");
+                    Console.WriteLine($"[Info] Added Tree tại ({x}, {y}) với {treeStages.Count} stages.");
                 }
                 else
                 {
-                    Console.WriteLine($"[Warning] Tree at ({x}, {y}) not added due to missing stages.");
+                    Console.WriteLine($"[Warning] Tree tại ({x}, {y}) không được thêm vào do thiếu stages.");
                 }
             }
 
@@ -173,7 +174,7 @@ namespace Project_Game.Entities
                 {
                     AnimatedObject animatedObj = new AnimatedObject(spriteSheetFolderPath, x, y, width, height, frameRate);
                     animatedObjects.Add(animatedObj);
-                    Console.WriteLine($"[Info] Added AnimatedObject of type {type} at ({x}, {y})");
+                    Console.WriteLine($"[Info] Added AnimatedObject of type {type} tại ({x}, {y})");
                 }
                 catch (Exception ex)
                 {
@@ -181,7 +182,38 @@ namespace Project_Game.Entities
                 }
             }
 
-            Console.WriteLine($"[Summary] Total objects loaded from XML: {objects.Count}, Chickens loaded: {chickens.Count}, Trees loaded: {trees.Count}, AnimatedObjects loaded: {animatedObjects.Count}");
+            // Xử lý các Kapybara
+            // Xử lý các Kapybara
+            foreach (XmlNode kapyNode in kapybaraNodeList)
+            {
+                string name = kapyNode.Attributes["name"]?.Value ?? "Kapybara";
+                int x = int.Parse(kapyNode.Attributes["x"]?.Value ?? "0");
+                int y = int.Parse(kapyNode.Attributes["y"]?.Value ?? "0");
+                int minX = int.Parse(kapyNode.Attributes["minX"]?.Value ?? (x - 50).ToString());
+                int maxX = int.Parse(kapyNode.Attributes["maxX"]?.Value ?? (x + 50).ToString());
+                int width = int.Parse(kapyNode.Attributes["width"]?.Value ?? "60"); // Thêm thuộc tính width
+                int height = int.Parse(kapyNode.Attributes["height"]?.Value ?? "50"); // Thêm thuộc tính height
+
+                Console.WriteLine($"[Debug] Kapybara node: name={name}, x={x}, y={y}, minX={minX}, maxX={maxX}, width={width}, height={height}");
+
+                try
+                {
+                    Kapybara kapy = new Kapybara(name, x, y, minX, maxX)
+                    {
+                        Width = width,    // Đặt Width theo XML
+                        Height = height   // Đặt Height theo XML
+                    };
+                    kapybaras.Add(kapy);
+                    Console.WriteLine($"[Info] Added Kapybara tên {name} tại ({x}, {y}) với patrol range [{minX}, {maxX}] và kích thước ({width}x{height}).");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Error] Error creating Kapybara tên {name}: {ex.Message}");
+                }
+            }
+
+
+            Console.WriteLine($"[Summary] Tổng số objects đã tải từ XML: {objects.Count}, Chickens đã tải: {chickens.Count}, Trees đã tải: {trees.Count}, AnimatedObjects đã tải: {animatedObjects.Count}, và Kapybaras đã tải: {kapybaras.Count}");
             return objects;
         }
     }

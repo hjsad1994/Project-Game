@@ -12,33 +12,32 @@ public class Renderer
         GameObjectManager objectManager,
         bool gameOverState)
     {
-        // Vẽ nền
+        // 1. Vẽ nền
         if (bg != null)
         {
             canvas.DrawImage(bg, 0, 0, 800, 600);
         }
 
-        // Vẽ các AnimatedObject
+        // 2. Vẽ StaticObjects
+        foreach (var staticObj in objectManager.StaticObjects)
+        {
+            staticObj.Draw(canvas);
+        }
+
+        // 3. Vẽ Trees
+        foreach (var tree in objectManager.Trees)
+        {
+            tree.Draw(canvas);
+        }
+
+        // 4. Vẽ AnimatedObjects
         foreach (var animatedObject in objectManager.AnimatedObjects)
         {
             animatedObject.Update();
             animatedObject.Draw(canvas);
         }
 
-        // Vẽ DroppedItems
-        foreach (var droppedItem in objectManager.DroppedItems)
-        {
-            droppedItem.Draw(canvas);
-        }
-
-        // Vẽ người chơi
-        var playerFrame = player.GetCurrentFrame();
-        if (playerFrame != null)
-        {
-            canvas.DrawImage(playerFrame, player.X, player.Y, player.Width, player.Height);
-        }
-
-        // Vẽ kẻ thù
+        // 5. Vẽ Enemies
         foreach (var en in objectManager.Enemies)
         {
             var enemyFrame = en.GetCurrentFrame();
@@ -48,7 +47,7 @@ public class Renderer
             }
         }
 
-        // Vẽ gà
+        // 6. Vẽ Chickens
         foreach (var chicken in objectManager.Chickens)
         {
             var chickenFrame = chicken.GetCurrentFrame();
@@ -58,44 +57,29 @@ public class Renderer
             }
         }
 
-        // Vẽ Kapybara
+        // 7. Vẽ Kapybaras
         foreach (var kapy in objectManager.Kapybaras)
         {
-            var kapyFrame = kapy.GetCurrentFrame();
-            if (kapyFrame != null)
-            {
-                canvas.DrawImage(kapyFrame, kapy.X, kapy.Y, kapy.Width, kapy.Height);
-            }
+            kapy.Draw(canvas); // Đảm bảo rằng phương thức Draw đã được thêm vào Kapybara
         }
 
-        // Vẽ các StaticObject
-        Console.WriteLine($"[Debug] Rendering {objectManager.StaticObjects.Count} StaticObjects.");
-        foreach (var staticObj in objectManager.StaticObjects)
-        {
-            staticObj.Draw(canvas);
-        }
-
-        // Vẽ các DroppedItem
-        Console.WriteLine($"[Debug] Rendering {objectManager.DroppedItems.Count} DroppedItems.");
+        // 8. Vẽ DroppedItems
         foreach (var droppedItem in objectManager.DroppedItems)
         {
             droppedItem.Draw(canvas);
         }
-
-        // Vẽ các cây
-        Console.WriteLine($"[Debug] Rendering {objectManager.Trees.Count} Trees.");
-        foreach (var tree in objectManager.Trees)
+        var playerFrame = player.GetCurrentFrame();
+        if (playerFrame != null)
         {
-            tree.Draw(canvas);
+            canvas.DrawImage(playerFrame, player.X, player.Y, player.Width, player.Height);
         }
-
-        // Vẽ UI nếu game không kết thúc
+        // 10. Vẽ UI nếu game không kết thúc
         if (!gameOverState)
         {
             // Bạn có thể thêm các phần vẽ UI khác ở đây nếu cần
         }
 
-        // Vẽ trạng thái Game Over
+        // 11. Vẽ trạng thái Game Over
         if (gameOverState)
         {
             using (Font font = new Font("Arial", 24, FontStyle.Bold))

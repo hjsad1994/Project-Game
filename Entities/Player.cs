@@ -459,7 +459,7 @@ namespace Project_Game.Entities
                                 damage = 25;
                                 break;
                             case "Watering-can":
-                                damage = 5;
+                                damage = 50;
                                 break;
                             default:
                                 damage = 10;

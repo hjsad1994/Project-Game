@@ -34,8 +34,8 @@ namespace Project_Game.Entities
         public bool IsAttacking => false;
         public bool ShouldRemove => false;
 
-        public Kapybara(string name, int startX, int startY, int minX, int maxX)
-            : base(startX, startY, 60, 50, name)
+        public Kapybara(string name, int startX, int startY, int minX, int maxX, int width = 60, int height = 50)
+            : base(startX, startY, width, height, name)
         {
             this.minX = minX;
             this.maxX = maxX;
@@ -56,7 +56,6 @@ namespace Project_Game.Entities
             LoadAnimation("LookAround", "Kapybara_LookAround_cuts", frameRate: 15, loop: false);
             LoadAnimation("LookAround_submerged", "Kapybara_LookAround_submerged_cuts", frameRate: 15, loop: false);
         }
-
 
         private void LoadAnimation(string stateName, string folderName, int frameRate = 15, bool loop = false)
         {
@@ -153,6 +152,21 @@ namespace Project_Game.Entities
         public override void TakeDamage(int damage)
         {
             // Kapybara không nhận sát thương
+        }
+
+        // Thêm phương thức Draw để vẽ Kapybara
+        public void Draw(Graphics g)
+        {
+            Image currentFrame = GetCurrentFrame();
+            if (currentFrame != null)
+            {
+                g.DrawImage(currentFrame, X, Y, Width, Height);
+                Console.WriteLine($"[Debug] Vẽ Kapybara '{Name}' tại ({X}, {Y}) với kích thước ({Width}x{Height}).");
+            }
+            else
+            {
+                Console.WriteLine($"[Error] Kapybara '{Name}' tại ({X}, {Y}) không có hình ảnh để vẽ.");
+            }
         }
     }
 }
