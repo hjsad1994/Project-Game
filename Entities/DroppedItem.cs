@@ -17,7 +17,7 @@ namespace Project_Game.Entities
         // Thuộc tính cho hiệu ứng bay vào người chơi
         private bool isFlying = false;
         private Player targetPlayer;
-        private float flySpeed = 5f; // Tốc độ bay vào người chơi
+        private float flySpeed = 3f; // Tốc độ bay vào người chơi
         public bool IsFlying => isFlying;
 
         public bool ShouldRemove { get; set; } = false;
@@ -84,7 +84,7 @@ namespace Project_Game.Entities
                 Y += (int)(directionY * flySpeed);
 
                 // Nếu đã đến gần người chơi, tự động thu thập
-                if (distance < flySpeed * 2)
+                if (distance < flySpeed)
                 {
                     // Thực hiện thu thập item
                     PickupItem();
