@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Xml;
 
 namespace Project_Game.Entities
@@ -236,17 +237,39 @@ namespace Project_Game.Entities
                 }
 
                 string oreImagePath = Path.Combine("Assets", "Items", "Ore", imageName);
+
+                // Đọc các DropItem nếu có
+                List<DropItemInfo> dropItems = new List<DropItemInfo>();
+                XmlNodeList dropItemNodes = oreNode.SelectNodes("DropItems/DropItem");
+                foreach (XmlNode dropItemNode in dropItemNodes)
+                {
+                    string dropItemName = dropItemNode.Attributes["name"]?.Value ?? "Ore";
+                    string dropItemImageName = dropItemNode.Attributes["imageName"]?.Value ?? "ore.png";
+                    int probability = int.Parse(dropItemNode.Attributes["probability"]?.Value ?? "100");
+
+                    string dropItemImagePath = Path.Combine("Assets", "Items", "Ore", dropItemImageName);
+                    if (File.Exists(dropItemImagePath))
+                    {
+                        dropItems.Add(new DropItemInfo(dropItemName, dropItemImagePath, probability));
+                        Console.WriteLine($"[Info] Added DropItem: {dropItemName} với probability {probability}% tại {dropItemImagePath}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[Error] DropItem image not found: {dropItemImagePath}");
+                    }
+                }
+
                 if (File.Exists(oreImagePath))
                 {
                     try
                     {
-                        Ore ore = new Ore(x, y, oreImagePath)
+                        Ore ore = new Ore(x, y, oreImagePath, dropItems)
                         {
                             Width = width,
                             Height = height
                         };
                         ores.Add(ore);
-                        Console.WriteLine($"[Info] Added Ore tại ({x}, {y}) với image {oreImagePath} và size ({width}x{height}).");
+                        Console.WriteLine($"[Info] Added Ore tại ({x}, {y}) với image {oreImagePath}, có {dropItems.Count} DropItems và size ({width}x{height}).");
                     }
                     catch (Exception ex)
                     {

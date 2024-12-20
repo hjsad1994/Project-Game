@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Xml;
 
 namespace Project_Game
 {
@@ -60,6 +59,7 @@ namespace Project_Game
         {
             DroppedItems.Add(item);
             // Obstacles.Add(item); // Nếu muốn DroppedItem cũng là chướng ngại vật
+            Console.WriteLine($"[Info] Thêm DroppedItem: {item.Item.Name} tại ({item.X}, {item.Y}) vào trò chơi.");
         }
 
         // Phương thức để thêm Ore vào danh sách
@@ -166,16 +166,6 @@ namespace Project_Game
             Kapybaras.AddRange(loadedKapybaras);
             Ores.AddRange(loadedOres); // Thêm Ores từ XML
 
-            // Thêm quặng vào Map2
-            // Nếu bạn đã khai báo Ores trong XML, không cần thêm thủ công nữa
-            // Nhưng nếu muốn thêm thêm Ores, bạn có thể làm điều đó ở đây
-            /*
-            Ore ore3 = new Ore(250, 250, Path.Combine("Assets", "Items", "Ore", "ore.png"));
-            Ore ore4 = new Ore(550, 450, Path.Combine("Assets", "Items", "Ore", "ore.png"));
-            AddOre(ore3);
-            AddOre(ore4);
-            */
-
             // Thêm StaticObjects vào Obstacles
             Obstacles.AddRange(StaticObjects);
             Obstacles.AddRange(loadedTrees);
@@ -219,13 +209,6 @@ namespace Project_Game
             Kapybaras.AddRange(loadedKapybaras);
             Ores.AddRange(loadedOres); // Thêm Ores từ XML
 
-            // Thêm quặng vào Map3
-            // Nếu bạn đã khai báo Ores trong XML, không cần thêm thủ công nữa
-            /*
-            Ore ore5 = new Ore(400, 300, Path.Combine("Assets", "Items", "Ore", "ore.png"));
-            AddOre(ore5);
-            */
-
             // Thêm kẻ thù
             Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 600, 200));
 
@@ -268,13 +251,6 @@ namespace Project_Game
             Kapybaras.AddRange(loadedKapybaras);
             Ores.AddRange(loadedOres); // Thêm Ores từ XML
 
-            // Thêm quặng vào Map4
-            // Nếu bạn đã khai báo Ores trong XML, không cần thêm thủ công nữa
-            /*
-            Ore ore6 = new Ore(350, 350, Path.Combine("Assets", "Items", "Ore", "ore.png"));
-            AddOre(ore6);
-            */
-
             // Thêm StaticObjects và AnimatedObjects vào Obstacles nếu cần
             Obstacles.AddRange(StaticObjects);
             Obstacles.AddRange(loadedTrees);
@@ -283,9 +259,6 @@ namespace Project_Game
             Console.WriteLine($"Map4 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}, Kapybaras Count: {Kapybaras.Count}, Ores Count: {Ores.Count}");
 
             player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
-
-            // Thêm quặng cho map4 nếu cần
-            //Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 600, 200));
 
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
@@ -329,9 +302,14 @@ namespace Project_Game
                 animatedObj.Update();
             }
 
-            foreach (var droppedItem in DroppedItems)
+            foreach (var droppedItem in DroppedItems.ToList()) // ToList để tránh lỗi khi xóa trong vòng lặp
             {
                 droppedItem.Update(player);
+                if (droppedItem.ShouldRemove)
+                {
+                    DroppedItems.Remove(droppedItem);
+                    Console.WriteLine($"[Info] DroppedItem {droppedItem.Item.Name} tại ({droppedItem.X}, {droppedItem.Y}) đã được loại bỏ.");
+                }
             }
 
             foreach (var tree in Trees)
@@ -339,10 +317,14 @@ namespace Project_Game
                 tree.UpdateTree();
             }
 
-            foreach (var ore in Ores)
+            foreach (var ore in Ores.ToList()) // ToList để tránh lỗi khi xóa trong vòng lặp
             {
-                // Quặng không có cập nhật liên tục trừ khi bạn muốn thêm logic nào đó
-                // Nếu có, hãy thêm ở đây
+                if (ore.ShouldRemove)
+                {
+                    Ores.Remove(ore);
+                    Obstacles.Remove(ore);
+                    Console.WriteLine($"[Info] Quặng tại ({ore.X}, {ore.Y}) đã được loại bỏ khỏi trò chơi.");
+                }
             }
 
             // Loại bỏ các đối tượng đã bị đánh dấu để loại bỏ

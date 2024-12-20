@@ -621,7 +621,7 @@ namespace Project_Game.Entities
 
                 foreach (var ore in ores)
                 {
-                    double distance = Math.Sqrt(Math.Pow(playerX - ore.X, 2) + Math.Pow(playerY - ore.Y, 2));
+                    double distance = Math.Sqrt(Math.Pow(X - ore.X, 2) + Math.Pow(Y - ore.Y, 2));
                     if (distance <= miningRange && distance < minDistance)
                     {
                         nearestOre = ore;
@@ -636,7 +636,7 @@ namespace Project_Game.Entities
 
                     // Kích hoạt hoạt ảnh đào quặng
                     IsAttacking = true;
-                    string miningPath = Path.Combine("Assets", "Player", "Player_Dig-up", currentDirection);
+                    string miningPath = Path.Combine("Assets", "Player", "Player_Dig-up", CurrentDirection);
                     attackAnimation.LoadFrames(miningPath);
                     attackAnimation.ResetAnimation();
 
@@ -649,8 +649,8 @@ namespace Project_Game.Entities
                     {
                         Console.WriteLine($"Loaded {attackAnimation.GetFrameCount()} mining frames từ {miningPath}");
                     }
-                    GameObjectManager.Instance.RemoveOre(nearestOre);
 
+                    // Loại bỏ quặng khỏi GameObjectManager sẽ được thực hiện trong GameObjectManager.UpdateAll
                 }
                 else
                 {

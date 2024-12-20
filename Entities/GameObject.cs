@@ -70,7 +70,10 @@ namespace Project_Game.Entities
             Rectangle objectRect = new Rectangle(X, Y, Width, Height);
             return rect.IntersectsWith(objectRect);
         }
-
+        public virtual void Update()
+        {
+            // Logic cập nhật mặc định (nếu có)
+        }
         public virtual void TakeDamage(int damage)
         {
             Health -= damage;
