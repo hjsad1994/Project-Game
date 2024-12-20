@@ -8,13 +8,19 @@ namespace Project_Game.Entities
 {
     public static class ObjectLoader
     {
-        public static List<StaticObject> LoadObjectsFromXml(string xmlFilePath, out List<Chicken> chickens, out List<AnimatedObject> animatedObjects, out List<Tree> trees, out List<Kapybara> kapybaras)
+        public static List<StaticObject> LoadObjectsFromXml(string xmlFilePath,
+            out List<Chicken> chickens,
+            out List<AnimatedObject> animatedObjects,
+            out List<Tree> trees,
+            out List<Kapybara> kapybaras,
+            out List<Ore> ores) // Thêm danh sách Ores
         {
             List<StaticObject> objects = new List<StaticObject>();
             chickens = new List<Chicken>();
             animatedObjects = new List<AnimatedObject>();
             trees = new List<Tree>();
             kapybaras = new List<Kapybara>();
+            ores = new List<Ore>(); // Khởi tạo danh sách Ores
 
             if (!File.Exists(xmlFilePath))
             {
@@ -29,8 +35,9 @@ namespace Project_Game.Entities
             XmlNodeList treeNodeList = doc.SelectNodes("/Objects/Tree");
             XmlNodeList animatedNodeList = doc.SelectNodes("/Objects/AnimatedObject");
             XmlNodeList kapybaraNodeList = doc.SelectNodes("/Objects/Kapybara");
+            XmlNodeList oreNodeList = doc.SelectNodes("/Objects/Ore"); // Thêm xử lý Ore
 
-            Console.WriteLine($"[Info] Found {nodeList.Count} Object node(s), {treeNodeList.Count} Tree node(s), {animatedNodeList.Count} AnimatedObject node(s), và {kapybaraNodeList.Count} Kapybara node(s) trong {xmlFilePath}.");
+            Console.WriteLine($"[Info] Found {nodeList.Count} Object node(s), {treeNodeList.Count} Tree node(s), {animatedNodeList.Count} AnimatedObject node(s), {kapybaraNodeList.Count} Kapybara node(s), và {oreNodeList.Count} Ore node(s) trong {xmlFilePath}.");
 
             // Xử lý các StaticObject và Chicken
             foreach (XmlNode node in nodeList)
@@ -183,7 +190,6 @@ namespace Project_Game.Entities
             }
 
             // Xử lý các Kapybara
-            // Xử lý các Kapybara
             foreach (XmlNode kapyNode in kapybaraNodeList)
             {
                 string name = kapyNode.Attributes["name"]?.Value ?? "Kapybara";
@@ -212,8 +218,48 @@ namespace Project_Game.Entities
                 }
             }
 
+            // Xử lý các Ore
+            foreach (XmlNode oreNode in oreNodeList)
+            {
+                string imageName = oreNode.Attributes["imageName"]?.Value;
+                int x = int.Parse(oreNode.Attributes["x"]?.Value ?? "0");
+                int y = int.Parse(oreNode.Attributes["y"]?.Value ?? "0");
+                int width = int.Parse(oreNode.Attributes["width"]?.Value ?? "32");
+                int height = int.Parse(oreNode.Attributes["height"]?.Value ?? "32");
 
-            Console.WriteLine($"[Summary] Tổng số objects đã tải từ XML: {objects.Count}, Chickens đã tải: {chickens.Count}, Trees đã tải: {trees.Count}, AnimatedObjects đã tải: {animatedObjects.Count}, và Kapybaras đã tải: {kapybaras.Count}");
+                Console.WriteLine($"[Debug] Ore node: imageName={imageName}, x={x}, y={y}, width={width}, height={height}");
+
+                if (string.IsNullOrEmpty(imageName))
+                {
+                    Console.WriteLine($"[Error] Ore imageName is missing at ({x}, {y}).");
+                    continue;
+                }
+
+                string oreImagePath = Path.Combine("Assets", "Items", "Ore", imageName);
+                if (File.Exists(oreImagePath))
+                {
+                    try
+                    {
+                        Ore ore = new Ore(x, y, oreImagePath)
+                        {
+                            Width = width,
+                            Height = height
+                        };
+                        ores.Add(ore);
+                        Console.WriteLine($"[Info] Added Ore tại ({x}, {y}) với image {oreImagePath} và size ({width}x{height}).");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Error] Error creating Ore tại ({x}, {y}): {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"[Error] Ore image not found: {oreImagePath}");
+                }
+            }
+
+            Console.WriteLine($"[Summary] Tổng số objects đã tải từ XML: {objects.Count}, Chickens đã tải: {chickens.Count}, Trees đã tải: {trees.Count}, AnimatedObjects đã tải: {animatedObjects.Count}, Kapybaras đã tải: {kapybaras.Count}, và Ores đã tải: {ores.Count}");
             return objects;
         }
     }

@@ -44,7 +44,7 @@
             // 
             this.healBar.BackColor = System.Drawing.Color.Lime;
             this.healBar.ForeColor = System.Drawing.Color.LimeGreen;
-            this.healBar.Location = new System.Drawing.Point(500, 24);
+            this.healBar.Location = new System.Drawing.Point(12, 21);
             this.healBar.Name = "healBar";
             this.healBar.Size = new System.Drawing.Size(158, 23);
             this.healBar.TabIndex = 1;

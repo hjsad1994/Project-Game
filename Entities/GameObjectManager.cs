@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 namespace Project_Game
 {
@@ -96,7 +97,8 @@ namespace Project_Game
             List<Tree> loadedTrees;
             List<Chicken> loadedChickens;
             List<AnimatedObject> loadedAnimatedObjects;
-            List<Kapybara> loadedKapybaras; // Thêm danh sách Kapybara
+            List<Kapybara> loadedKapybaras;
+            List<Ore> loadedOres; // Thêm danh sách Ores
 
             // Cập nhật phương thức gọi LoadObjectsFromXml với tham số out mới
             var loadedObjects = ObjectLoader.LoadObjectsFromXml(
@@ -104,7 +106,8 @@ namespace Project_Game
                 out loadedChickens,
                 out loadedAnimatedObjects,
                 out loadedTrees,
-                out loadedKapybaras // Thêm tham số out Kapybaras
+                out loadedKapybaras,
+                out loadedOres // Thêm tham số out Ores
             );
 
             // Thêm kẻ thù
@@ -115,20 +118,14 @@ namespace Project_Game
             AnimatedObjects.AddRange(loadedAnimatedObjects);
             Chickens.AddRange(loadedChickens);
             Trees.AddRange(loadedTrees);
-            Kapybaras.AddRange(loadedKapybaras); // Thêm Kapybaras vào danh sách
+            Kapybaras.AddRange(loadedKapybaras);
+            Ores.AddRange(loadedOres); // Thêm Ores từ XML
 
             // Thêm cây và các đối tượng static vào danh sách Obstacles
             Obstacles.AddRange(loadedObjects);
             Obstacles.AddRange(loadedTrees);
-            // Thêm quặng vào Obstacles nếu có (nếu không, bạn cần thêm quặng riêng biệt)
+            Obstacles.AddRange(loadedOres); // Thêm Ores vào Obstacles
 
-            // Ví dụ: Thêm quặng vào Map1
-            Ore ore1 = new Ore(300, 300, Path.Combine("Assets", "Items", "Ore", "ore.png"));
-            Ore ore2 = new Ore(320, 300, Path.Combine("Assets", "Items", "Ore", "ore.png"));
-            Ore ore3 = new Ore(500, 350, Path.Combine("Assets", "Items", "Ore", "ore.png"));
-            AddOre(ore1);
-            AddOre(ore2);
-            AddOre(ore3);
             Console.WriteLine($"Map1 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}, Kapybaras Count: {Kapybaras.Count}, Ores Count: {Ores.Count}");
 
             // Thêm thông tin chi tiết về từng House
@@ -150,14 +147,16 @@ namespace Project_Game
             List<Tree> loadedTrees;
             List<Chicken> loadedChickens;
             List<AnimatedObject> loadedAnimatedObjects;
-            List<Kapybara> loadedKapybaras; // Thêm danh sách Kapybara
+            List<Kapybara> loadedKapybaras;
+            List<Ore> loadedOres; // Thêm danh sách Ores
 
             var loadedObjects = ObjectLoader.LoadObjectsFromXml(
                 "Assets/MapData/map2_objects.xml",
                 out loadedChickens,
                 out loadedAnimatedObjects,
                 out loadedTrees,
-                out loadedKapybaras // Thêm tham số out Kapybaras
+                out loadedKapybaras,
+                out loadedOres // Thêm tham số out Ores
             );
 
             StaticObjects.AddRange(loadedObjects);
@@ -165,17 +164,22 @@ namespace Project_Game
             Chickens.AddRange(loadedChickens);
             Trees.AddRange(loadedTrees);
             Kapybaras.AddRange(loadedKapybaras);
+            Ores.AddRange(loadedOres); // Thêm Ores từ XML
 
             // Thêm quặng vào Map2
+            // Nếu bạn đã khai báo Ores trong XML, không cần thêm thủ công nữa
+            // Nhưng nếu muốn thêm thêm Ores, bạn có thể làm điều đó ở đây
+            /*
             Ore ore3 = new Ore(250, 250, Path.Combine("Assets", "Items", "Ore", "ore.png"));
             Ore ore4 = new Ore(550, 450, Path.Combine("Assets", "Items", "Ore", "ore.png"));
             AddOre(ore3);
             AddOre(ore4);
+            */
 
             // Thêm StaticObjects vào Obstacles
             Obstacles.AddRange(StaticObjects);
             Obstacles.AddRange(loadedTrees);
-            // Thêm quặng vào Obstacles đã được thực hiện trong AddOre
+            Obstacles.AddRange(loadedOres); // Thêm Ores vào Obstacles
 
             Console.WriteLine($"Map2 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}, Kapybaras Count: {Kapybaras.Count}, Ores Count: {Ores.Count}");
 
@@ -197,13 +201,15 @@ namespace Project_Game
             List<Chicken> loadedChickens;
             List<AnimatedObject> loadedAnimatedObjects;
             List<Kapybara> loadedKapybaras;
+            List<Ore> loadedOres; // Thêm danh sách Ores
 
             var loadedObjects = ObjectLoader.LoadObjectsFromXml(
                 "Assets/MapData/map3_objects.xml",
                 out loadedChickens,
                 out loadedAnimatedObjects,
                 out loadedTrees,
-                out loadedKapybaras
+                out loadedKapybaras,
+                out loadedOres // Thêm tham số out Ores
             );
 
             StaticObjects.AddRange(loadedObjects);
@@ -211,10 +217,14 @@ namespace Project_Game
             Chickens.AddRange(loadedChickens);
             Trees.AddRange(loadedTrees);
             Kapybaras.AddRange(loadedKapybaras);
+            Ores.AddRange(loadedOres); // Thêm Ores từ XML
 
             // Thêm quặng vào Map3
+            // Nếu bạn đã khai báo Ores trong XML, không cần thêm thủ công nữa
+            /*
             Ore ore5 = new Ore(400, 300, Path.Combine("Assets", "Items", "Ore", "ore.png"));
             AddOre(ore5);
+            */
 
             // Thêm kẻ thù
             Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 600, 200));
@@ -222,7 +232,7 @@ namespace Project_Game
             // Thêm StaticObjects và AnimatedObjects vào Obstacles nếu cần
             Obstacles.AddRange(StaticObjects);
             Obstacles.AddRange(loadedTrees);
-            // Thêm quặng vào Obstacles đã được thực hiện trong AddOre
+            Obstacles.AddRange(loadedOres); // Thêm Ores vào Obstacles
 
             Console.WriteLine($"Map3 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}, Kapybaras Count: {Kapybaras.Count}, Ores Count: {Ores.Count}");
 
@@ -240,13 +250,15 @@ namespace Project_Game
             List<Chicken> loadedChickens;
             List<AnimatedObject> loadedAnimatedObjects;
             List<Kapybara> loadedKapybaras;
+            List<Ore> loadedOres; // Thêm danh sách Ores
 
             var loadedObjects = ObjectLoader.LoadObjectsFromXml(
                 "Assets/MapData/map4_objects.xml",
                 out loadedChickens,
                 out loadedAnimatedObjects,
                 out loadedTrees,
-                out loadedKapybaras
+                out loadedKapybaras,
+                out loadedOres // Thêm tham số out Ores
             );
 
             StaticObjects.AddRange(loadedObjects);
@@ -254,15 +266,19 @@ namespace Project_Game
             Chickens.AddRange(loadedChickens);
             Trees.AddRange(loadedTrees);
             Kapybaras.AddRange(loadedKapybaras);
+            Ores.AddRange(loadedOres); // Thêm Ores từ XML
 
             // Thêm quặng vào Map4
+            // Nếu bạn đã khai báo Ores trong XML, không cần thêm thủ công nữa
+            /*
             Ore ore6 = new Ore(350, 350, Path.Combine("Assets", "Items", "Ore", "ore.png"));
             AddOre(ore6);
+            */
 
             // Thêm StaticObjects và AnimatedObjects vào Obstacles nếu cần
             Obstacles.AddRange(StaticObjects);
             Obstacles.AddRange(loadedTrees);
-            // Thêm quặng vào Obstacles đã được thực hiện trong AddOre
+            Obstacles.AddRange(loadedOres); // Thêm Ores vào Obstacles
 
             Console.WriteLine($"Map4 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}, Kapybaras Count: {Kapybaras.Count}, Ores Count: {Ores.Count}");
 
