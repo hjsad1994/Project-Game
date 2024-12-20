@@ -11,13 +11,16 @@ namespace Project_Game
     {
         public List<StaticObject> StaticObjects { get; private set; }
         public List<AnimatedObject> AnimatedObjects { get; private set; }
-        public List<TestEnemy> Enemies { get; private set; }
+        public List<Enemy> Enemies { get; private set; }
         public List<Chicken> Chickens { get; private set; }
         public List<Kapybara> Kapybaras { get; private set; }
         public List<GameObject> Obstacles { get; private set; }
-        public List<DroppedItem> DroppedItems { get; private set; } // Thêm danh sách DroppedItem
+        public List<DroppedItem> DroppedItems { get; private set; }
         public List<Tree> Trees { get; private set; }
-        public List<Ore> Ores { get; private set; } // Thêm danh sách Ores
+        public List<Ore> Ores { get; private set; }
+
+        // Danh sách Bullet mới thêm
+        public List<Bullet> Bullets { get; private set; }
 
         private Player player;
         private GameLogic gameLogic;
@@ -39,13 +42,14 @@ namespace Project_Game
             this.player = player;
             Obstacles = new List<GameObject>();
             AnimatedObjects = new List<AnimatedObject>();
-            Enemies = new List<TestEnemy>();
+            Enemies = new List<Enemy>();
             Chickens = new List<Chicken>();
             Kapybaras = new List<Kapybara>();
             StaticObjects = new List<StaticObject>();
             DroppedItems = new List<DroppedItem>();
-            Trees = new List<Tree>(); // Khởi tạo danh sách Trees
-            Ores = new List<Ore>(); // Khởi tạo danh sách Ores
+            Trees = new List<Tree>();
+            Ores = new List<Ore>();
+            Bullets = new List<Bullet>(); // Khởi tạo danh sách Bullets
             _instance = this; // Thiết lập instance cho Singleton
         }
 
@@ -54,19 +58,18 @@ namespace Project_Game
             this.gameLogic = logic;
         }
 
-        // Phương thức để thêm DroppedItem vào danh sách
+        // Phương thức thêm DroppedItem
         public void AddDroppedItem(DroppedItem item)
         {
             DroppedItems.Add(item);
-            // Obstacles.Add(item); // Nếu muốn DroppedItem cũng là chướng ngại vật
             Console.WriteLine($"[Info] Thêm DroppedItem: {item.Item.Name} tại ({item.X}, {item.Y}) vào trò chơi.");
         }
 
-        // Phương thức để thêm Ore vào danh sách
+        // Phương thức thêm Ore
         public void AddOre(Ore ore)
         {
             Ores.Add(ore);
-            Obstacles.Add(ore); // Thêm quặng vào danh sách vật cản để người chơi và kẻ thù tránh va chạm
+            Obstacles.Add(ore);
             Console.WriteLine($"[Info] Thêm quặng tại ({ore.X}, {ore.Y}) vào trò chơi.");
         }
 
@@ -87,7 +90,12 @@ namespace Project_Game
             }
         }
 
-        // ... Các phương thức LoadMapX hiện tại ...
+        // Thêm phương thức để thêm Bullet
+        public void AddGameObject(Bullet bullet)
+        {
+            Bullets.Add(bullet);
+            Console.WriteLine($"[Info] Thêm Bullet tại ({bullet.X}, {bullet.Y}) vào trò chơi.");
+        }
 
         public void LoadMap1()
         {
@@ -98,44 +106,40 @@ namespace Project_Game
             List<Chicken> loadedChickens;
             List<AnimatedObject> loadedAnimatedObjects;
             List<Kapybara> loadedKapybaras;
-            List<Ore> loadedOres; // Thêm danh sách Ores
+            List<Ore> loadedOres;
 
-            // Cập nhật phương thức gọi LoadObjectsFromXml với tham số out mới
             var loadedObjects = ObjectLoader.LoadObjectsFromXml(
                 "Assets/MapData/map1_objects.xml",
                 out loadedChickens,
                 out loadedAnimatedObjects,
                 out loadedTrees,
                 out loadedKapybaras,
-                out loadedOres // Thêm tham số out Ores
+                out loadedOres
             );
 
-            // Thêm kẻ thù
-            Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 1, 700, 150));
+            Enemies.AddRange(TestEnemy.CreateEnemies("Assets\\Enemies\\Skeleton_Swordman", 1, 700, 150));
+            Enemies.AddRange(SkeletonMage.CreateEnemies("Assets\\Enemies\\Skeleton_Mage", 1, 300, 150));
 
-            // Thêm các đối tượng vào danh sách tương ứng
+
             StaticObjects.AddRange(loadedObjects);
             AnimatedObjects.AddRange(loadedAnimatedObjects);
             Chickens.AddRange(loadedChickens);
             Trees.AddRange(loadedTrees);
             Kapybaras.AddRange(loadedKapybaras);
-            Ores.AddRange(loadedOres); // Thêm Ores từ XML
+            Ores.AddRange(loadedOres);
 
-            // Thêm cây và các đối tượng static vào danh sách Obstacles
             Obstacles.AddRange(loadedObjects);
             Obstacles.AddRange(loadedTrees);
-            Obstacles.AddRange(loadedOres); // Thêm Ores vào Obstacles
+            Obstacles.AddRange(loadedOres);
 
             Console.WriteLine($"Map1 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}, Kapybaras Count: {Kapybaras.Count}, Ores Count: {Ores.Count}");
 
-            // Thêm thông tin chi tiết về từng House
             foreach (var house in StaticObjects.OfType<House>())
             {
                 Console.WriteLine($"[Info] House tại ({house.X}, {house.Y}) size ({house.Width}x{house.Height})");
             }
 
-            player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
-
+            player.SetObstacles(Obstacles);
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
 
@@ -148,7 +152,7 @@ namespace Project_Game
             List<Chicken> loadedChickens;
             List<AnimatedObject> loadedAnimatedObjects;
             List<Kapybara> loadedKapybaras;
-            List<Ore> loadedOres; // Thêm danh sách Ores
+            List<Ore> loadedOres;
 
             var loadedObjects = ObjectLoader.LoadObjectsFromXml(
                 "Assets/MapData/map2_objects.xml",
@@ -156,7 +160,7 @@ namespace Project_Game
                 out loadedAnimatedObjects,
                 out loadedTrees,
                 out loadedKapybaras,
-                out loadedOres // Thêm tham số out Ores
+                out loadedOres
             );
 
             StaticObjects.AddRange(loadedObjects);
@@ -164,21 +168,16 @@ namespace Project_Game
             Chickens.AddRange(loadedChickens);
             Trees.AddRange(loadedTrees);
             Kapybaras.AddRange(loadedKapybaras);
-            Ores.AddRange(loadedOres); // Thêm Ores từ XML
+            Ores.AddRange(loadedOres);
 
-            // Thêm StaticObjects vào Obstacles
             Obstacles.AddRange(StaticObjects);
             Obstacles.AddRange(loadedTrees);
-            Obstacles.AddRange(loadedOres); // Thêm Ores vào Obstacles
+            Obstacles.AddRange(loadedOres);
 
             Console.WriteLine($"Map2 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}, Kapybaras Count: {Kapybaras.Count}, Ores Count: {Ores.Count}");
 
-            player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
+            player.SetObstacles(Obstacles);
 
-            // Spawn quái cho map2 (nếu bạn muốn có quái ở map2)
-            //Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 600, 200));
-
-            // Cập nhật danh sách enemies trong gameLogic
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
 
@@ -191,7 +190,7 @@ namespace Project_Game
             List<Chicken> loadedChickens;
             List<AnimatedObject> loadedAnimatedObjects;
             List<Kapybara> loadedKapybaras;
-            List<Ore> loadedOres; // Thêm danh sách Ores
+            List<Ore> loadedOres;
 
             var loadedObjects = ObjectLoader.LoadObjectsFromXml(
                 "Assets/MapData/map3_objects.xml",
@@ -199,7 +198,7 @@ namespace Project_Game
                 out loadedAnimatedObjects,
                 out loadedTrees,
                 out loadedKapybaras,
-                out loadedOres // Thêm tham số out Ores
+                out loadedOres
             );
 
             StaticObjects.AddRange(loadedObjects);
@@ -207,20 +206,17 @@ namespace Project_Game
             Chickens.AddRange(loadedChickens);
             Trees.AddRange(loadedTrees);
             Kapybaras.AddRange(loadedKapybaras);
-            Ores.AddRange(loadedOres); // Thêm Ores từ XML
+            Ores.AddRange(loadedOres);
 
-            // Thêm kẻ thù
             Enemies.AddRange(TestEnemy.CreateEnemies("Assets/Enemies/Skeleton_Swordman", 3, 600, 200));
 
-            // Thêm StaticObjects và AnimatedObjects vào Obstacles nếu cần
             Obstacles.AddRange(StaticObjects);
             Obstacles.AddRange(loadedTrees);
-            Obstacles.AddRange(loadedOres); // Thêm Ores vào Obstacles
+            Obstacles.AddRange(loadedOres);
 
             Console.WriteLine($"Map3 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}, Kapybaras Count: {Kapybaras.Count}, Ores Count: {Ores.Count}");
 
-            player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
-
+            player.SetObstacles(Obstacles);
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
 
@@ -233,7 +229,7 @@ namespace Project_Game
             List<Chicken> loadedChickens;
             List<AnimatedObject> loadedAnimatedObjects;
             List<Kapybara> loadedKapybaras;
-            List<Ore> loadedOres; // Thêm danh sách Ores
+            List<Ore> loadedOres;
 
             var loadedObjects = ObjectLoader.LoadObjectsFromXml(
                 "Assets/MapData/map4_objects.xml",
@@ -241,25 +237,22 @@ namespace Project_Game
                 out loadedAnimatedObjects,
                 out loadedTrees,
                 out loadedKapybaras,
-                out loadedOres // Thêm tham số out Ores
+                out loadedOres
             );
 
             StaticObjects.AddRange(loadedObjects);
             AnimatedObjects.AddRange(loadedAnimatedObjects);
             Chickens.AddRange(loadedChickens);
             Trees.AddRange(loadedTrees);
-            Kapybaras.AddRange(loadedKapybaras);
-            Ores.AddRange(loadedOres); // Thêm Ores từ XML
+            Ores.AddRange(loadedOres);
 
-            // Thêm StaticObjects và AnimatedObjects vào Obstacles nếu cần
             Obstacles.AddRange(StaticObjects);
             Obstacles.AddRange(loadedTrees);
-            Obstacles.AddRange(loadedOres); // Thêm Ores vào Obstacles
+            Obstacles.AddRange(loadedOres);
 
             Console.WriteLine($"Map4 Loaded - StaticObjects Count: {StaticObjects.Count}, AnimatedObjects Count: {AnimatedObjects.Count}, Obstacles Count: {Obstacles.Count}, Chickens Count: {Chickens.Count}, Trees Count: {Trees.Count}, Kapybaras Count: {Kapybaras.Count}, Ores Count: {Ores.Count}");
 
-            player.SetObstacles(Obstacles); // Cập nhật Obstacles cho Player
-
+            player.SetObstacles(Obstacles);
             gameLogic.SetEnemies(Enemies.Cast<Enemy>().ToList());
         }
 
@@ -274,9 +267,10 @@ namespace Project_Game
             Kapybaras.Clear();
             StaticObjects.Clear();
             Obstacles.Clear();
-            DroppedItems.Clear(); // Xoá DroppedItems khi tải bản đồ mới
-            Trees.Clear(); // Thêm dòng này để xoá danh sách Trees
-            Ores.Clear(); // Xoá danh sách Ores
+            DroppedItems.Clear();
+            Trees.Clear();
+            Ores.Clear();
+            Bullets.Clear();
             Console.WriteLine("[Info] Cleared all game objects.");
         }
 
@@ -286,12 +280,19 @@ namespace Project_Game
             {
                 enemy.Update(Obstacles, player);
             }
-
             foreach (var chicken in Chickens)
             {
                 chicken.Update(player);
             }
-
+            foreach (var bullet in Bullets.ToList())
+            {
+                bullet.Update();
+                bullet.CheckHit(player);
+                if (bullet.ShouldRemove)
+                {
+                    Bullets.Remove(bullet);
+                }
+            }
             foreach (var kapy in Kapybaras)
             {
                 kapy.Update();
@@ -302,7 +303,7 @@ namespace Project_Game
                 animatedObj.Update();
             }
 
-            foreach (var droppedItem in DroppedItems.ToList()) // ToList để tránh lỗi khi xóa trong vòng lặp
+            foreach (var droppedItem in DroppedItems.ToList())
             {
                 droppedItem.Update(player);
                 if (droppedItem.ShouldRemove)
@@ -317,7 +318,7 @@ namespace Project_Game
                 tree.UpdateTree();
             }
 
-            foreach (var ore in Ores.ToList()) // ToList để tránh lỗi khi xóa trong vòng lặp
+            foreach (var ore in Ores.ToList())
             {
                 if (ore.ShouldRemove)
                 {
@@ -327,83 +328,78 @@ namespace Project_Game
                 }
             }
 
-            // Loại bỏ các đối tượng đã bị đánh dấu để loại bỏ
+            // Cập nhật Bullet
+            foreach (var bullet in Bullets.ToList())
+            {
+                bullet.Update();
+                bullet.CheckHit(player);
+                if (bullet.ShouldRemove)
+                {
+                    Bullets.Remove(bullet);
+                    Console.WriteLine("[Info] Bullet đã bị loại bỏ.");
+                }
+            }
+
             RemoveDestroyedObjects();
         }
 
         public void RenderAll(Graphics g)
         {
-            // Vẽ StaticObjects
             foreach (var staticObj in StaticObjects)
             {
                 staticObj.Draw(g);
             }
-
-            // Vẽ Trees
+            foreach (var bullet in Bullets)
+            {
+                bullet.Draw(g);
+            }
             foreach (var tree in Trees)
             {
                 tree.Draw(g);
             }
 
-            // Vẽ Ores
             foreach (var ore in Ores)
             {
                 ore.Draw(g);
             }
 
-            // Vẽ AnimatedObjects
             foreach (var animatedObj in AnimatedObjects)
             {
                 animatedObj.Draw(g);
             }
 
-            // Vẽ DroppedItems
             foreach (var droppedItem in DroppedItems)
             {
                 droppedItem.Draw(g);
             }
 
-            // Vẽ Enemies
             foreach (var enemy in Enemies)
             {
                 enemy.Draw(g);
             }
-
-            // Vẽ Kapybaras
             foreach (var kapy in Kapybaras)
             {
                 kapy.Draw(g);
             }
 
-            // Vẽ các đối tượng khác như Player
-            // (Assuming bạn đã có một Renderer để vẽ các đối tượng khác)
+            // Vẽ Bullet
+            foreach (var bullet in Bullets)
+            {
+                bullet.Draw(g);
+            }
         }
 
         private void RemoveDestroyedObjects()
         {
-            // Loại bỏ các đối tượng Static đã bị đánh dấu
             StaticObjects.RemoveAll(o => o is IRemovable removable && removable.ShouldRemove);
-
-            // Loại bỏ các AnimatedObjects đã bị đánh dấu
             AnimatedObjects.RemoveAll(o => o is IRemovable removable && removable.ShouldRemove);
-
-            // Loại bỏ các Enemies đã bị đánh dấu
             Enemies.RemoveAll(e => e is IRemovable removable && removable.ShouldRemove);
-
-            // Loại bỏ các Chickens đã bị đánh dấu
             Chickens.RemoveAll(c => c is IRemovable removable && removable.ShouldRemove);
-
-            // Loại bỏ các Kapybaras đã bị đánh dấu
             Kapybaras.RemoveAll(k => k is IRemovable removable && removable.ShouldRemove);
-
-            // Loại bỏ các DroppedItems đã bị đánh dấu
             DroppedItems.RemoveAll(d => d is IRemovable removable && removable.ShouldRemove);
-
-            // Loại bỏ các Trees đã bị đánh dấu
             Trees.RemoveAll(t => t is IRemovable removable && removable.ShouldRemove);
-
-            // Loại bỏ các Ores đã bị đánh dấu
             Ores.RemoveAll(o => o is IRemovable removable && removable.ShouldRemove);
+            Bullets.RemoveAll(b => b is IRemovable removable && removable.ShouldRemove);
         }
     }
 }

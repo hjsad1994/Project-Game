@@ -237,6 +237,10 @@ namespace Project_Game.Entities
                 g.DrawRectangle(pen, barX, barY, barWidth, barHeight);
             }
         }
+        public virtual void Update(List<GameObject> obstacles, Player target)
+        {
+            // Update dành cho Enemy
+        }
 
     }
 }

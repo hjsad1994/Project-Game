@@ -39,6 +39,7 @@
 //    }
 //}
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace Project_Game.Entities
@@ -71,6 +72,7 @@ namespace Project_Game.Entities
             return rect.IntersectsWith(objectRect);
         }
         public virtual void Update()
+
         {
             // Logic cập nhật mặc định (nếu có)
         }

@@ -523,7 +523,7 @@ namespace Project_Game
                     break;
             }
 
-            List<TestEnemy> enemiesToAttack = new List<TestEnemy>();
+            List<Enemy> enemiesToAttack = new List<Enemy>();
             foreach (var en in objectManager.Enemies)
             {
                 if (!en.IsDead())
@@ -535,7 +535,6 @@ namespace Project_Game
                     }
                 }
             }
-
             if (enemiesToAttack.Count > 0)
             {
                 List<Enemy> enemiesToAttackList = enemiesToAttack.Cast<Enemy>().ToList();
@@ -547,7 +546,6 @@ namespace Project_Game
                 player.PerformAttack(new List<Enemy>());
                 Console.WriteLine("Player performed attack, but no enemies were hit.");
             }
-
             Invalidate();
         }
 
@@ -607,7 +605,7 @@ namespace Project_Game
                     break;
             }
 
-            List<TestEnemy> enemiesToAttack = new List<TestEnemy>();
+            List<Enemy> enemiesToAttack = new List<Enemy>();
             foreach (var en in objectManager.Enemies)
             {
                 if (!en.IsDead())

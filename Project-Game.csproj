@@ -50,6 +50,7 @@
     <Compile Include="Entities\AnimatedObject.cs" />
     <Compile Include="Entities\AnimationManager.cs" />
     <Compile Include="Entities\Attack.cs" />
+    <Compile Include="Entities\Bullet.cs" />
     <Compile Include="Entities\CachedAnimation.cs" />
     <Compile Include="Entities\Chicken.cs" />
     <Compile Include="Entities\DropItemInfo.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Entities\Ore.cs" />
     <Compile Include="Entities\Player.cs" />
     <Compile Include="Entities\Renderer.cs" />
+    <Compile Include="Entities\SkeletonMage.cs" />
     <Compile Include="Entities\StaticObject.cs" />
     <Compile Include="Entities\TestEnemy.cs" />
     <Compile Include="Entities\Tree.cs" />

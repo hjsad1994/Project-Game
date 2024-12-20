@@ -544,7 +544,7 @@ namespace Project_Game.Entities
         {
             this.obstacles = newObstacles;
             // Cập nhật danh sách Ores từ Obstacles nếu cần
-           //this.ores = newObstacles.OfType<Ore>().ToList();
+            //this.ores = newObstacles.OfType<Ore>().ToList();
         }
 
         public void PickupItems(List<DroppedItem> droppedItems, InventoryManager inventory)
