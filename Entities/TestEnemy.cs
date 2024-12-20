@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace Project_Game.Entities
 {
@@ -11,9 +10,12 @@ namespace Project_Game.Entities
         private AnimationManager movementAnimation;
         private AnimationManager attackAnimation;
         private Dictionary<string, AnimationManager> idleAnimations;
+        private AnimationManager preDeadAnimation; // Thêm AnimationManager cho Pre-Dead
         private AnimationManager deadAnimation;
 
         private bool isDead = false;
+        private bool isPreDead = false; // Cờ để xác định trạng thái Pre-Dead
+        private bool hasDroppedItem = false; // Cờ để đảm bảo DropItem chỉ được gọi một lần
         private string currentAnimationDirection = "";
         private bool isMoving = false;
         private string baseFolderPath;
@@ -31,7 +33,7 @@ namespace Project_Game.Entities
         private int directionChangeCooldown = 1500;
         private DateTime lastDirectionChangeTime = DateTime.MinValue;
 
-        private static Random random = new Random();
+        private static Random random = new Random(); // Sử dụng 'random' duy nhất
 
         // Tốc độ
         private float chaseSpeed = 0.5f;
@@ -39,7 +41,6 @@ namespace Project_Game.Entities
 
         // Lưu vị trí dưới dạng float để di chuyển mượt mà
         private float posX, posY;
-        private static Random rand = new Random();
 
         public TestEnemy(string baseFolder, int maxHealth = 50, int startX = 500, int startY = 100)
             : base("TestEnemy", maxHealth)
@@ -55,6 +56,7 @@ namespace Project_Game.Entities
 
             LoadEnemyImages(Path.Combine(baseFolderPath, "Movement"));
             LoadIdleAnimations(Path.Combine(baseFolderPath, "Idle"));
+            LoadPreDeadAnimations(Path.Combine(baseFolderPath, "Pre-Dead")); // Tải Pre-Dead cho từng hướng
             LoadDeadAnimation(Path.Combine(baseFolderPath, "Dead"));
         }
 
@@ -85,10 +87,12 @@ namespace Project_Game.Entities
 
         public override void LoadEnemyImages(string baseFolderPath)
         {
+            // Tải hoạt ảnh Movement cho từng hướng
             movementAnimation.LoadFrames(Path.Combine(baseFolderPath, "Down"));
             movementAnimation.LoadFrames(Path.Combine(baseFolderPath, "Up"));
             movementAnimation.LoadFrames(Path.Combine(baseFolderPath, "Left"));
             movementAnimation.LoadFrames(Path.Combine(baseFolderPath, "Right"));
+            Console.WriteLine($"[Info] Loaded Movement animations from {baseFolderPath}");
         }
 
         private void LoadIdleAnimations(string baseFolderPath)
@@ -99,13 +103,28 @@ namespace Project_Game.Entities
                 var anim = new AnimationManager(frameRate: 15);
                 anim.LoadFrames(Path.Combine(baseFolderPath, dir));
                 idleAnimations[dir] = anim;
+                Console.WriteLine($"[Info] Loaded Idle animation for direction '{dir}' from {Path.Combine(baseFolderPath, dir)}");
             }
         }
 
-        private void LoadDeadAnimation(string baseFolderPath)
+        private void LoadPreDeadAnimations(string preDeadFolderPath)
         {
-            deadAnimation = new AnimationManager(frameRate: 15);
-            deadAnimation.LoadFrames(baseFolderPath);
+            // Tải Pre-Dead cho từng hướng
+            preDeadAnimation = new AnimationManager(frameRate: 30);
+            string[] directions = { "Down", "Up", "Left", "Right" };
+            foreach (var dir in directions)
+            {
+                string dirPath = Path.Combine(preDeadFolderPath, dir);
+                preDeadAnimation.LoadFrames(dirPath);
+                Console.WriteLine($"[Info] Loaded Pre-Dead animation for direction '{dir}' from {dirPath}");
+            }
+        }
+
+        private void LoadDeadAnimation(string deadFolderPath)
+        {
+            deadAnimation = new AnimationManager(frameRate: 30);
+            deadAnimation.LoadFrames(deadFolderPath);
+            Console.WriteLine($"[Info] Loaded Dead animation from {deadFolderPath}");
         }
 
         public override void HandleAttack(Player target, List<GameObject> obstacles)
@@ -275,6 +294,7 @@ namespace Project_Game.Entities
         {
             Direction = newDirection;
             movementAnimation.LoadFrames(Path.Combine(baseFolderPath, "Movement", Direction));
+            Console.WriteLine($"[Info] {Name} đổi hướng thành '{Direction}'");
         }
 
         private bool CheckCollisionWithObstacles(int newX, int newY, List<GameObject> obstacles)
@@ -346,25 +366,48 @@ namespace Project_Game.Entities
             {
                 currentAnimationDirection = Direction;
                 movementAnimation.LoadFrames(Path.Combine(baseFolderPath, "Movement", Direction));
+                Console.WriteLine($"[Info] {Name} đối diện hướng '{Direction}' để tấn công.");
             }
         }
 
         public override void TakeDamage(int damage)
         {
+            if (isDead) return; // Nếu đã chết, không làm gì cả
+
             base.TakeDamage(damage);
+
             if (Health <= 0 && !isDead)
             {
                 isDead = true;
-                deadAnimation.ResetAnimation();
-                Console.WriteLine($"{Name} đã chết.");
-                DropItem(); // Gọi phương thức DropItem khi quái bị giết
+                isPreDead = true;
+                preDeadAnimation.ResetAnimation();
+                Console.WriteLine($"{Name} đã chết và bắt đầu trạng thái Pre-Dead.");
             }
         }
 
         public override Image GetCurrentFrame()
         {
+            if (isPreDead)
+            {
+                // Chạy hoạt ảnh Pre-Dead
+                Console.WriteLine($"[Debug] {Name} đang chạy Pre-Dead.");
+                if (!preDeadAnimation.IsComplete())
+                {
+                    preDeadAnimation.UpdateAnimation(loop: false);
+                    return preDeadAnimation.GetCurrentFrame();
+                }
+                else
+                {
+                    isPreDead = false;
+                    deadAnimation.ResetAnimation(); // Bắt đầu hoạt ảnh Dead
+                    Console.WriteLine($"{Name} đã hoàn thành Pre-Dead và chuyển sang Dead.");
+                }
+            }
+
             if (isDead)
             {
+                // Chạy hoạt ảnh Dead
+                Console.WriteLine($"[Debug] {Name} đang chạy Dead.");
                 if (!deadAnimation.IsComplete())
                 {
                     deadAnimation.UpdateAnimation(loop: false);
@@ -372,13 +415,22 @@ namespace Project_Game.Entities
                 }
                 else
                 {
+                    if (!hasDroppedItem)
+                    {
+                        DropItem(); // Gọi DropItem khi hoàn thành Dead animation
+                        hasDroppedItem = true;
+                        Console.WriteLine($"{Name} đã rớt item sau khi chết.");
+                    }
+
                     ShouldRemove = true;
+                    Console.WriteLine($"{Name} hoàn thành Dead và sẽ bị loại bỏ khỏi trò chơi.");
                     return null;
                 }
             }
 
             if (IsAttacking)
             {
+                Console.WriteLine($"[Debug] {Name} đang tấn công.");
                 return attackAnimation.GetCurrentFrame();
             }
 
@@ -387,30 +439,45 @@ namespace Project_Game.Entities
                 if (idleAnimations.ContainsKey(Direction))
                 {
                     idleAnimations[Direction].UpdateAnimation();
+                    Console.WriteLine($"[Debug] {Name} đang Idle với hướng '{Direction}'.");
                     return idleAnimations[Direction].GetCurrentFrame();
                 }
             }
 
+            Console.WriteLine($"[Debug] {Name} đang di chuyển với hướng '{Direction}'.");
             return movementAnimation.GetCurrentFrame();
         }
 
         public static List<TestEnemy> CreateEnemies(string baseFolder, int count, int startX, int startY)
         {
             var enemies = new List<TestEnemy>();
-            Random rand = new Random();
             for (int i = 0; i < count; i++)
             {
-                int x = startX + rand.Next(-100, 100);
-                int y = startY + rand.Next(-100, 100);
+                int x = startX + random.Next(-100, 100); // Sử dụng 'random' duy nhất
+                int y = startY + random.Next(-100, 100); // Sử dụng 'random' duy nhất
                 var enemy = new TestEnemy(baseFolder, 50, x, y);
                 enemies.Add(enemy);
             }
+            Console.WriteLine($"[Info] Tạo {count} TestEnemy từ thư mục '{baseFolder}' tại vị trí bắt đầu ({startX}, {startY}).");
             return enemies;
         }
 
         public void Update(List<GameObject> obstacles, Player target)
         {
-            if (isDead) return;
+            if (isDead && !isPreDead) return; // Nếu đã chết và không phải Pre-Dead, không cần cập nhật thêm
+
+            if (isPreDead)
+            {
+                preDeadAnimation.UpdateAnimation(loop: false);
+                // Không thực hiện các hành động khác trong trạng thái Pre-Dead
+                return;
+            }
+
+            if (isDead)
+            {
+                deadAnimation.UpdateAnimation(loop: false);
+                return;
+            }
 
             if (!IsAttacking)
             {
@@ -439,8 +506,8 @@ namespace Project_Game.Entities
                     Item droppedItem = new Item(itemName, itemIcon);
 
                     // Tính toán khoảng cách và hướng ngẫu nhiên
-                    double angle = rand.NextDouble() * 2 * Math.PI; // Góc ngẫu nhiên từ 0 đến 2π radians
-                    float distance = rand.Next(10, 40); // Khoảng cách ngẫu nhiên từ 10 đến 40 pixels
+                    double angle = random.NextDouble() * 2 * Math.PI; // Sử dụng 'random' thay vì 'rand'
+                    float distance = random.Next(10, 40); // Sử dụng 'random' thay vì 'rand'
                     int offsetX = (int)(Math.Cos(angle) * distance);
                     int offsetY = (int)(Math.Sin(angle) * distance);
 
